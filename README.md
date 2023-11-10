@@ -1,4 +1,4 @@
-This package wraps the C/C++ automatic differentation library [ADOL-C](https://github.com/coin-or/ADOL-C) 
+This package wraps the C/C++ automatic differentation library [ADOL-C](https://github.com/coin-or/ADOL-C) for the usage in [Julia](https://julialang.org/). 
 
 ## How to use this package?
 
