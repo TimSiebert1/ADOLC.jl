@@ -1,13 +1,11 @@
-cmake_minimum_required(VERSION 3.27.7)
+cmake_minimum_required(VERSION 3.20.0)
 
 project(test_power)
 
 set(CMAKE_CXX_STANDARD 17)
 
-list(APPEND CMAKE_PREFIX_PATH ${ADOLC_DIR})
-
 find_package(JlCxx REQUIRED)
-find_library(ADOLC_LIB adolc REQUIRED)
+find_library(ADOLC_LIB adolc REQUIRED PATHS "${ADOLC_DIR}/lib64")
 
 set(CMAKE_INSTALL_RPATH "${JlCxx_DIR}/../")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
