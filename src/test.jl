@@ -1,7 +1,7 @@
 using CxxWrap
 
-include("CppHello.jl")
-using .CppHello
+include("ADOLC_wrap.jl")
+using .ADOLC_wrap
 
 
 
