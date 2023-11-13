@@ -3,7 +3,7 @@ module ADOLC_wrap
 
   # one need to specify the location of adolc_wrap.{so, dylib}
   total_build_dir = joinpath(@__DIR__, "build")
-  @wrapmodule(() -> joinpath(total_build_dir,"libtest_power"))
+  @wrapmodule(() -> joinpath(total_build_dir,"libadolc_wrap"))
 
   function __init__()
     @initcxx
