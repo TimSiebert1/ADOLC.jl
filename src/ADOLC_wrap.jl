@@ -1,6 +1,9 @@
 module ADOLC_wrap
   using CxxWrap
-  @wrapmodule(() -> joinpath("../build/","libtest_power"))
+
+  # one need to specify the location of adolc_wrap.{so, dylib}
+  total_build_dir = joinpath(@__DIR__, "build")
+  @wrapmodule(() -> joinpath(total_build_dir,"libtest_power"))
 
   function __init__()
     @initcxx
