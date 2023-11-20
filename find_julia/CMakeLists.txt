@@ -4,6 +4,7 @@
 cmake_minimum_required(VERSION 3.5.0)
 project(FindJulia)
 
+set(CMAKE_MODULE_PATH "./")
 
 # this path must contain the "bin" and "include" dirs 
 # on MacOS it may be something like 
