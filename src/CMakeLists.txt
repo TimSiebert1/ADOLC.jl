@@ -8,7 +8,7 @@ find_package(JlCxx REQUIRED)
 find_library(ADOLC_LIB adolc REQUIRED PATHS "${ADOLC_DIR}/lib64")
 
 add_library(${PROJECT_NAME} SHARED adolc_interface.cpp)
-#add_executable(run_test.exe adolc_interface.cpp)
+#add_executable(${PROJECT_NAME} adolc_interface.cpp)
 target_include_directories(
     ${PROJECT_NAME} 
     PUBLIC "${ADOLC_DIR}/include/"

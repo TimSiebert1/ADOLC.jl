@@ -1,10 +1,15 @@
 #include <jlcxx/jlcxx.hpp>
-#include <adolc/adolc.h> /* use of ALL ADOL-C interfaces */
+#include <adolc/adolc.h>
 #include <iostream>
 
 adouble add(adouble &a, adouble &b)
 {
   return a + b;
+}
+
+adouble add2(adouble const &a, double const v)
+{
+  return a + v;
 }
 
 adouble &assign(adouble &x, double val)
@@ -54,6 +59,11 @@ void write_out(double *A)
   }
 }
 
+adouble fmax2(adouble const &a, adouble const &b)
+{
+  return fmax(a, b);
+}
+
 JLCXX_MODULE define_julia_module(jlcxx::Module &types)
 {
   types.add_type<adouble>("adouble")
@@ -61,6 +71,8 @@ JLCXX_MODULE define_julia_module(jlcxx::Module &types)
 
   types.method("getValue", [](adouble &a)
                { return a.getValue(); });
+  types.method("gradient", [](int tag, int n, double *x, double *g)
+               { return gradient(tag, n, x, g); });
   types.method("alloc_vec", alloc_vec);
   types.method("myalloc2", myalloc2);
   types.method("trace_on", [](int tag)
@@ -88,10 +100,13 @@ JLCXX_MODULE define_julia_module(jlcxx::Module &types)
 
   types.set_override_module(jl_base_module);
   types.method("+", add);
+  types.method("+", add2);
   types.method("<<", assign);
   types.method(">>", dassign);
   types.method("^", [](adouble x, int n)
                { return power(x, n); });
+  types.method("max", [](adouble const &a, adouble const &b)
+               { return fmax2(a, b); });
   types.unset_override_module();
   types.method("getindex_mat", [](double **A, const int &row, const int &col)
                { return A[row - 1][col - 1]; });
@@ -111,5 +126,7 @@ int main()
   double *A;
   A = alloc_vec(2);
   write_out(A);
+  condassign(d, c - d, c, d);
+  std::cout << d.getValue() << std::endl;
   std::cout << A[1] << std::endl;
 }

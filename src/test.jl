@@ -1,14 +1,12 @@
-using CxxWrap
-
 include("ADOLC_wrap.jl")
 using .ADOLC_wrap
 
 
 
-n = 3
+n = 4
 X = myalloc2(1,n+4);
 Y = myalloc2(1,n+4);
-X[1, 1] = 0.5;                
+X[1, 1] = 1.0;                
 X[1, 2] = 1.0;  
 
 for i=1:n+2
@@ -31,7 +29,6 @@ x << X[1, 1];
 
 #actual function call
 y = x^n;
-
 
 #only one dependent adouble
 y >> Y[1, 1]
