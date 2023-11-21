@@ -7,9 +7,14 @@ adouble add(adouble const &a, adouble const &b)
   return a + b;
 }
 
-adouble add2(adouble const &a, double const v)
+adouble add_right(adouble const &a, double const v)
 {
   return a + v;
+}
+
+adouble add_left(double const v, adouble const &a)
+{
+  return v + a;
 }
 
 adouble diff(adouble const &a, adouble const &b)
@@ -17,14 +22,40 @@ adouble diff(adouble const &a, adouble const &b)
   return a - b;
 }
 
-adouble diff2(adouble const &a, double const v)
+adouble diff_right(adouble const &a, double const v)
 {
   return a - v;
+}
+
+adouble diff_left(double const v, adouble const &a)
+{
+  return v - a;
 }
 adouble diff_unary(adouble const &a)
 {
   return (-1) * a;
 }
+
+adouble mult(adouble const &a, adouble const &b)
+{
+  return a * b;
+}
+
+adouble mult_right(adouble const &a, double const v)
+{
+  return a * v;
+}
+
+adouble mult_left(double const v, adouble const &a)
+{
+  return v * a;
+}
+
+adouble fabs2(adouble const &a)
+{
+  return fabs(a);
+}
+
 adouble &assign(adouble &x, double val)
 {
   x <<= val;
@@ -71,7 +102,10 @@ void write_out(double *A)
     std::cout << A[i] << std::endl;
   }
 }
-
+adouble sqrt2(adouble const &a)
+{
+  return sqrt(a);
+}
 adouble fmax2(adouble const &a, adouble const &b)
 {
   return fmax(a, b);
@@ -115,18 +149,30 @@ JLCXX_MODULE define_julia_module(jlcxx::Module &types)
   types.set_override_module(jl_base_module);
 
   types.method("+", add);
-  types.method("+", add2);
+  types.method("+", add_right);
+  types.method("+", add_left);
 
   types.method("-", diff);
-  types.method("-", diff2);
+  types.method("-", diff_right);
+  types.method("-", diff_left);
   types.method("-", diff_unary);
+
+  types.method("*", mult);
+  types.method("*", mult_left);
+  types.method("*", mult_right);
 
   types.method("<<", assign);
   types.method(">>", dassign);
+
   types.method("^", [](adouble x, int n)
                { return power(x, n); });
+
   types.method("max", [](adouble const &a, adouble const &b)
                { return fmax2(a, b); });
+  types.method("abs", [](adouble const &a)
+               { return fabs2(a); });
+  types.method("sqrt", [](adouble const &a)
+               { return sqrt2(a); });
   types.unset_override_module();
 
   // utils for accessing matrices
