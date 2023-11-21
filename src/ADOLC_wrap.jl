@@ -21,7 +21,7 @@ export trace_on, trace_off, forward, reverse2, gradient
 # matrix operations 
 export getindex_mat, setindex_mat, getindex_vec, setindex_vec
 
-# operations
-export max
+# current base operations:
+# max, abs, sqrt, *, +, -, ^
 
 end # module ADOLC_wrap
