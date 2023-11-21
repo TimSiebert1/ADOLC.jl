@@ -12,7 +12,8 @@ module ADOLC_wrap
 
 
 
-function gradient(tape_num::Int64, n::Int64, x::Vector{Float64})
+function gradient(tape_num::Int64, x::Vector{Float64})
+    n = length(x)
     g = Vector{Float64}(undef, n)
     gradient(tape_num, n, x, g)
     return g
