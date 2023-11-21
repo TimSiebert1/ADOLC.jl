@@ -10,6 +10,14 @@ module ADOLC_wrap
   end
   include("ops.jl")
 
+
+
+function gradient(tape_num::Int64, n::Int64, x::Vector{Float64})
+    g = Vector{Float64}(undef, n)
+    gradient(tape_num, n, x, g)
+    return g
+end
+
 export adouble, getValue
 
 # allocators
