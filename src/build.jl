@@ -1,8 +1,8 @@
 using Pkg
 
 
-#Pkg.add(url="git@github.com:TimSiebert1/ADOLC_jll.jl.git")
-#Pkg.add("libcxxwrap_julia_jll")
+Pkg.add(url="git@github.com:TimSiebert1/ADOLC_jll.jl.git")
+Pkg.add("libcxxwrap_julia_jll")
 Pkg.add("CxxWrap")
 
 using ADOLC_jll

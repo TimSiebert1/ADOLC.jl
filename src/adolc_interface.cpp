@@ -2,7 +2,7 @@
 #include <adolc/adolc.h>
 #include <iostream>
 
-adouble add(adouble &a, adouble &b)
+adouble add(adouble const &a, adouble const &b)
 {
   return a + b;
 }
@@ -12,6 +12,19 @@ adouble add2(adouble const &a, double const v)
   return a + v;
 }
 
+adouble diff(adouble const &a, adouble const &b)
+{
+  return a - b;
+}
+
+adouble diff2(adouble const &a, double const v)
+{
+  return a - v;
+}
+adouble diff_unary(adouble const &a)
+{
+  return (-1) * a;
+}
 adouble &assign(adouble &x, double val)
 {
   x <<= val;
@@ -98,9 +111,16 @@ JLCXX_MODULE define_julia_module(jlcxx::Module &types)
                               double **Z)
                { reverse(tag, m, n, d, u, Z); });
 
+  // basic arithmetic operations
   types.set_override_module(jl_base_module);
+
   types.method("+", add);
   types.method("+", add2);
+
+  types.method("-", diff);
+  types.method("-", diff2);
+  types.method("-", diff_unary);
+
   types.method("<<", assign);
   types.method(">>", dassign);
   types.method("^", [](adouble x, int n)
@@ -108,6 +128,8 @@ JLCXX_MODULE define_julia_module(jlcxx::Module &types)
   types.method("max", [](adouble const &a, adouble const &b)
                { return fmax2(a, b); });
   types.unset_override_module();
+
+  // utils for accessing matrices
   types.method("getindex_mat", [](double **A, const int &row, const int &col)
                { return A[row - 1][col - 1]; });
   types.method("setindex_mat", [](double **A, const double val, const int &row, const int &col)
