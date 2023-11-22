@@ -41,5 +41,5 @@ g = gradient(1, [-4.5, 2.0])
 println("Crescent: ", g[1], ", ", g[2])
 ```
 
-However, this should be done carefully. Since the tape is not rebuild it could lead to wrong results if the function contains conditional statements. If the control flow differs at the new point you will see a Warning like ```ADOL-C Warning: Branch switch detected in comparison (operator le_zero). Forward sweep aborted! Retaping recommended!```. Then you have to reevaluate the whole function for the new point. If the control flow isn't changing, everything will work fine. 
-Note, in contrast to someones expectation some functions like the `max` function does not contain conditional statements due to implementation "tricks". 
+However, this should be done carefully. Since the tape is not rebuild it could lead to wrong results if the function contains conditional statements. If the control flow differs at the new point you will see a warning like ```ADOL-C Warning: Branch switch detected in comparison (operator le_zero). Forward sweep aborted! Retaping recommended!```. Then you have to reevaluate the whole function for the new point and create a new tape. If the control flow isn't changing, everything will work fine. 
+Note, in contrast to someones expectation some functions like `max` does not contain conditional statements due to implementation "tricks". 
