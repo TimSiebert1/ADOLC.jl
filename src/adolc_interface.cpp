@@ -51,6 +51,21 @@ adouble mult_left(double const v, adouble const &a)
   return v * a;
 }
 
+adouble div2(adouble const &a, adouble const &b)
+{
+  return a / b;
+}
+
+adouble div_right(adouble const &a, double const v)
+{
+  return a / v;
+}
+
+adouble div_left(double const v, adouble const &a)
+{
+  return v / a;
+}
+
 adouble fabs2(adouble const &a)
 {
   return fabs(a);
@@ -65,6 +80,7 @@ adouble &assign(adouble &x, double val)
 double dassign(adouble &x, double val)
 {
   x >>= val;
+  std::cout << "Hello from c++ " << val << std::endl;
   return val;
 }
 adouble power(adouble x, int n)
@@ -105,6 +121,10 @@ void write_out(double *A)
 adouble sqrt2(adouble const &a)
 {
   return sqrt(a);
+}
+adouble exp2(adouble const &a)
+{
+  return exp(a);
 }
 adouble fmax2(adouble const &a, adouble const &b)
 {
@@ -161,6 +181,10 @@ JLCXX_MODULE define_julia_module(jlcxx::Module &types)
   types.method("*", mult_left);
   types.method("*", mult_right);
 
+  types.method("/", div2);
+  types.method("/", div_left);
+  types.method("/", div_right);
+
   types.method("<<", assign);
   types.method(">>", dassign);
 
@@ -173,6 +197,8 @@ JLCXX_MODULE define_julia_module(jlcxx::Module &types)
                { return fabs2(a); });
   types.method("sqrt", [](adouble const &a)
                { return sqrt2(a); });
+  types.method("exp", [](adouble const &a)
+               { return exp2(a); });
   types.unset_override_module();
 
   // utils for accessing matrices

@@ -11,12 +11,17 @@ module ADOLC_wrap
   include("ops.jl")
 
 
-
 function gradient(tape_num::Int64, x::Vector{Float64})
-    n = length(x)
-    g = Vector{Float64}(undef, n)
-    gradient(tape_num, n, x, g)
-    return g
+  num_ind = length(x)
+  g = Vector{Float64}(undef, num_ind)
+  gradient(tape_num, num_ind, x, g)
+  return g
+end
+
+function gradient(tape_num::Int64, num_ind::Int64, x::Vector{Float64})
+  g = Vector{Float64}(undef, num_ind)
+  gradient(tape_num, num_ind, x, g)
+  return g
 end
 
 export adouble, getValue
@@ -31,6 +36,7 @@ export trace_on, trace_off, forward, reverse2, gradient
 export getindex_mat, setindex_mat, getindex_vec, setindex_vec
 
 # current base operations:
-# max, abs, sqrt, *, +, -, ^
+# max, abs, exp, sqrt, *, +, -, ^
+
 
 end # module ADOLC_wrap

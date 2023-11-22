@@ -21,4 +21,8 @@ end
 Base.:>>(a::Vector{Main.ADOLC_wrap.adoubleAllocated}, x::Vector{Float64}) = init_dependent_vec(a, x)
 
 
+function Base.:*(a::Main.ADOLC_wrap.adoubleAllocated, x::Vector{Float64})
+    return map((x_i)->a*x_i, x)
+end
+
 
