@@ -71,16 +71,14 @@ adouble fabs2(adouble const &a)
   return fabs(a);
 }
 
-adouble &assign(adouble &x, double val)
+void assign(adouble &x, double val)
 {
   x <<= val;
-  return x;
 }
 
-double dassign(adouble &x, double val)
+double dassign(adouble &x, double &val)
 {
   x >>= val;
-  std::cout << "Hello from c++ " << val << std::endl;
   return val;
 }
 adouble power(adouble x, int n)

@@ -6,23 +6,27 @@ Base.setindex!(X::CxxPtr{Float64}, val::Float64, row::Int64) = setindex_vec(X, v
 
 
 # convient inits for independant and dependants
-function init_independent_vec(a::Vector{Main.ADOLC_wrap.adoubleAllocated}, x::Vector{Float64})
+function init_independent_vec(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::Vector{Float64})
     for i in 1:length(x)
         a[i] << x[i]
     end
 end
-Base.:<<(a::Vector{Main.ADOLC_wrap.adoubleAllocated}, x::Vector{Float64}) = init_independent_vec(a, x)
+Base.:<<(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::Vector{Float64}) = init_independent_vec(a, x)
 
-function init_dependent_vec(a::Vector{Main.ADOLC_wrap.adoubleAllocated}, x::Vector{Float64})
+function init_dependent_vec(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::Vector{Float64})
     for i in 1:length(x)
         a[i] >> x[i]
     end
 end
-Base.:>>(a::Vector{Main.ADOLC_wrap.adoubleAllocated}, x::Vector{Float64}) = init_dependent_vec(a, x)
+Base.:>>(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::Vector{Float64}) = init_dependent_vec(a, x)
 
 
-function Base.:*(a::Main.ADOLC_wrap.adoubleAllocated, x::Vector{Float64})
+function Base.:*(a::Main.ADOLC_wrap.Adouble.adoubleAllocated, x::Vector{Float64})
     return map((x_i)->a*x_i, x)
 end
+
+
+
+
 
 
