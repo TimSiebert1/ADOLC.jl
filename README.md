@@ -5,7 +5,7 @@ This package wraps the C/C++ automatic differentation library [ADOL-C](https://g
 1. git clone the repo
 2. use the commands `cd ADOLC_wrap/src && julia --project build.jl`
 3. check if its works by using `julia --project test.jl`
-4. Use the ADOLC functions by import the package with `include("/path/to/ADOLC_wrap/src/ADOLC_wrap.jl"); using .ADOLC_wrap`
+4. Use the ADOLC functions by import the package with `include("/path/to/ADOLC_wrap/src/ADOLC_wrap.jl"); using .ADOLC_wrap.Adouble`
 
 ## Example
 After including the package, define the function you are planning to differentiate.
