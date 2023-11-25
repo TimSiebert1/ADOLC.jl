@@ -131,7 +131,7 @@ adouble fmax2(adouble const &a, adouble const &b)
 
 JLCXX_MODULE define_julia_module(jlcxx::Module &types)
 {
-  types.add_type<adouble>("adouble")
+  types.add_type<adouble>("adouble", jlcxx::julia_type("AbstractFloat", "Base"))
       .constructor<double>();
 
   types.method("getValue", [](adouble &a)

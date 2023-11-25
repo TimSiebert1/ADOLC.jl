@@ -14,7 +14,25 @@ function Base.:*(a::Main.ADOLC_wrap.TlAdouble.tladoubleAllocated, x::Vector{Floa
 end
 
 
-  export tladouble, getADValue, setADValue, getValue
+  export tladouble, getADValue, setADValue, getValue, tl_init_for_gradient, getindex_tl, tl_init, isless
+
+  Base.isless(val::Float64, x::Main.ADOLC_wrap.TlAdouble.tladoubleAllocated) = isless(val, x)
+
+  Base.getindex(X::CxxWrap.CxxWrapCore.CxxPtr{tladouble}, row::Int64) = getindex_tl(X, row)
+
+  Base.iterate(x::Main.ADOLC_wrap.TlAdouble.tladoubleAllocated) = (x, nothing)
+  Base.iterate(x::Main.ADOLC_wrap.TlAdouble.tladoubleAllocated, y::Nothing) = nothing
+  
+  function tl_init_for_gradient(data::Vector{Float64}) 
+      tl_a = tl_init_for_gradient(data, length(data))
+      tl_a_vec = Vector{Any}(undef, length(data))
+      for i in 1:length(data)
+        tl_a_vec[i] = tl_a[i]
+      end
+      return tl_a_vec
+
+  end
+
 
   # current base operations:
   # max, abs, exp, sqrt, *, +, -, ^

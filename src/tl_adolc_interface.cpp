@@ -107,18 +107,38 @@ tladouble fmax2(tladouble const &a, tladouble const &b)
     return fmax(a, b);
 }
 
+tladouble *tl_init_for_gradient(double const *data, int const &n)
+{
+    adtl::setNumDir(n);
+    tladouble *x = new tladouble[n];
+
+    for (int i = 0; i < n; ++i) // Initialize x_i
+    {
+        x[i] = data[i];
+        for (int j = 0; j < n; ++j)
+            if (i == j)
+                x[i].setADValue(j, 1);
+    }
+    return x;
+}
+
 JLCXX_MODULE define_julia_module_tl(jlcxx::Module &types)
 {
-    types.add_type<tladouble>("tladouble")
+    types.add_type<tladouble>("tladouble", jlcxx::julia_type("AbstractFloat", "Base"))
         .constructor<double>();
-
+    types.method("tl_init_for_gradient", [](double const *data, int const &n)
+                 { return tl_init_for_gradient(data, n); });
     types.method("getValue", [](tladouble &a)
                  { return a.getValue(); });
-    types.method("getADValue", [](tladouble &a)
+    types.method("getADValue", [](tladouble const &a)
                  { return *a.getADValue(); });
+    types.method("getADValue", [](tladouble const &a, int const &i)
+                 { return a.getADValue(i - 1); });
     types.method("setADValue", [](tladouble &a, double const val)
                  { return a.setADValue(&val); });
 
+    types.method("isless", [](double const &val, tladouble const &a)
+                 { return val < a; });
     // basic arithmetic operations
     types.set_override_module(jl_base_module);
 
@@ -151,4 +171,7 @@ JLCXX_MODULE define_julia_module_tl(jlcxx::Module &types)
     types.method("exp", [](tladouble const &a)
                  { return exp2(a); });
     types.unset_override_module();
+
+    types.method("getindex_tl", [](tladouble *A, const int &row)
+                 { return A[row - 1]; });
 }
