@@ -137,8 +137,9 @@ JLCXX_MODULE define_julia_module_tl(jlcxx::Module &types)
     types.method("setADValue", [](tladouble &a, double const val)
                  { return a.setADValue(&val); });
 
-    types.method("isless", [](double const &val, tladouble const &a)
-                 { return val < a; });
+    types.method("getindex_tl", [](tladouble *A, const int &row)
+                 { return A[row - 1]; });
+
     // basic arithmetic operations
     types.set_override_module(jl_base_module);
 
@@ -159,6 +160,30 @@ JLCXX_MODULE define_julia_module_tl(jlcxx::Module &types)
     types.method("/", div_left);
     types.method("/", div_right);
 
+    types.method("<", [](double const &val, tladouble const &a)
+                 { return val < a; });
+    types.method("<", [](tladouble const &a, double const &val)
+                 { return a < val; });
+
+    types.method(">", [](double const &val, tladouble const &a)
+                 { return val > a; });
+    types.method(">", [](tladouble const &a, double const &val)
+                 { return a > val; });
+    types.method(">=", [](tladouble const &a, double const &val)
+                 { return a >= val; });
+    types.method(">=", [](double const &val, tladouble const &a)
+                 { return val >= a; });
+    types.method("<=", [](tladouble const &a, double const &val)
+                 { return a <= val; });
+    types.method("<=", [](double const &val, tladouble const &a)
+                 { return val >= a; });
+
+    types.method("==", [](tladouble const &a, double const &val)
+                 { return a == val; });
+    types.method("==", [](double const &val, tladouble const &a)
+                 { return val == a; });
+    types.method("==", [](tladouble &a, tladouble const &b)
+                 { return a == b; });
     types.method("^", [](tladouble x, int n)
                  { return power(x, n); });
 
@@ -171,7 +196,4 @@ JLCXX_MODULE define_julia_module_tl(jlcxx::Module &types)
     types.method("exp", [](tladouble const &a)
                  { return exp2(a); });
     types.unset_override_module();
-
-    types.method("getindex_tl", [](tladouble *A, const int &row)
-                 { return A[row - 1]; });
 }
