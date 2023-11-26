@@ -83,6 +83,8 @@ Base.:-(a::Tladouble, x::Bool) = Tladouble(a.val - Float64(x))
 
 Base.:-(a::Tladouble, b::Tladouble) = Tladouble(a.val - b.val)
 
+Base.:-(a::Tladouble) = (-1) * a
+
 ##############################################################
 
 #--------------- Operation: / -------------------
