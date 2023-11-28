@@ -4,8 +4,8 @@ This package wraps the C/C++ automatic differentation library [ADOL-C](https://g
 
 1. git clone the repo
 2. use the commands `cd ADOLC_wrap/src && julia --project build.jl`
-3. check if its works by using `julia --project test.jl`
-4. Use the ADOLC functions by import the package with `include("/path/to/ADOLC_wrap/src/ADOLC_wrap.jl"); using .ADOLC_wrap.Adouble`
+3. check if its works by using `julia --project examples/power.jl`
+4. Use the ADOLC functions by import the package with `include("/path/to/ADOLC_wrap/src/ADOLC_wrap.jl"); using .ADOLC_wrap.Adouble` or `using .ADOLC_wrap.TlAdouble` for tape-based and tape-less ADOLC
 
 ## Example
 After including the package, define the function you are planning to differentiate.
@@ -43,3 +43,5 @@ println("Crescent: ", g[1], ", ", g[2])
 
 However, this should be done carefully. Since the tape is not rebuild it could lead to wrong results if the function contains conditional statements. If the control flow differs at the new point you will see a warning like ```ADOL-C Warning: Branch switch detected in comparison (operator le_zero). Forward sweep aborted! Retaping recommended!```. Then you have to reevaluate the whole function for the new point and create a new tape. If the control flow isn't changing, everything will work fine. 
 Note, in contrast to someones expectation some functions like `max` does not contain conditional statements due to implementation "tricks". 
+
+Further examples can be found in the `examples` file.
