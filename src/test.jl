@@ -1,5 +1,5 @@
 include("ADOLC_wrap.jl")
-using .ADOLC_wrap
+using .ADOLC_wrap.Adouble
 
 
 
