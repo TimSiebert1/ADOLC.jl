@@ -212,13 +212,18 @@ Base.sqrt(a::Tladouble) = Tladouble(sqrt(a.val))
 #-------- utilities for type handling ----------
 Base.promote(x::Float64, y::Tladouble) = Tladouble(x, false)
 Base.promote_rule(::Type{Tladouble}, ::Type{Float64}) = Tladouble
-Base.convert(::Type{Tladouble}, x::Float64) = Tladouble(x, false)
-Base.convert(::Type{Tladouble}, x::Int64) = Tladouble(Float64(x), false)
-Base.zero(::Type{Tladouble}) = Float64(0.0)
 
 # since every operation where an arugment is a adouble have to return a adouble
 Base.promote_op(f::Core.Any, ::Type{Float64}, ::Type{Tladouble}) = Tladouble
 Base.promote_rule(::Type{Tladouble}, ::Type{Main.ADOLC_wrap.TlAdouble.tladoubleAllocated}) = Tladouble
+
+
+Base.convert(::Type{Tladouble}, x::Float64) = Tladouble(x, false)
+Base.convert(::Type{Tladouble}, x::Int64) = Tladouble(Float64(x), false)
+
+
+Base.zero(::Type{Tladouble}) = Float64(0.0)
+
 
 ###############################################################
 
@@ -230,6 +235,7 @@ function tladouble_vector_init(data::Vector{Float64})
 
   # c++ function
   tl_a = tl_init_for_gradient(data, length(data))
+
   tl_a_vec = Vector{Tladouble}(undef, length(data))
   for i in 1:length(data)
     tl_a_vec[i] = Tladouble(tl_a[i])
