@@ -4,7 +4,7 @@ This package wraps the C/C++ automatic differentation library [ADOL-C](https://g
 
 1. git clone the repo
 2. use the commands `cd ADOLC_wrap/src && julia --project build.jl`
-3. check if its works by using `julia --project examples/power.jl`
+3. check if its works by using `julia --project examples/gradient.jl`
 4. Use the ADOLC functions by import the package with `include("/path/to/ADOLC_wrap/src/ADOLC_wrap.jl"); using .ADOLC_wrap.Adouble` or `using .ADOLC_wrap.TlAdouble` for tape-based and tape-less ADOLC
 
 ## Example
