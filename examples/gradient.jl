@@ -1,4 +1,4 @@
-include("../ADOLC_wrap.jl")
+include("../src/ADOLC_wrap.jl")
 using .ADOLC_wrap.Adouble
 
 # Chained LQ
