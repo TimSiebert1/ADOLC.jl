@@ -1,2 +1,2 @@
 cd src && julia --project build.jl
-julia --project test.jl
+cd .. && cd examples && julia --project gradient.jl
