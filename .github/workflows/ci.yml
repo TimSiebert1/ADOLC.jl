@@ -50,7 +50,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
-      - uses: TimSiebert1/ADOLC_wrap
+      - uses: git@github.com:TimSiebert1/ADOLC_wrap.git
         with:
             owner: 'TimSiebert1'
             repository: 'ADOLC_wrap'
