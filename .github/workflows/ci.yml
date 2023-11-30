@@ -50,12 +50,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - uses: TimSiebert1/ADOLC_wrap
+        with:
+            owner: 'TimSiebert1'
+            repository: 'ADOLC_wrap'
+            access-token: ${{ secrets.ACCESS_TOKEN }}
         with:
           version: '1'
-
-      - run: gh repo clone TimSiebert1/ADOLC_wrap
       - run: |
           julia --project'
             using Pkg
