@@ -55,8 +55,7 @@ jobs:
             owner: 'TimSiebert1'
             repository: 'ADOLC_wrap'
             access-token: ${{ secrets.ACCESS_TOKEN }}
-        with:
-          version: '1'
+            version: '1'
       - run: |
           julia --project'
             using Pkg
