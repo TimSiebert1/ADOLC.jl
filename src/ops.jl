@@ -1,9 +1,12 @@
 Base.getindex(X::CxxPtr{CxxPtr{Float64}}, row::Int64, col::Int64) = getindex_mat(X, row, col)
 Base.setindex!(X::CxxPtr{CxxPtr{Float64}}, val::Float64, row::Int64, col::Int64) = setindex_mat(X, val, row, col)
+
+
 Base.getindex(X::CxxPtr{Float64}, row::Int64) = getindex_vec(X, row)
 Base.setindex!(X::CxxPtr{Float64}, val::Float64, row::Int64) = setindex_vec(X, val, row)
-  
 
+Base.getindex(X::CxxPtr{Int16}, row::Int64) = getindex_vec(X, row)
+Base.setindex!(X::CxxPtr{Int16}, val::Int16, row::Int64) = setindex_vec(X, val, row)
 
 # convient inits for independant and dependants
 function init_independent_vec(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::Vector{Float64})

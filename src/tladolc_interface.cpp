@@ -164,19 +164,29 @@ JLCXX_MODULE define_julia_module_tl(jlcxx::Module &types)
                  { return val < a; });
     types.method("<", [](tladouble const &a, double const &val)
                  { return a < val; });
+    types.method("<", [](tladouble const &a, tladouble const &b)
+                 { return a < b; });
 
     types.method(">", [](double const &val, tladouble const &a)
                  { return val > a; });
     types.method(">", [](tladouble const &a, double const &val)
                  { return a > val; });
+    types.method(">", [](tladouble const &a, tladouble const &b)
+                 { return a > b; });
+
     types.method(">=", [](tladouble const &a, double const &val)
                  { return a >= val; });
     types.method(">=", [](double const &val, tladouble const &a)
                  { return val >= a; });
+    types.method(">=", [](tladouble const &a, tladouble const &b)
+                 { return a >= b; });
+
     types.method("<=", [](tladouble const &a, double const &val)
                  { return a <= val; });
     types.method("<=", [](double const &val, tladouble const &a)
-                 { return val >= a; });
+                 { return val <= a; });
+    types.method("<=", [](tladouble const &a, tladouble const &b)
+                 { return a <= b; });
 
     types.method("==", [](tladouble const &a, double const &val)
                  { return a == val; });
@@ -184,6 +194,7 @@ JLCXX_MODULE define_julia_module_tl(jlcxx::Module &types)
                  { return val == a; });
     types.method("==", [](tladouble &a, tladouble const &b)
                  { return a == b; });
+
     types.method("^", [](tladouble x, int n)
                  { return power(x, n); });
 

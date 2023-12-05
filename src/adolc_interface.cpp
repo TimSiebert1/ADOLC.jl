@@ -128,6 +128,10 @@ adouble fmax2(adouble const &a, adouble const &b)
 {
   return fmax(a, b);
 }
+adouble fmin2(adouble const &a, adouble const &b)
+{
+  return fmin(a, b);
+}
 
 JLCXX_MODULE define_julia_module(jlcxx::Module &types)
 {
@@ -163,6 +167,18 @@ JLCXX_MODULE define_julia_module(jlcxx::Module &types)
                               double **Z)
                { reverse(tag, m, n, d, u, Z); });
 
+  // pointwise-smooth functions
+  types.method("enableMinMaxUsingAbs", enableMinMaxUsingAbs);
+  types.method("get_num_switches", get_num_switches);
+  types.method("zos_pl_forward", zos_pl_forward);
+  types.method("fos_pl_forward", fos_pl_forward);
+  types.method("fov_pl_forward", fov_pl_forward);
+  types.method("alloc_short", [](int i)
+               { return new short[i]; });
+  types.method("abs_normal", abs_normal);
+
+  //--------------------
+
   // basic arithmetic operations
   types.set_override_module(jl_base_module);
 
@@ -191,6 +207,8 @@ JLCXX_MODULE define_julia_module(jlcxx::Module &types)
 
   types.method("max", [](adouble const &a, adouble const &b)
                { return fmax2(a, b); });
+  types.method("min", [](adouble const &a, adouble const &b)
+               { return fmin2(a, b); });
   types.method("abs", [](adouble const &a)
                { return fabs2(a); });
   types.method("sqrt", [](adouble const &a)
@@ -199,7 +217,7 @@ JLCXX_MODULE define_julia_module(jlcxx::Module &types)
                { return exp2(a); });
   types.unset_override_module();
 
-  // utils for accessing matrices
+  // utils for accessing matrices or vectors
   types.method("getindex_mat", [](double **A, const int &row, const int &col)
                { return A[row - 1][col - 1]; });
   types.method("setindex_mat", [](double **A, const double val, const int &row, const int &col)
@@ -208,6 +226,11 @@ JLCXX_MODULE define_julia_module(jlcxx::Module &types)
                { return A[row - 1]; });
   types.method("setindex_vec", [](double *A, const double val, const int &row)
                { A[row - 1] = val; });
+
+  types.method("setindex_vec", [](short *A, const short &val, const int &row)
+               { A[row - 1] = val; });
+  types.method("getindex_vec", [](short *A, const int &row)
+               { return A[row - 1]; });
 }
 
 int main()

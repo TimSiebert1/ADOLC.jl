@@ -35,6 +35,9 @@ module Adouble
   # matrix operations 
   export getindex_mat, setindex_mat, getindex_vec, setindex_vec
 
+
+  # point-wise smooth utils 
+  export enableMinMaxUsingAbs, get_num_switches, zos_pl_forward, fos_pl_forward, fov_pl_forward, alloc_short, abs_normal
   # current base operations:
   # max, abs, exp, sqrt, *, +, -, ^
 
