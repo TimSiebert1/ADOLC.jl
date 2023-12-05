@@ -44,4 +44,80 @@ println("Crescent: ", g[1], ", ", g[2])
 However, this should be done carefully. Since the tape is not rebuild it could lead to wrong results if the function contains conditional statements. If the control flow differs at the new point you will see a warning like ```ADOL-C Warning: Branch switch detected in comparison (operator le_zero). Forward sweep aborted! Retaping recommended!```. Then you have to reevaluate the whole function for the new point and create a new tape. If the control flow isn't changing, everything will work fine. 
 Note, in contrast to someones expectation some functions like `max` does not contain conditional statements due to implementation "tricks". 
 
+
+## Example for abs-norm interface
+For this example we utilize the abs-norm interface of ADOLC. The interface is imported by the call
+```julia
+include("/PATH/TO/ADOLC_wrap/src/ADOLC_wrap.jl")
+using .ADOLC_wrap.Adouble
+```
+To enable the abs-norm functionalities we use
+```julia
+enableMinMaxUsingAbs()
+```
+Then a function has to be defined. For this example, the following is used
+```julia
+function func_eval(x)
+    return (max(-x[1]-x[2], -x[1]-x[2]+x[1]^2+x[2]^2-1) + max(-x[2]-x[3], -x[2]-x[3]+x[2]^2+x[3]^2-1))
+end 
+```
+Select a start point and allocate the memory for the output and vector of adoubles with
+```julia
+x = [-0.500000, -0.500000, -0.500000]
+y = Vector{Float64}(undef, 1)
+a = [adouble() for _ in 1:length(x)]
+b = [adouble() for _ in 1:length(y)]
+```
+Like in the previous example, the function is evaluated with the adoubles and everything is recored on the tape.
+```julia
+tape_num = 0
+trace_on(tape_num)
+a << x
+b = func_eval(a)
+b >> y
+trace_off(0)
+```
+Beside the number of dependents (`length(y)`) and number of independents (`length(x)`), the `abs_normal` function of ADOLC is checking the number of switches in the max funciton, provided by the call
+```julia
+num_switches = get_num_switches(tape_num)
+```
+Finally, the user is requiered to allocate the arrays and matrices which will be filled by the `abs_normal` and the user have to select two constants, corresponding to the switch variables `z` and output of the function `y`.
+```julia
+z = Vector{Float64}(undef, num_switches)
+Y = myalloc2(length(y), length(x))
+J = myalloc2(length(y), num_swichtes)
+Z = myalloc2(num_swichtes, length(x))
+L = myalloc2(num_swichtes, num_swichtes)
+cz = [-0.5, -0.5]
+cy = [1.5]
+```
+The result is computed with
+```julia 
+abs_normal(0, length(y), length(x), num_swichtes, x, y, z, cz, cy, Y, J, Z, L)
+```
+You might test it by
+```julia
+using Test
+@test Y[1, 1] == -1.5
+@test Y[1, 2] == -3.0
+@test Y[1, 3] == -1.5
+
+@test J[1, 1] == 0.5
+@test J[1, 2] == 0.5
+
+@test Z[1, 1] == -1.0
+@test Z[1, 2] == -1.0
+@test Z[1, 3] == 0.0
+@test Z[2, 1] == 0.0
+@test Z[2, 2] == -1.0
+@test Z[2, 3] == -1.0
+
+
+@test L[1, 1] == 0.0
+@test L[1, 2] == 0.0
+@test L[2, 1] == 0.0
+@test L[2, 2] == 0.0
+```
+
+
 Further examples can be found in the `examples` file.
