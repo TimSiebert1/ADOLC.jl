@@ -142,8 +142,6 @@ JLCXX_MODULE define_julia_module(jlcxx::Module &types)
                { return a.getValue(); });
   types.method("gradient", [](int tag, int n, double *x, double *g)
                { return gradient(tag, n, x, g); });
-  types.method("alloc_vec", alloc_vec);
-  types.method("myalloc2", myalloc2);
   types.method("trace_on", [](int tag)
                { return trace_on(tag); });
   types.method("trace_off", trace_off);
@@ -173,8 +171,6 @@ JLCXX_MODULE define_julia_module(jlcxx::Module &types)
   types.method("zos_pl_forward", zos_pl_forward);
   types.method("fos_pl_forward", fos_pl_forward);
   types.method("fov_pl_forward", fov_pl_forward);
-  types.method("alloc_short", [](int i)
-               { return new short[i]; });
   types.method("abs_normal", abs_normal);
 
   //--------------------
@@ -216,32 +212,4 @@ JLCXX_MODULE define_julia_module(jlcxx::Module &types)
   types.method("exp", [](adouble const &a)
                { return exp2(a); });
   types.unset_override_module();
-
-  // utils for accessing matrices or vectors
-  types.method("getindex_mat", [](double **A, const int &row, const int &col)
-               { return A[row - 1][col - 1]; });
-  types.method("setindex_mat", [](double **A, const double val, const int &row, const int &col)
-               { A[row - 1][col - 1] = val; });
-  types.method("getindex_vec", [](double *A, const int &row)
-               { return A[row - 1]; });
-  types.method("setindex_vec", [](double *A, const double val, const int &row)
-               { A[row - 1] = val; });
-
-  types.method("setindex_vec", [](short *A, const short &val, const int &row)
-               { A[row - 1] = val; });
-  types.method("getindex_vec", [](short *A, const int &row)
-               { return A[row - 1]; });
-}
-
-int main()
-{
-  adouble c = 5.0;
-  adouble d = 4.0;
-  double **X = myalloc2(1, 3);
-  double *A;
-  A = alloc_vec(2);
-  write_out(A);
-  condassign(d, c - d, c, d);
-  std::cout << d.getValue() << std::endl;
-  std::cout << A[1] << std::endl;
 }

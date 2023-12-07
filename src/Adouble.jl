@@ -8,7 +8,26 @@ module Adouble
     function __init__()
       @initcxx
     end
-    include("ops.jl")
+
+# convient inits for vector of independant and dependant 
+function init_independent_vec(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::AbstractVector) 
+  for i in eachindex(x)
+      a[i] << x[i]
+  end
+end
+Base.:<<(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::AbstractVector) = init_independent_vec(a, x)
+
+function init_dependent_vec(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::AbstractVector)
+  for i in eachindex(x)
+      a[i] >> x[i]
+  end
+end
+Base.:>>(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::AbstractVector) = init_dependent_vec(a, x)
+
+
+function Base.:*(a::Main.ADOLC_wrap.Adouble.adoubleAllocated, x::AbstractVector)
+  return map((x_i)->a*x_i, x)
+end
 
 
   function gradient(tape_num::Int64, x::Vector{Float64})
@@ -24,10 +43,8 @@ module Adouble
     return g
   end
 
-  export adouble, getValue
 
-  # allocators
-  export myalloc2, alloc_vec
+  export adouble, getValue
 
   # adolc utils
   export trace_on, trace_off, forward, reverse2, gradient
@@ -37,7 +54,7 @@ module Adouble
 
 
   # point-wise smooth utils 
-  export enableMinMaxUsingAbs, get_num_switches, zos_pl_forward, fos_pl_forward, fov_pl_forward, alloc_short, abs_normal
+  export enableMinMaxUsingAbs, get_num_switches, zos_pl_forward, fos_pl_forward, fov_pl_forward, abs_normal
   # current base operations:
   # max, abs, exp, sqrt, *, +, -, ^
 

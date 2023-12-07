@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(JlCxx REQUIRED)
 find_library(ADOLC_LIB adolc REQUIRED PATHS "${ADOLC_DIR}/lib64")
 
-add_library(${PROJECT_NAME} SHARED adolc_interface.cpp tladolc_interface.cpp)
+add_library(${PROJECT_NAME} SHARED adolc_interface.cpp tladolc_interface.cpp array_types.cpp)
 #add_executable(${PROJECT_NAME} adolc_interface.cpp)
 target_include_directories(
     ${PROJECT_NAME} 
