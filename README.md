@@ -11,7 +11,7 @@ This package wraps the C/C++ automatic differentation library [ADOL-C](https://g
 After including the package,
 ```julia
 include("/path/to/ADOLC_wrap/src/ADOLC_wrap.jl")
-using .ADOLC_wrap.Adouble`
+using .ADOLC_wrap.Adouble
 ```
 define the function you are planning to differentiate.
 ```julia
