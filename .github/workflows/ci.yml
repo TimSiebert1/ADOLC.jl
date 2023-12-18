@@ -30,4 +30,4 @@ jobs:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
       - name: show-content
-        uses: ls
+        run: ls
