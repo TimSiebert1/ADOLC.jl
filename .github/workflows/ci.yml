@@ -31,3 +31,4 @@ jobs:
           arch: ${{ matrix.arch }}
       - name: build-project
         run: cd src && julia --project build.jl
+      - uses:  webfactory/ssh-agent@v0.5.4
