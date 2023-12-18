@@ -29,5 +29,5 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - name: show-content
-        run: ls
+      - name: build-project
+        run: cd src && julia --project build.jl
