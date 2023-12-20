@@ -7,6 +7,8 @@ include("TlAdouble.jl")
 
 using Main.ADOLC_wrap.array_types
 using Main.ADOLC_wrap.Adouble
+using Main.ADOLC_wrap.TlAdouble
+
 struct AbsNormalProblem{T}
     m::Int64
     n::Int64
@@ -116,6 +118,45 @@ function abs_normal!(
     abs_normal!(cz, cy, Y_cxx, J_cxx, Z_cxx, L_cxx, tape_num, m, n, num_switches, x, y, z)
 end
 
-export abs_normal!, AbsNormalProblem
+
+function gradient(func, init_point::Vector{Float64})
+    """
+    Assumption: num_dependent = 0
+    """
+    if length(init_point) < 100
+        a = TlAdouble.tladouble_vector_init(init_point)
+        b = func(a)
+        return TlAdouble.get_gradient(b, length(init_point))
+    else
+        a = [adouble() for _ in eachindex(init_point)]
+        y = 0.0
+        tape_num = 1
+        trace_on(tape_num)
+        a << init_point
+        b = func(a)
+        b >> y
+        trace_off(0)
+        return Adouble.gradient(tape_num, init_point)
+    end
+    
+end
+
+function gradient(func, init_point::Vector{Float64}, num_dependent::Int64)
+    """
+    Assumption: num_dependent > 1
+    """
+    a = [adouble() for _ in eachindex(init_point)]
+    y = Vector{Float64}(undef, num_dependent)
+
+    tape_num = 1
+    trace_on(tape_num)
+    a << init_point
+    b = func(a)
+    b >> y
+    trace_off(0)
+    return Adouble.gradient(tape_num, init_point)
+end
+
+export abs_normal!, AbsNormalProblem, gradient
 
 end # module ADOLC_wrap

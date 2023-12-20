@@ -243,8 +243,17 @@ function tladouble_vector_init(data::Vector{Float64})
   return tl_a_vec
 
 end
+
+function get_gradient(a::Tladouble, num_independent::Int64)
+  grad = Vector{Float64}(undef, num_independent)
+  for i in 1:num_independent
+    grad[i] = getADValue(a.val, i)
+  end
+  return grad
+end
+
   # current base operations:
   # max, abs, exp, sqrt, *, +, -, ^
-  export tladouble, getADValue, setADValue, getValue, tl_init_for_gradient, getindex_tl, tladouble_vector_init, Tladouble
+  export tladouble, getADValue, setADValue, getValue, tl_init_for_gradient, getindex_tl, tladouble_vector_init, Tladouble, get_gradient
 
 end # module adouble

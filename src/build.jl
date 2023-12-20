@@ -1,6 +1,5 @@
 using Pkg
 
-Pkg.instantiate()
 
 Pkg.add(url="git@github.com:TimSiebert1/ADOLC_jll.jl.git")
 Pkg.add("libcxxwrap_julia_jll")

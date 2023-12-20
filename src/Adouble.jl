@@ -10,19 +10,32 @@ module Adouble
     end
 
 # convient inits for vector of independant and dependant 
-function init_independent_vec(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::AbstractVector) 
+function Base.:<<(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::AbstractVector)
   for i in eachindex(x)
       a[i] << x[i]
   end
 end
-Base.:<<(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::AbstractVector) = init_independent_vec(a, x)
 
-function init_dependent_vec(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::AbstractVector)
+
+function Base.:>>(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::AbstractVector)
   for i in eachindex(x)
       a[i] >> x[i]
   end
 end
-Base.:>>(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::AbstractVector) = init_dependent_vec(a, x)
+
+function Base.:>>(a::Main.ADOLC_wrap.Adouble.adoubleAllocated, x::Vector{Float64})
+  if length(x) != 1
+    throw("DimensionMismatch: Length of x ($x) should be 1!")
+  end
+  return [a] >> x
+end
+
+function Base.:>>(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::Float64)
+  if length(a) != 1
+    throw("DimensionMismatch: Length of a ($a) should be 1!")
+  end
+  return a >> [x]
+end
 
 
 function Base.:*(a::Main.ADOLC_wrap.Adouble.adoubleAllocated, x::AbstractVector)
