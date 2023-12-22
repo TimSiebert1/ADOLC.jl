@@ -222,7 +222,7 @@ Base.convert(::Type{Tladouble}, x::Float64) = Tladouble(x, false)
 Base.convert(::Type{Tladouble}, x::Int64) = Tladouble(Float64(x), false)
 
 
-Base.zero(::Type{Tladouble}) = Float64(0.0)
+
 
 
 ###############################################################

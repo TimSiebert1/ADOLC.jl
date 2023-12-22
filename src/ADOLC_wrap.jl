@@ -119,6 +119,7 @@ function abs_normal!(
 end
 
 
+
 function gradient(func, init_point::Vector{Float64})
     """
     Assumption: num_dependent = 0
@@ -138,7 +139,6 @@ function gradient(func, init_point::Vector{Float64})
         trace_off(0)
         return Adouble.gradient(tape_num, init_point)
     end
-    
 end
 
 function gradient(func, init_point::Vector{Float64}, num_dependent::Int64)
