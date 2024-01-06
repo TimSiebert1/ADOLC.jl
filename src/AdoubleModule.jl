@@ -1,4 +1,4 @@
-module Adouble
+module AdoubleModule
     using CxxWrap
     
     # one need to specify the location of adolc_wrap.{so, dylib}
@@ -10,27 +10,27 @@ module Adouble
     end
 
 # convient inits for vector of independant and dependant 
-function Base.:<<(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::AbstractVector)
+function Base.:<<(a::Vector{Main.ADOLC_wrap.AdoubleModule.AdoubleCxxAllocated}, x::AbstractVector)
   for i in eachindex(x)
       a[i] << x[i]
   end
 end
 
 
-function Base.:>>(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::AbstractVector)
+function Base.:>>(a::Vector{Main.ADOLC_wrap.AdoubleModule.AdoubleCxxAllocated}, x::AbstractVector)
   for i in eachindex(x)
       a[i] >> x[i]
   end
 end
 
-function Base.:>>(a::Main.ADOLC_wrap.Adouble.adoubleAllocated, x::Vector{Float64})
+function Base.:>>(a::Main.ADOLC_wrap.AdoubleModule.AdoubleCxxAllocated, x::Vector{Float64})
   if length(x) != 1
     throw("DimensionMismatch: Length of x ($x) should be 1!")
   end
   return [a] >> x
 end
 
-function Base.:>>(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::Float64)
+function Base.:>>(a::Vector{Main.ADOLC_wrap.AdoubleModule.AdoubleCxxAllocated}, x::Float64)
   if length(a) != 1
     throw("DimensionMismatch: Length of a ($a) should be 1!")
   end
@@ -38,7 +38,7 @@ function Base.:>>(a::Vector{Main.ADOLC_wrap.Adouble.adoubleAllocated}, x::Float6
 end
 
 
-function Base.:*(a::Main.ADOLC_wrap.Adouble.adoubleAllocated, x::AbstractVector)
+function Base.:*(a::Main.ADOLC_wrap.AdoubleModule.AdoubleCxxAllocated, x::AbstractVector)
   return map((x_i)->a*x_i, x)
 end
 
@@ -57,10 +57,10 @@ end
   end
 
 
-  export adouble, getValue
+  export AdoubleCxx, getValue
 
   # adolc utils
-  export trace_on, trace_off, ad_forward, ad_reverse
+  export trace_on, trace_off, ad_forward, ad_reverse, gradient
 
 
 

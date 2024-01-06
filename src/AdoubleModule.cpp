@@ -122,7 +122,7 @@ adouble fmin2(adouble const &a, adouble const &b)
 
 JLCXX_MODULE Adouble_module(jlcxx::Module &types)
 {
-  types.add_type<adouble>("adouble", jlcxx::julia_type("AbstractFloat", "Base"))
+  types.add_type<adouble>("AdoubleCxx", jlcxx::julia_type("AbstractFloat", "Base"))
       .constructor<double>();
 
   types.method("getValue", [](adouble &a)

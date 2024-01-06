@@ -1,12 +1,12 @@
 module ADOLC_wrap
 
 include("array_types.jl")
-include("Adouble.jl")
+include("AdoubleModule.jl")
 include("TladoubleModule.jl")
 
 
 using Main.ADOLC_wrap.array_types
-using Main.ADOLC_wrap.Adouble
+using Main.ADOLC_wrap.AdoubleModule
 using Main.ADOLC_wrap.TladoubleModule
 
 struct AbsNormalProblem{T}
@@ -29,7 +29,7 @@ struct AbsNormalProblem{T}
 
     function AbsNormalProblem{T}(tape_num::Int64, m::Int64, n::Int64, x::Vector{T}, y::Vector{T}) where T <: Real
         
-        num_switches = Adouble.get_num_switches(tape_num)
+        num_switches = AdoubleModule.get_num_switches(tape_num)
         z = CxxVector{Float64}(num_switches)
 
         cz = CxxVector{Float64}(num_switches)
@@ -89,7 +89,7 @@ function _abs_normal!(
     Z = Z_cxx.data
     L = L_cxx.data
 
-    Adouble.abs_normal(tape_num, m, n, num_switches, x, y, z, cz, cy, Y, J, Z, L)
+    AdoubleModule.abs_normal(tape_num, m, n, num_switches, x, y, z, cz, cy, Y, J, Z, L)
 end
 
 
@@ -133,14 +133,14 @@ function _gradient_tape_based(func, init_point::Vector{Float64}, num_dependent::
     Assumption: num_dependent > 1
     """
     y = Vector{Float64}(undef, num_dependent)
-    a = [adouble() for _ in eachindex(init_point)]
+    a = [AdoubleModule.AdoubleCxx() for _ in eachindex(init_point)]
     tape_num = 1
     trace_on(tape_num, 1)
     a << init_point
     b = func(a)
     b >> y
     trace_off(0)
-    return Adouble.gradient(tape_num, init_point)
+    return AdoubleModule.gradient(tape_num, init_point)
 end
 
 
