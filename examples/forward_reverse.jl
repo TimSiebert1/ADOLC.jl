@@ -1,6 +1,6 @@
 include("../src/ADOLC_wrap.jl")
-using .ADOLC_wrap.Adouble
-
+using .ADOLC_wrap.array_types
+using .ADOLC_wrap.AdoubleModule
 
 
 n = 4
@@ -16,8 +16,8 @@ Z = myalloc2(1,n+2)
 
 
 # declare active variables 
-x = adouble()
-y = adouble()   
+x = AdoubleCxx()
+y = AdoubleCxx()   
 # beginning of active section
 
 # tag = 1 and keep = 0
@@ -34,10 +34,10 @@ y = x^n;
 y >> Y[1, 1]
 trace_off(0); 
 
-u = alloc_vec(1)
+u = alloc_vec_double(1)
 u[1] = 1.0                       
 for i = 1:n+2            
-  forward(1,1,1,i,i+1,X,Y); 
+  ad_forward(1,1,1,i,i+1,X,Y); 
   if i == 1   
     println(Y[1, i], " - ", getValue(y), " = ", Y[1, i]- getValue(y)," (should be 0)")
 
@@ -45,5 +45,6 @@ for i = 1:n+2
     Z[1, i] = Z[1, i-1]/(i - 1)
     println(Y[1, i], " - ", Z[1, i], " = ", Y[1, i]-Z[1, i], " (should be 0)")
     end
-  reverse2(1,1,1,i,u,Z)
+  ad_reverse(1,1,1,i,u,Z)
 end
+

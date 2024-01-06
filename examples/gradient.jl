@@ -1,5 +1,5 @@
 include("../src/ADOLC_wrap.jl")
-using .ADOLC_wrap.Adouble
+using .ADOLC_wrap.AdoubleModule
 
 # Chained LQ
 function chained_lq(x)
@@ -10,7 +10,7 @@ function chained_lq(x)
 end
 
 x = [0.0, 2.0, -1.0]
-a = [adouble() for _ in 1:3]
+a = [AdoubleCxx() for _ in 1:3]
 y = 0.0
 trace_on(1)
 
