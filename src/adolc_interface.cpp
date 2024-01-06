@@ -103,19 +103,6 @@ adouble power(adouble x, int n)
   } /* end else */
 }
 
-double *alloc_vec(int size)
-{
-  double *A = new double[size];
-  return A;
-}
-
-void write_out(double *A)
-{
-  for (auto i = 0; i < 2; i++)
-  {
-    std::cout << A[i] << std::endl;
-  }
-}
 adouble sqrt2(adouble const &a)
 {
   return sqrt(a);
@@ -133,7 +120,7 @@ adouble fmin2(adouble const &a, adouble const &b)
   return fmin(a, b);
 }
 
-JLCXX_MODULE define_julia_module(jlcxx::Module &types)
+JLCXX_MODULE Adouble_module(jlcxx::Module &types)
 {
   types.add_type<adouble>("adouble", jlcxx::julia_type("AbstractFloat", "Base"))
       .constructor<double>();
@@ -144,12 +131,14 @@ JLCXX_MODULE define_julia_module(jlcxx::Module &types)
                { return gradient(tag, n, x, g); });
   types.method("trace_on", [](int tag)
                { return trace_on(tag); });
+  types.method("trace_on", [](int tag, int keep)
+               { return trace_on(tag, keep); });
   types.method("trace_off", trace_off);
-  types.method("forward", [](short tag, int m, int n,
-                             int d,
-                             int keep,
-                             double **X,
-                             double **Y)
+  types.method("ad_forward", [](short tag, int m, int n,
+                                int d,
+                                int keep,
+                                double **X,
+                                double **Y)
                { forward(tag,
                          m,
                          n,
@@ -157,14 +146,18 @@ JLCXX_MODULE define_julia_module(jlcxx::Module &types)
                          keep,
                          X,
                          Y); });
-  types.method("reverse2", [](short tag,
-                              int m,
-                              int n,
-                              int d,
-                              double *u,
-                              double **Z)
+  types.method("ad_reverse", [](short tag,
+                                int m,
+                                int n,
+                                int d,
+                                double *u,
+                                double **Z)
                { reverse(tag, m, n, d, u, Z); });
-
+  /*
+  types.method("zos_pl_forward", zos_pl_forward);
+  types.method("fos_pl_forward", fos_pl_forward);
+  types.method("fov_pl_forward", fov_pl_forward);
+  */
   // pointwise-smooth functions
   types.method("enableMinMaxUsingAbs", enableMinMaxUsingAbs);
   types.method("get_num_switches", get_num_switches);

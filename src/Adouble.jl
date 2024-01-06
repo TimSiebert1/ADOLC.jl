@@ -3,7 +3,7 @@ module Adouble
     
     # one need to specify the location of adolc_wrap.{so, dylib}
     total_build_dir = joinpath(@__DIR__, "build")
-    @wrapmodule(() -> joinpath(total_build_dir,"libadolc_wrap"), :define_julia_module)
+    @wrapmodule(() -> joinpath(total_build_dir,"libadolc_wrap"), :Adouble_module)
     
     function __init__()
       @initcxx
@@ -60,10 +60,8 @@ end
   export adouble, getValue
 
   # adolc utils
-  export trace_on, trace_off, forward, reverse2, gradient
+  export trace_on, trace_off, ad_forward, ad_reverse
 
-  # matrix operations 
-  export getindex_mat, setindex_mat, getindex_vec, setindex_vec
 
 
   # point-wise smooth utils 
