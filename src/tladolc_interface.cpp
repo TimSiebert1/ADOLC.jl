@@ -122,9 +122,9 @@ tladouble *tl_init_for_gradient(double const *data, int const &n)
     return x;
 }
 
-JLCXX_MODULE define_julia_module_tl(jlcxx::Module &types)
+JLCXX_MODULE Tladouble_module(jlcxx::Module &types)
 {
-    types.add_type<tladouble>("tladouble", jlcxx::julia_type("AbstractFloat", "Base"))
+    types.add_type<tladouble>("TladoubleCxx", jlcxx::julia_type("AbstractFloat", "Base"))
         .constructor<double>();
     types.method("tl_init_for_gradient", [](double const *data, int const &n)
                  { return tl_init_for_gradient(data, n); });
