@@ -153,11 +153,14 @@ JLCXX_MODULE Adouble_module(jlcxx::Module &types)
                                 double *u,
                                 double **Z)
                { reverse(tag, m, n, d, u, Z); });
-  /*
-  types.method("zos_pl_forward", zos_pl_forward);
-  types.method("fos_pl_forward", fos_pl_forward);
-  types.method("fov_pl_forward", fov_pl_forward);
-  */
+
+  types.method("zos_forward", zos_forward);
+  types.method("fos_forward", fos_forward);
+  types.method("hos_forward", hos_forward);
+
+  types.method("fov_forward", fov_forward);
+  types.method("hov_forward", hov_forward);
+
   // pointwise-smooth functions
   types.method("enableMinMaxUsingAbs", enableMinMaxUsingAbs);
   types.method("get_num_switches", get_num_switches);

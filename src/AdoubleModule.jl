@@ -59,8 +59,11 @@ end
 
   export AdoubleCxx, getValue
 
-  # adolc utils
+  # general adolc
   export trace_on, trace_off, ad_forward, ad_reverse, gradient
+
+  # more low level function
+  export zos_forward, fos_forward, hos_forward, fov_forward, hov_forward
 
 
 

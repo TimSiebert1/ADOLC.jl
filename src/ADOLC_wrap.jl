@@ -158,7 +158,7 @@ function gradient(func, init_point::Vector{Float64}, num_dependent::Int64; switc
             mode = length(init_point) < switch_point ? :tape_less : :tape_based
             return gradient(func, init_point, num_dependent, switch_point=switch_point, mode=mode)
         else
-            error("Mode $(mode) is not implemented!")
+            throw("Mode $(mode) is not implemented!")
         end
     end
 end
