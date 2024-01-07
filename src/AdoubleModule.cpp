@@ -161,6 +161,12 @@ JLCXX_MODULE Adouble_module(jlcxx::Module &types)
   types.method("fov_forward", fov_forward);
   types.method("hov_forward", hov_forward);
 
+  types.method("fos_reverse", fos_reverse);
+  types.method("hos_reverse", hos_reverse);
+
+  types.method("fov_reverse", fov_reverse);
+  types.method("hov_reverse", hov_reverse);
+
   // pointwise-smooth functions
   types.method("enableMinMaxUsingAbs", enableMinMaxUsingAbs);
   types.method("get_num_switches", get_num_switches);

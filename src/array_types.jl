@@ -12,6 +12,10 @@ module array_types
 
 ##### raw CxxPtr utilities ###################
 
+Base.getindex(X::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64, row::Int64, col::Int64) = getindex_tens(X, dim, row, col)
+Base.setindex!(X::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, val::Cdouble, dim::Int64, row::Int64, col::Int64) = setindex_tens(X, val, dim, row, col)
+
+
 Base.getindex(X::CxxPtr{CxxPtr{Cdouble}}, row::Int64, col::Int64) = getindex_mat(X, row, col)
 Base.setindex!(X::CxxPtr{CxxPtr{Cdouble}}, val::Cdouble, row::Int64, col::Int64) = setindex_mat(X, val, row, col)
 
@@ -117,6 +121,6 @@ Base.size(X::CxxVector{T}) where T <: Real = X.n
 Base.getindex(X::CxxVector{T}, row::Int64) where T <: Real = getindex(X.data, row)
 Base.setindex!(X::CxxVector{T}, val::T, row::Int64) where T <: Real = setindex!(X.data, val, row)
 
-export CxxMatrix, CxxVector, myalloc2, myalloc1, alloc_vec_double, alloc_vec_short, alloc_vec
+export CxxMatrix, CxxVector, myalloc3, myalloc2, myalloc1, alloc_vec_double, alloc_vec_short, alloc_vec, alloc_mat_short
 
 end # module arry_types

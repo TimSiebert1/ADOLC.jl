@@ -64,6 +64,7 @@ end
 
   # more low level function
   export zos_forward, fos_forward, hos_forward, fov_forward, hov_forward
+  export              fos_reverse, hos_reverse, fov_reverse, hov_reverse
 
 
 
