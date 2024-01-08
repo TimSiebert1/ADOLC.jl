@@ -120,43 +120,88 @@ end
 
 
 function _gradient_tape_less(func, init_point::Vector{Float64})
-    """
-    Assumption: num_dependent > 1
-    """
     a = TladoubleModule.tladouble_vector_init(init_point)
     b = func(a)
     return TladoubleModule.get_gradient(b, length(init_point))
 end
 
-function _gradient_tape_based(func, init_point::Vector{Float64}, num_dependent::Int64)
-    """
-    Assumption: num_dependent > 1
-    """
+function _gradient_tape_based(func, init_point::Vector{Float64}, num_dependent::Int64, derivative_order::Int64)
+
+    num_independent = length(init_point)
     y = Vector{Float64}(undef, num_dependent)
-    a = [AdoubleModule.AdoubleCxx() for _ in eachindex(init_point)]
+    a = [AdoubleModule.AdoubleCxx() for _ in 1:num_independent]
     tape_num = 1
-    trace_on(tape_num, 1)
+    keep = 1
+    trace_on(tape_num, keep)
     a << init_point
     b = func(a)
     b >> y
     trace_off(0)
-    return AdoubleModule.gradient(tape_num, init_point)
+
+    if derivative_order == 1
+        
+        U = myalloc2(num_dependent, num_dependent)
+        for i in 1:num_dependent
+            for j in 1:num_dependent
+                U[i, j] = 0.0
+                if i == j
+                    U[i, i] = 1.0
+                end
+            end
+        end
+
+        Z = myalloc2(num_dependent, num_independent)
+        fov_reverse(tape_num, num_dependent, num_independent, num_dependent, U, Z) 
+        return Z
+
+    else
+        output = Vector{Any}(undef, num_independent)
+        
+        for direction in 1:num_independent
+            # forward until last derivative_order
+            X = myalloc2(num_independent, derivative_order)
+            for i in 1:num_independent
+                for j in 1:derivative_order
+                    X[i, j] = 0.0
+                end
+            end
+            X[direction, 1] = 1.0
+            Y = myalloc2(num_dependent, derivative_order)
+            hos_forward(tape_num, num_dependent, num_independent, 1, derivative_order+1, init_point, X, y, Y) 
+
+            U = myalloc2(num_dependent, num_dependent)
+            for i in 1:num_dependent
+                for j in 1:num_dependent
+                    U[i, j] = 0.0
+                    if i == j 
+                        U[i, i] = 1.0
+                    end
+                end
+            end
+
+            Z = myalloc3(num_dependent, num_independent, derivative_order+1)
+            nz = alloc_mat_short(num_dependent, num_independent)
+            hov_reverse(tape_num, num_dependent, num_independent, derivative_order, num_dependent, U, Z, nz) 
+            output[direction] = Z
+        end
+        return output
+
+    end
 end
 
 
-function gradient(func, init_point::Vector{Float64}, num_dependent::Int64; switch_point::Int64=100, mode=nothing)
-    """
-    Assumption: num_dependent > 1
-    """
+function gradient(func, init_point::Vector{Float64}, num_dependent::Int64; switch_point::Int64=100, mode=nothing, derivative_order::Int64=1)
+
     if mode === :tape_less
         return _gradient_tape_less(func, init_point)
     elseif mode === :tape_based
-        return _gradient_tape_based(func, init_point, num_dependent)
+        return _gradient_tape_based(func, init_point, num_dependent, derivative_order)
 
     else 
         if mode === nothing
             mode = length(init_point) < switch_point ? :tape_less : :tape_based
-            return gradient(func, init_point, num_dependent, switch_point=switch_point, mode=mode)
+            mode = derivative_order > 1 ? :tape_based : mode
+            return gradient(func, init_point, num_dependent, switch_point=switch_point, mode=mode, derivative_order=derivative_order)
         else
             throw("Mode $(mode) is not implemented!")
         end
