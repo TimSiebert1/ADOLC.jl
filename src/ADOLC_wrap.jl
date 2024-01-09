@@ -118,6 +118,78 @@ function abs_normal!(
     abs_normal!(cz, cy, Y_cxx, J_cxx, Z_cxx, L_cxx, tape_num, m, n, num_switches, x, y, z)
 end
 
+function tensor_address2(derivative_order::Int64, multi_index::Tuple{Vararg{Int64}})
+    # need non-increasing order -> ask ADOLC
+    multi_index_sorted = sort(collect(Int32, multi_index), rev=true)
+
+    # "+1" because c++ index is -1
+    return Int64(tensor_address(derivative_order, multi_index_sorted)) + 1
+end
+
+function create_cxx_identity(n::Int64, m::Int64)
+    I = myalloc2(n, m)
+    for i in 1:n
+        for j in 1:m
+            I[i, j] = 0.0
+            if i == j
+                I[i, i] = 1.0
+            end
+        end
+    end
+    return I
+end
+
+
+function build_tensor(derivative_order::Int64, num_dependent::Int64, num_independent::Int64, CxxTensor)
+
+    # allocate the output (julia) tensor 
+    tensor = Array{Float64}(undef, [num_independent for _ in 1:derivative_order]..., num_dependent)
+
+    
+    # creates all index-pairs; the i-th entry specifies the i-th directional derivative w.r.t x_i
+    # e.g. (1, 1, 3, 4) gives the derivative w.r.t x_1, x_1, x_3, x_4
+    # this is used as index for the tensor and to get the address from the compressed vector
+    idxs = vec(collect(Iterators.product(Iterators.repeated(1:num_independent, derivative_order)...)))
+
+    # build the tensor
+    for idx in idxs
+        for component in 1:num_dependent
+            tensor[idx..., component] = CxxTensor[component, tensor_address2(derivative_order, idx)]
+        end
+    end
+    return tensor
+end
+
+function _higher_order(
+    tape_num,
+    init_point::Vector{Float64},
+    num_dependent::Int64, 
+    num_independent::Int64,
+    derivative_order::Int64; 
+    num_direction=nothing, 
+    seed_matrix=nothing,
+    compressed_out::Bool=true
+    )
+
+    if num_direction === nothing
+        num_direction = num_independent
+    end
+
+    # allocate c++ memory for the tensor_eval function
+    CxxTensor = myalloc2(num_dependent, binomial(num_direction + derivative_order, derivative_order))
+
+    if seed_matrix === nothing
+        seed_matrix = create_cxx_identity(num_independent, num_direction)
+    end
+
+    # calculate the derivatives, written into CxxTensor
+    tensor_eval(tape_num, num_dependent, num_independent, derivative_order, num_direction, init_point, CxxTensor, seed_matrix)
+    if compressed_out
+        return CxxTensor
+    else
+        return build_tensor(derivative_order, num_dependent, num_independent, CxxTensor)
+    end
+end
 
 function _gradient_tape_less(func, init_point::Vector{Float64})
     a = TladoubleModule.tladouble_vector_init(init_point)
@@ -125,7 +197,13 @@ function _gradient_tape_less(func, init_point::Vector{Float64})
     return TladoubleModule.get_gradient(b, length(init_point))
 end
 
-function _gradient_tape_based(func, init_point::Vector{Float64}, num_dependent::Int64, derivative_order::Int64)
+function _gradient_tape_based(func, 
+                            init_point::Vector{Float64}, 
+                            num_dependent::Int64, 
+                            derivative_order::Int64;
+                            num_direction=nothing,
+                            seed_matrix=nothing,
+                            compressed_out::Bool=true)
 
     num_independent = length(init_point)
     y = Vector{Float64}(undef, num_dependent)
@@ -138,70 +216,63 @@ function _gradient_tape_based(func, init_point::Vector{Float64}, num_dependent::
     b >> y
     trace_off(0)
 
-    if derivative_order == 1
-        
-        U = myalloc2(num_dependent, num_dependent)
-        for i in 1:num_dependent
-            for j in 1:num_dependent
-                U[i, j] = 0.0
-                if i == j
-                    U[i, i] = 1.0
-                end
-            end
-        end
-
-        Z = myalloc2(num_dependent, num_independent)
-        fov_reverse(tape_num, num_dependent, num_independent, num_dependent, U, Z) 
-        return Z
-
-    else
-        output = Vector{Any}(undef, num_independent)
-        
-        for direction in 1:num_independent
-            # forward until last derivative_order
-            X = myalloc2(num_independent, derivative_order)
-            for i in 1:num_independent
-                for j in 1:derivative_order
-                    X[i, j] = 0.0
-                end
-            end
-            X[direction, 1] = 1.0
-            Y = myalloc2(num_dependent, derivative_order)
-            hos_forward(tape_num, num_dependent, num_independent, 1, derivative_order+1, init_point, X, y, Y) 
-
-            U = myalloc2(num_dependent, num_dependent)
-            for i in 1:num_dependent
-                for j in 1:num_dependent
-                    U[i, j] = 0.0
-                    if i == j 
-                        U[i, i] = 1.0
-                    end
-                end
-            end
-
-            Z = myalloc3(num_dependent, num_independent, derivative_order+1)
-            nz = alloc_mat_short(num_dependent, num_independent)
-            hov_reverse(tape_num, num_dependent, num_independent, derivative_order, num_dependent, U, Z, nz) 
-            output[direction] = Z
-        end
-        return output
-
+    if num_direction === nothing
+        return _higher_order(tape_num, 
+                        init_point, 
+                        num_dependent, 
+                        num_independent, 
+                        derivative_order,
+                        num_direction=num_independent,
+                        seed_matrix=seed_matrix,
+                        compressed_out=compressed_out)
+    else                  
+        return _higher_order(tape_num, 
+                            init_point, 
+                            num_dependent, 
+                            num_independent, 
+                            derivative_order,
+                            num_direction=num_direction, 
+                            seed_matrix=seed_matrix,
+                            compressed_out=compressed_out)
     end
 end
 
 
-function gradient(func, init_point::Vector{Float64}, num_dependent::Int64; switch_point::Int64=100, mode=nothing, derivative_order::Int64=1)
+function gradient(func, 
+                init_point::Vector{Float64},
+                num_dependent::Int64; 
+                switch_point::Int64=100, 
+                mode=nothing, 
+                derivative_order::Int64=1,
+                num_direction=nothing,
+                seed_matrix=nothing,
+                compressed_out::Bool=true)
+
 
     if mode === :tape_less
         return _gradient_tape_less(func, init_point)
     elseif mode === :tape_based
-        return _gradient_tape_based(func, init_point, num_dependent, derivative_order)
+        return _gradient_tape_based(func, 
+                                    init_point, 
+                                    num_dependent, 
+                                    derivative_order, 
+                                    num_direction=num_direction,
+                                    seed_matrix=seed_matrix,
+                                    compressed_out=compressed_out)
 
     else 
         if mode === nothing
             mode = length(init_point) < switch_point ? :tape_less : :tape_based
             mode = derivative_order > 1 ? :tape_based : mode
-            return gradient(func, init_point, num_dependent, switch_point=switch_point, mode=mode, derivative_order=derivative_order)
+            return gradient(func, 
+                            init_point,
+                            num_dependent; 
+                            switch_point=switch_point, 
+                            mode=mode, 
+                            derivative_order=derivative_order,
+                            num_direction=num_direction,
+                            seed_matrix=seed_matrix,
+                            compressed_out=compressed_out)
         else
             throw("Mode $(mode) is not implemented!")
         end
@@ -209,5 +280,6 @@ function gradient(func, init_point::Vector{Float64}, num_dependent::Int64; switc
 end
 
 export abs_normal!, AbsNormalProblem, gradient, _gradient_tape_based, _gradient_tape_less
+export _higher_order, tensor_address2, build_tensor, create_cxx_identity
 
 end # module ADOLC_wrap

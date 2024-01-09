@@ -167,6 +167,10 @@ JLCXX_MODULE Adouble_module(jlcxx::Module &types)
   types.method("fov_reverse", fov_reverse);
   types.method("hov_reverse", hov_reverse);
 
+  // easy to use higher order drivers
+  types.method("tensor_address", tensor_address);
+  types.method("tensor_eval", tensor_eval);
+
   // pointwise-smooth functions
   types.method("enableMinMaxUsingAbs", enableMinMaxUsingAbs);
   types.method("get_num_switches", get_num_switches);

@@ -1,2 +1,5 @@
-change the init for tape-less adouble vector mode
-rewrite example
+in higher_order:
+                - Replace CxxTensor with julia vector
+                - Replace CxxTensor with julia vector in build_tensor
+in tensor_address:
+                - move "+1" to c++

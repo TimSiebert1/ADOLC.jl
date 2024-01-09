@@ -66,6 +66,8 @@ end
   export zos_forward, fos_forward, hos_forward, fov_forward, hov_forward
   export              fos_reverse, hos_reverse, fov_reverse, hov_reverse
 
+  # easy to use higher order driver
+  export tensor_eval, tensor_address
 
 
   # point-wise smooth utils 
