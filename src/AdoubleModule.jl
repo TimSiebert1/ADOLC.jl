@@ -69,6 +69,9 @@ end
   # easy to use higher order driver
   export tensor_eval, tensor_address
 
+  # more drivers
+  export   jacobian, hessian, vec_jac, jac_vec, hess_vec, hess_mat, lagra_hess_vec, jac_solv
+
 
   # point-wise smooth utils 
   export enableMinMaxUsingAbs, get_num_switches, zos_pl_forward, fos_pl_forward, fov_pl_forward, abs_normal

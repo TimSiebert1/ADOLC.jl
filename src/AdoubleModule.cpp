@@ -134,6 +134,18 @@ JLCXX_MODULE Adouble_module(jlcxx::Module &types)
   types.method("trace_on", [](int tag, int keep)
                { return trace_on(tag, keep); });
   types.method("trace_off", trace_off);
+
+  // easy to use drivers
+
+  types.method("jacobian", jacobian);
+  types.method("hessian", hessian);
+  types.method("vec_jac", vec_jac);
+  types.method("jac_vec", jac_vec);
+  types.method("hess_vec", hess_vec);
+  types.method("hess_mat", hess_mat);
+  types.method("lagra_hess_vec", lagra_hess_vec);
+  types.method("jac_solv", jac_solv);
+
   types.method("ad_forward", [](short tag, int m, int n,
                                 int d,
                                 int keep,
