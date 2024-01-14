@@ -1,6 +1,6 @@
-include("../../external/ADOLC_wrap/src/ADOLC_wrap.jl")
-using .ADOLC_wrap.AdoubleModule
-using .ADOLC_wrap
+include("../src/ADOLC.jl")
+using .ADOLC.AdoubleModule
+using .ADOLC
 
 enableMinMaxUsingAbs()
 

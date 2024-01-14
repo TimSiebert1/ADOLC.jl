@@ -1,5 +1,5 @@
-include("../src/ADOLC_wrap.jl")
-using .ADOLC_wrap
+include("../src/ADOLC.jl")
+using .ADOLC
 using Test
 # Chained LQ
 
@@ -30,8 +30,8 @@ function func(x)
 end
 
 init_point = [-1.0, 2.0, -1.0]
-num_dependent = 2
-Z = gradient(func, init_point, num_dependent, mode=:tape_based)
+num_dependents = 2
+Z = gradient(func, init_point, num_dependents, mode=:tape_based)
 
 @test Z[1, 1] == 8.0
 @test Z[2, 1] == 1.0
@@ -40,37 +40,29 @@ Z = gradient(func, init_point, num_dependent, mode=:tape_based)
 @test Z[1, 3] == 0.0
 @test Z[2, 3] == 0.5
 
+Z = gradient(func, init_point, num_dependents, mode=:tape_based, derivative_order=2, compressed_out=false)
 
 
+@test Z[1, 1, 1] == 0.0
+@test Z[1, 2, 1] == 12.0
+@test Z[1, 3, 1] == 0.0
 
-Z = gradient(func, init_point, num_dependent, mode=:tape_based, derivative_order=2)
+@test Z[2, 1, 1] == 12.0
+@test Z[2, 2, 1] == -12.0
+@test Z[2, 3, 1] == 0.0
 
+@test Z[3, 1, 1] == 0.0
+@test Z[3, 2, 1] == 0.0
+@test Z[3, 3, 1] == 0.0
 
-@test Z[1][1, 1, 1] == 8.0
-@test Z[1][1, 2, 1] == -12.0
-@test Z[1][1, 3, 1] == 0.0
-@test Z[1][1, 1, 2] == 0.0
-@test Z[1][1, 2, 2] == 12.0
-@test Z[1][1, 3, 2] == 0.0
+@test Z[1, 1, 2] == 0.0
+@test Z[1, 2, 2] == 0.0
+@test Z[1, 3, 2] == 0.0
 
-@test Z[1][2, 1, 1] == 1.0
-@test Z[1][2, 2, 1] == 0.25
-@test Z[1][2, 3, 1] == 0.5
-@test Z[1][2, 1, 2] == 0.0
-@test Z[1][2, 2, 2] == 0.0
-@test Z[1][2, 3, 2] == 0.0
+@test Z[2, 1, 2] == 0.0
+@test Z[2, 2, 2] == -0.25
+@test Z[2, 3, 2] == -0.25
 
-
-@test Z[2][1, 1, 1] == 8.0
-@test Z[2][1, 2, 1] == -12.0
-@test Z[2][1, 3, 1] == 0.0
-@test Z[2][1, 1, 2] == 12.0
-@test Z[2][1, 2, 2] == -12.0
-@test Z[2][1, 3, 2] == 0.0
-
-@test Z[2][2, 1, 1] == 1.0
-@test Z[2][2, 2, 1] == 0.25
-@test Z[2][2, 3, 1] == 0.5
-@test Z[2][2, 1, 2] == 0.0
-@test Z[2][2, 2, 2] == 
-@test Z[2][2, 3, 2] == 0.0
+@test Z[3, 1, 2] == 0.0
+@test Z[3, 2, 2] == -0.25
+@test Z[3, 3, 2] == 0.0

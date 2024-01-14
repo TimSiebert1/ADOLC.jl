@@ -1,6 +1,6 @@
-include("../src/ADOLC_wrap.jl")
-using .ADOLC_wrap.array_types
-using .ADOLC_wrap.AdoubleModule
+include("../src/ADOLC.jl")
+using .ADOLC.array_types
+using .ADOLC.AdoubleModule
 
 
 n = 4

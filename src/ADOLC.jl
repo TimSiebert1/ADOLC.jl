@@ -1,13 +1,13 @@
-module ADOLC_wrap
+module ADOLC
 
 include("array_types.jl")
 include("AdoubleModule.jl")
 include("TladoubleModule.jl")
 
 
-using Main.ADOLC_wrap.array_types
-using Main.ADOLC_wrap.AdoubleModule
-using Main.ADOLC_wrap.TladoubleModule
+using Main.ADOLC.array_types
+using Main.ADOLC.AdoubleModule
+using Main.ADOLC.TladoubleModule
 
 struct AbsNormalProblem{T}
     m::Int64
@@ -140,54 +140,103 @@ function create_cxx_identity(n::Int64, m::Int64)
 end
 
 
-function build_tensor(derivative_order::Int64, num_dependent::Int64, num_independent::Int64, CxxTensor)
+function build_tensor(derivative_order::Int64, num_dependents::Int64, num_independents::Int64, CxxTensor)
 
     # allocate the output (julia) tensor 
-    tensor = Array{Float64}(undef, [num_independent for _ in 1:derivative_order]..., num_dependent)
+    tensor = Array{Float64}(undef, [num_independents for _ in 1:derivative_order]..., num_dependents)
 
     
     # creates all index-pairs; the i-th entry specifies the i-th directional derivative w.r.t x_i
     # e.g. (1, 1, 3, 4) gives the derivative w.r.t x_1, x_1, x_3, x_4
     # this is used as index for the tensor and to get the address from the compressed vector
-    idxs = vec(collect(Iterators.product(Iterators.repeated(1:num_independent, derivative_order)...)))
+    idxs = vec(collect(Iterators.product(Iterators.repeated(1:num_independents, derivative_order)...)))
 
     # build the tensor
     for idx in idxs
-        for component in 1:num_dependent
+        for component in 1:num_dependents
             tensor[idx..., component] = CxxTensor[component, tensor_address2(derivative_order, idx)]
         end
     end
     return tensor
 end
 
+function reverse(tape_num::Int64,
+                num_dependents::Int64,
+                num_independents::Int64;
+                num_directions=nothing,
+                seed=nothing)
+
+    if num_directions === nothing
+        num_directions = num_dependents
+    end
+    if num_directions == 1
+        if seed===nothing
+            if num_dependents != num_directions
+                @warn "No seed is given and num_dependents != num_directions. 
+                    Creating seed for the gradient of the first component of the function!"
+            end
+            seed = zeros(num_dependents)
+            seed[1] = 1.0
+        end
+    
+        z = Vector{Float64}(undef, num_independents)
+        fos_reverse(tape_num, num_dependents, num_independents, seed, z)
+        return z
+    else
+        if seed===nothing
+            if num_dependents != num_directions
+                @warn "No seed is given and num_dependents != num_directions. 
+                        Creating the seed for first gradients of the first 
+                        $(min(num_dependents, num_directions)) components of 
+                        the function! "
+            end
+            seed = myalloc2(num_directions, num_dependents)
+            for i in 1:num_directions
+                for j in 1:num_dependents
+                    seed[i, j] = 0.0
+                    if i == j
+                        seed[i, i] = 1.0
+                    end
+                end
+            end
+        end
+        Z = myalloc2(num_directions, num_independents)
+        fov_reverse(tape_num, num_dependents, num_independents, num_directions, seed, Z)
+        return Z
+    end
+
+end
+    
+     
+
 function _higher_order(
     tape_num,
     init_point::Vector{Float64},
-    num_dependent::Int64, 
-    num_independent::Int64,
+    num_dependents::Int64, 
+    num_independents::Int64,
     derivative_order::Int64; 
-    num_direction=nothing, 
-    seed_matrix=nothing,
+    num_directions=nothing, 
+    seed=nothing,
     compressed_out::Bool=true
     )
 
-    if num_direction === nothing
-        num_direction = num_independent
+    if num_directions === nothing
+        num_directions = num_independents
     end
 
     # allocate c++ memory for the tensor_eval function
-    CxxTensor = myalloc2(num_dependent, binomial(num_direction + derivative_order, derivative_order))
+    CxxTensor = myalloc2(num_dependents, binomial(num_directions + derivative_order, derivative_order))
 
-    if seed_matrix === nothing
-        seed_matrix = create_cxx_identity(num_independent, num_direction)
+    if seed === nothing
+        seed = create_cxx_identity(num_independents, num_directions)
     end
 
     # calculate the derivatives, written into CxxTensor
-    tensor_eval(tape_num, num_dependent, num_independent, derivative_order, num_direction, init_point, CxxTensor, seed_matrix)
+    tensor_eval(tape_num, num_dependents, num_independents, derivative_order, num_directions, init_point, CxxTensor, seed)
     if compressed_out
         return CxxTensor
     else
-        return build_tensor(derivative_order, num_dependent, num_independent, CxxTensor)
+        return build_tensor(derivative_order, num_dependents, num_independents, CxxTensor)
     end
 end
 
@@ -199,15 +248,15 @@ end
 
 function _gradient_tape_based(func, 
                             init_point::Vector{Float64}, 
-                            num_dependent::Int64, 
+                            num_dependents::Int64, 
                             derivative_order::Int64;
-                            num_direction=nothing,
-                            seed_matrix=nothing,
+                            num_directions=nothing,
+                            seed=nothing,
                             compressed_out::Bool=true)
 
-    num_independent = length(init_point)
-    y = Vector{Float64}(undef, num_dependent)
-    a = [AdoubleModule.AdoubleCxx() for _ in 1:num_independent]
+    num_independents = length(init_point)
+    y = Vector{Float64}(undef, num_dependents)
+    a = [AdoubleModule.AdoubleCxx() for _ in 1:num_independents]
     tape_num = 1
     keep = 1
     trace_on(tape_num, keep)
@@ -216,36 +265,52 @@ function _gradient_tape_based(func,
     b >> y
     trace_off(0)
 
-    if num_direction === nothing
-        return _higher_order(tape_num, 
-                        init_point, 
-                        num_dependent, 
-                        num_independent, 
-                        derivative_order,
-                        num_direction=num_independent,
-                        seed_matrix=seed_matrix,
-                        compressed_out=compressed_out)
-    else                  
-        return _higher_order(tape_num, 
+    if num_directions === nothing
+        if derivative_order == 1
+            return reverse(tape_num,
+                          num_dependents,
+                          num_independents, 
+                          num_directions=num_dependents,
+                          seed=seed)
+        else
+            return _higher_order(tape_num, 
                             init_point, 
-                            num_dependent, 
-                            num_independent, 
+                            num_dependents, 
+                            num_independents, 
                             derivative_order,
-                            num_direction=num_direction, 
-                            seed_matrix=seed_matrix,
+                            num_directions=num_independents,
+                            seed=seed,
                             compressed_out=compressed_out)
+        end
+    else 
+        if derivative_order == 1
+            return reverse(tape_num,
+                            num_dependents,
+                            num_independents, 
+                            num_directions=num_directions,
+                            seed=seed)
+        else                 
+            return _higher_order(tape_num, 
+                                init_point, 
+                                num_dependents, 
+                                num_independents, 
+                                derivative_order,
+                                num_directions=num_directions, 
+                                seed=seed,
+                                compressed_out=compressed_out)
+        end
     end
 end
 
 
 function gradient(func, 
                 init_point::Vector{Float64},
-                num_dependent::Int64; 
+                num_dependents::Int64; 
                 switch_point::Int64=100, 
                 mode=nothing, 
                 derivative_order::Int64=1,
-                num_direction=nothing,
-                seed_matrix=nothing,
+                num_directions=nothing,
+                seed=nothing,
                 compressed_out::Bool=true)
 
 
@@ -254,10 +319,10 @@ function gradient(func,
     elseif mode === :tape_based
         return _gradient_tape_based(func, 
                                     init_point, 
-                                    num_dependent, 
+                                    num_dependents, 
                                     derivative_order, 
-                                    num_direction=num_direction,
-                                    seed_matrix=seed_matrix,
+                                    num_directions=num_directions,
+                                    seed=seed,
                                     compressed_out=compressed_out)
 
     else 
@@ -266,12 +331,12 @@ function gradient(func,
             mode = derivative_order > 1 ? :tape_based : mode
             return gradient(func, 
                             init_point,
-                            num_dependent; 
+                            num_dependents; 
                             switch_point=switch_point, 
                             mode=mode, 
                             derivative_order=derivative_order,
-                            num_direction=num_direction,
-                            seed_matrix=seed_matrix,
+                            num_directions=num_directions,
+                            seed=seed,
                             compressed_out=compressed_out)
         else
             throw("Mode $(mode) is not implemented!")
@@ -280,15 +345,15 @@ function gradient(func,
 end
 
 
-function check_input_taylor_coeff(num_independent, 
+function check_input_taylor_coeff(num_independents, 
                                 derivative_order::Int64;
-                                num_direction=nothing,
+                                num_directions=nothing,
                                 init_series=nothing)
-    if num_direction == 1
+    if num_directions == 1
         if derivative_order == 1
             @assert(init_series !== nothing, 
             "For derivative_order=$(derivative_order) and 
-            num_direction=$(num_direction) you have to provide an 
+            num_directions=$(num_directions) you have to provide an 
             init_series (as a vector) to initialize the taylor series 
             propagation!")
 
@@ -296,9 +361,9 @@ function check_input_taylor_coeff(num_independent,
             "Please provide the init_series with length(size(init_series))=1
             and not $(length(size(init_series))).")
 
-            @assert(size(init_series)[1]==num_independent,
+            @assert(size(init_series)[1]==num_independents,
             "Please provide a init_series of length 
-            $(num_independent) to initialize the taylor series 
+            $(num_independents) to initialize the taylor series 
             propagation. Each entry corresponds to one independant.")
 
         else
@@ -306,11 +371,11 @@ function check_input_taylor_coeff(num_independent,
                 @assert(length(size(init_series))==2,
                 "Please provide the init_series with length(size(init_series))==2
                 and not $(length(size(init_series))).")
-                @assert size(init_series==(num_independent, derivative_order), 
+                @assert size(init_series==(num_independents, derivative_order), 
                 "The init_series has the wrong shape: $(size(init_series)) but must be
-                ($(num_independent), $(derivative_order)). Please provide the taylor 
+                ($(num_independents), $(derivative_order)). Please provide the taylor 
                 coefficients of the init_series up to order derivative_order-1. 
-                In detail init_series must have the shape (num_independent, derivative_order)
+                In detail init_series must have the shape (num_independents, derivative_order)
                 and the i-th column corresponds to the i-1-th taylor coefficient 
                 of the init_series.")
             end
@@ -322,22 +387,22 @@ function check_input_taylor_coeff(num_independent,
     propagation!")
     @assert(length(size(init_series))==derivative_order,
     "The input for init_series has the wrong shape! Please provide
-    a vector of $(num_independent) to initialize the taylor
+    a vector of $(num_independents) to initialize the taylor
     series propagation. Each entry corresponds to one independant")
 end
 
 
 function taylor_coeff(func, 
                     init_point, 
-                    num_dependent, 
-                    num_independent, 
+                    num_dependents, 
+                    num_independents, 
                     derivative_order;
-                    num_direction=nothing,
+                    num_directions=nothing,
                     init_series=nothing)
 
 
     a = [AdoubleCxx() for _ in eachindex(init_point)]
-    y0 = Vector{Float64}(undef, num_dependent)
+    y0 = Vector{Float64}(undef, num_dependents)
     tape_num = 1
     keep = 0
     trace_on(tape_num, keep)
@@ -347,25 +412,25 @@ function taylor_coeff(func,
     trace_off(0)
 
     """
-    check_input_taylor_coeff(num_independent, 
+    check_input_taylor_coeff(num_independents, 
                             derivative_order,
-                            num_direction=num_direction,
+                            num_directions=num_directions,
                             init_series=init_series)
     """
 
-    if num_direction === nothing
-        num_direction = num_independent
+    if num_directions === nothing
+        num_directions = num_independents
 
-    elseif num_direction == 1
+    elseif num_directions == 1
         if derivative_order == 1
             y1 = Vector{Float64}(undef, 2)
-            fos_forward(tape_num, num_dependent, num_independent, keep, init_point, init_series, y0, y1) 
+            fos_forward(tape_num, num_dependents, num_independents, keep, init_point, init_series, y0, y1) 
             return y0, y1
         else
-            Y = myalloc2(num_dependent, derivative_order)
+            Y = myalloc2(num_dependents, derivative_order)
             hos_forward(tape_num, 
-                        num_dependent, 
-                        num_independent, 
+                        num_dependents, 
+                        num_independents, 
                         derivative_order, 
                         0, 
                         init_point, 
@@ -377,9 +442,9 @@ function taylor_coeff(func,
     else
         if derivative_order == 1
             if init_series === nothing
-                init_series = myalloc2(num_independent, num_direction)
-                for i in 1:num_independent
-                    for j in 1:num_direction
+                init_series = myalloc2(num_independents, num_directions)
+                for i in 1:num_independents
+                    for j in 1:num_directions
                         init_series[i, j] = 0.0
                         if i == j
                             init_series[i, i] = 1.0
@@ -387,29 +452,29 @@ function taylor_coeff(func,
                     end
                 end   
             end  
-            Y = myalloc2(num_dependent, num_direction)
-            fov_forward(tape_num, num_dependent, num_independent, num_direction, init_point, init_series, y0, Y)
+            Y = myalloc2(num_dependents, num_directions)
+            fov_forward(tape_num, num_dependents, num_independents, num_directions, init_point, init_series, y0, Y)
             return y0, Y
         else
             if init_series === nothing
-                init_series = myalloc3(num_independent, num_direction, derivative_order)
-                for i in 1:num_independent
+                init_series = myalloc3(num_independents, num_directions, derivative_order)
+                for i in 1:num_independents
                     for j in 1:derivative_order
-                        for k in 1:num_direction
+                        for k in 1:num_directions
                             init_series[i, j, k] = 0.0
                         end 
                     end
                 end
-                for k in 1:num_direction
+                for k in 1:num_directions
                     init_series[k, k, 1] = 1.0
                 end
             end
-            Y = myalloc3(num_dependent, num_direction, derivative_order)
+            Y = myalloc3(num_dependents, num_directions, derivative_order)
             hov_forward(tape_num, 
-                        num_dependent, 
-                        num_independent, 
+                        num_dependents, 
+                        num_independents, 
                         derivative_order, 
-                        num_independent,
+                        num_independents,
                         init_point, 
                         init_series, 
                         y0, 
@@ -423,4 +488,4 @@ export abs_normal!, AbsNormalProblem, gradient, _gradient_tape_based, _gradient_
 export _higher_order, tensor_address2, build_tensor, create_cxx_identity
 export taylor_coeff, check_input_taylor_coeff
 
-end # module ADOLC_wrap
+end # module ADOLC

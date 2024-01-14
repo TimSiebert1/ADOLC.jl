@@ -1,11 +1,10 @@
-include("../src/ADOLC_wrap.jl")
-using .ADOLC_wrap
-using .ADOLC_wrap.AdoubleModule
-using .ADOLC_wrap.array_types
+include("../src/ADOLC.jl")
+using .ADOLC
+using .ADOLC.AdoubleModule
+using .ADOLC.array_types
 using Test
-using BenchmarkTools
 
-# Chained LQ
+
 
 function func(x)
     return [
@@ -173,6 +172,7 @@ hov_reverse(tape_num, m, n, d, q, U, Z, nz)
 @test Z[1, 1, 1] == 8.0
 @test Z[1, 2, 1] == -12.0
 @test Z[1, 3, 1] == 0.0
+
 @test Z[1, 1, 2] == 12.0
 @test Z[1, 2, 2] == -12.0
 @test Z[1, 3, 2] == 0.0
@@ -180,6 +180,7 @@ hov_reverse(tape_num, m, n, d, q, U, Z, nz)
 @test Z[2, 1, 1] == 1.0
 @test Z[2, 2, 1] == 0.25
 @test Z[2, 3, 1] == 0.5
+
 @test Z[2, 1, 2] == 0.0
 @test Z[2, 2, 2] == -0.25
 @test Z[2, 3, 2] == -0.25

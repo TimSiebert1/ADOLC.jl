@@ -1,7 +1,6 @@
-include("../src/ADOLC_wrap.jl")
-using .ADOLC_wrap.AdoubleModule
+include("../src/ADOLC.jl")
+using .ADOLC.AdoubleModule
 
-# Chained LQ
 function chained_lq(x)
     return (
         max(-x[1] - x[2], -x[1] - x[2] + x[1]^2 + x[2]^2 - 1) +

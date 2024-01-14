@@ -10,27 +10,27 @@ module AdoubleModule
     end
 
 # convient inits for vector of independant and dependant 
-function Base.:<<(a::Vector{Main.ADOLC_wrap.AdoubleModule.AdoubleCxxAllocated}, x::AbstractVector)
+function Base.:<<(a::Vector{AdoubleModule.AdoubleCxxAllocated}, x::AbstractVector)
   for i in eachindex(x)
       a[i] << x[i]
   end
 end
 
 
-function Base.:>>(a::Vector{Main.ADOLC_wrap.AdoubleModule.AdoubleCxxAllocated}, x::AbstractVector)
+function Base.:>>(a::Vector{AdoubleModule.AdoubleCxxAllocated}, x::AbstractVector)
   for i in eachindex(x)
       a[i] >> x[i]
   end
 end
 
-function Base.:>>(a::Main.ADOLC_wrap.AdoubleModule.AdoubleCxxAllocated, x::Vector{Float64})
+function Base.:>>(a::AdoubleModule.AdoubleCxxAllocated, x::Vector{Float64})
   if length(x) != 1
     throw("DimensionMismatch: Length of x ($x) should be 1!")
   end
   return [a] >> x
 end
 
-function Base.:>>(a::Vector{Main.ADOLC_wrap.AdoubleModule.AdoubleCxxAllocated}, x::Float64)
+function Base.:>>(a::Vector{AdoubleModule.AdoubleCxxAllocated}, x::Float64)
   if length(a) != 1
     throw("DimensionMismatch: Length of a ($a) should be 1!")
   end
@@ -38,7 +38,7 @@ function Base.:>>(a::Vector{Main.ADOLC_wrap.AdoubleModule.AdoubleCxxAllocated}, 
 end
 
 
-function Base.:*(a::Main.ADOLC_wrap.AdoubleModule.AdoubleCxxAllocated, x::AbstractVector)
+function Base.:*(a::AdoubleModule.AdoubleCxxAllocated, x::AbstractVector)
   return map((x_i)->a*x_i, x)
 end
 

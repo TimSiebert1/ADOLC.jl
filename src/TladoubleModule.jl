@@ -21,7 +21,7 @@ module TladoubleModule
                 to have containers of type Tladouble but without allocating 
                 an element which has to be differentiated. 
     """
-    val:: Union{Float64, Main.ADOLC_wrap.TladoubleModule.TladoubleCxxAllocated}
+    val:: Union{Float64, TladoubleModule.TladoubleCxxAllocated}
     Tladouble() = new(TladoubleCxx())
     function Tladouble(x::Float64, isadouble::Bool)
         """
@@ -37,7 +37,7 @@ module TladoubleModule
     Tladouble(x::Float64) = new(x)
 
     # conversion from the c++ type tladouble to the julia type Tladouble
-    Tladouble(a::Main.ADOLC_wrap.TladoubleModule.TladoubleCxxAllocated) = new(a)
+    Tladouble(a::TladoubleModule.TladoubleCxxAllocated) = new(a)
 end
 
 getValue(a::Tladouble) = typeof(a.val) == Float64 ? a.val : getValue(a.val)

@@ -1,6 +1,6 @@
-include("../src/ADOLC_wrap.jl")
-using .ADOLC_wrap
-using .ADOLC_wrap.array_types
+include("../src/ADOLC.jl")
+using .ADOLC
+using .ADOLC.array_types
 using Test
 
 function func(x)
@@ -21,7 +21,7 @@ x0 = [-1.0, 2.0, -1.0]
 
 x1 = [1.0, 0.0, 0.0]
 x0 = [-1.0, 2.0, -1.0]
-y0, y1 = taylor_coeff(func, x0, 2, 3, 1, init_series=x1, num_direction=1) 
+y0, y1 = taylor_coeff(func, x0, 2, 3, 1, init_series=x1, num_directions=1) 
 
 @test y0[1] == -8.0
 @test y0[2] == -1.5
@@ -31,7 +31,7 @@ y0, y1 = taylor_coeff(func, x0, 2, 3, 1, init_series=x1, num_direction=1)
 
 x1 = [0.0, 1.0, 0.0]
 y1 = Vector{Float64}(undef, 2)
-y0, y1 = taylor_coeff(func, x0, 2, 3, 1, init_series=x1, num_direction=1) 
+y0, y1 = taylor_coeff(func, x0, 2, 3, 1, init_series=x1, num_directions=1) 
 
 @test y0[1] == -8.0
 @test y0[2] == -1.5
@@ -42,7 +42,7 @@ y0, y1 = taylor_coeff(func, x0, 2, 3, 1, init_series=x1, num_direction=1)
 
 x1 = [0.0, 0.0, 1.0]
 y1 = Vector{Float64}(undef, 2)
-y0, y1 = taylor_coeff(func, x0, 2, 3, 1, init_series=x1, num_direction=1)
+y0, y1 = taylor_coeff(func, x0, 2, 3, 1, init_series=x1, num_directions=1)
 
 @test y0[1] == -8.0
 @test y0[2] == -1.5
@@ -65,7 +65,7 @@ for i in 1:n
     end
 end
 
-y0, Y = taylor_coeff(func, x0, m, n, 1, num_direction=p, init_series=X) 
+y0, Y = taylor_coeff(func, x0, m, n, 1, num_directions=p, init_series=X) 
 
 
 @test y0[1] == -8.0
@@ -81,7 +81,7 @@ y0, Y = taylor_coeff(func, x0, m, n, 1, num_direction=p, init_series=X)
 
 
 
-y0, Y = taylor_coeff(func, x0, m, n, 1, num_direction=p) 
+y0, Y = taylor_coeff(func, x0, m, n, 1, num_directions=p) 
 @test y0[1] == -8.0
 @test y0[2] == -1.5
 
@@ -106,7 +106,7 @@ for i in 1:n
     end
 end
 X[2, 1] = 1.0
-y0, Y = taylor_coeff(func, x0, m, n, derivative_order, num_direction=1, init_series=X) 
+y0, Y = taylor_coeff(func, x0, m, n, derivative_order, num_directions=1, init_series=X) 
 
 
 
@@ -125,7 +125,7 @@ y0, Y = taylor_coeff(func, x0, m, n, derivative_order, num_direction=1, init_ser
 ######### test higher order vector ########
 
 derivative_order = 3
-num_direction = 3
+num_directions = 3
 # first dim number of independants
 # second dim number of directions
 # third dim number of dervatives
@@ -145,7 +145,7 @@ for k in 1:num_direction
 end
 
 
-y0, Y = taylor_coeff(func, x0, m, n, derivative_order, num_direction=num_direction, init_series=X) 
+y0, Y = taylor_coeff(func, x0, m, n, derivative_order, num_directions=num_directions, init_series=X) 
 
 
 
