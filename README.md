@@ -5,13 +5,13 @@ This package wraps the C/C++ automatic differentation library [ADOL-C](https://g
 1. git clone the repo
 2. use the commands `cd ADOLC.jl/src && julia --project build.jl`
 3. check if its works by using `cd .. && julia --project examples/gradient.jl`
-4. Use the ADOLC functions by import the package with `include("/path/to/ADOLC.jl/src/ADOLC.jl"); using .ADOLC.AdoubleModule` or `using .ADOLC_wrap.TladoubleModule` for tape-based and tape-less ADOLC.
+4. Use the ADOLC functions by import the package with `include("/path/to/ADOLC.jl/src/ADOLC.jl"); using .ADOLC.AdoubleModule` or `using .ADOLC.TladoubleModule` for tape-based and tape-less ADOLC.
 
 ## Example
 After including the package,
 ```julia
-include("/path/to/ADOLC_wrap/src/ADOLC_wrap.jl")
-using .ADOLC_wrap.AdoubleModule
+include("/path/to/ADOLC.jl/src/ADOLC.jl")
+using .ADOLC.AdoubleModule
 ```
 define the function you are planning to differentiate.
 ```julia
@@ -53,9 +53,9 @@ Note, in contrast to someones expectation some functions like `max` does not con
 ## Example for abs-normal interface
 For this example we utilize the abs-normal interface of ADOLC. To use the interface load the libraries
 ```julia
-include("/PATH/TO/ADOLC_wrap/src/ADOLC_wrap.jl")
-using .ADOLC_wrap.AdoubleModule
-using .ADOLC_wrap
+include("/PATH/TO/ADOLC/src/ADOLC.jl")
+using .ADOLC.AdoubleModule
+using .ADOLC
 ```
 Enable the abs-normal functionalities by calling
 ```julia
