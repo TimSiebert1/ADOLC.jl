@@ -2,7 +2,7 @@
 
 julia_version = "1.9.3"
 manifest_format = "2.0"
-project_hash = "672bba83873ddf7ce2da43d3f43639547614f029"
+project_hash = "9af9a33bae93b0dfe194bcfba4faf0532f5777b1"
 
 [[deps.ADOLC_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "libcxxwrap_julia_jll", "libjulia_jll"]
@@ -21,6 +21,12 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+
+[[deps.CxxWrap]]
+deps = ["Libdl", "MacroTools", "libcxxwrap_julia_jll"]
+git-tree-sha1 = "3345cb637ca1efb2ebf7f5145558522b92660d1f"
+uuid = "1f15a43c-97ca-5a2a-ae31-89f07a497df4"
+version = "0.14.2"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -83,6 +89,12 @@ uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 
 [[deps.Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
+
+[[deps.MacroTools]]
+deps = ["Markdown", "Random"]
+git-tree-sha1 = "2fa9ee3e63fd3a4f7a9a4f4744a52f4856de82df"
+uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
+version = "0.5.13"
 
 [[deps.Markdown]]
 deps = ["Base64"]
