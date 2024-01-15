@@ -10,6 +10,7 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 build/
+cxx_src/
 
 cpp_examples/
 src/TODO

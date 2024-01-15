@@ -2,6 +2,8 @@ include("../src/ADOLC.jl")
 using .ADOLC.AdoubleModule
 using .ADOLC
 
+
+
 enableMinMaxUsingAbs()
 
 function func_eval(x)

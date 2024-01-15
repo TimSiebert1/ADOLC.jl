@@ -129,10 +129,10 @@ num_directions = 3
 # first dim number of independants
 # second dim number of directions
 # third dim number of dervatives
-X = myalloc3(n, num_direction, derivative_order)
+X = myalloc3(n, num_directions, derivative_order)
 for i in 1:n
     for j in 1:derivative_order
-        for k in 1:num_direction
+        for k in 1:num_directions
             X[i, j, k] = 0.0
         end 
     end
@@ -140,7 +140,7 @@ end
 
 # for the ith direction the ith component is set to 1
 # this gives the partials w.r.t to ith component
-for k in 1:num_direction
+for k in 1:num_directions
     X[k, k, 1] = 1.0
 end
 

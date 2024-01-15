@@ -1,23 +1,7 @@
 using Pkg
 
 
-Pkg.add(url="git@github.com:TimSiebert1/ADOLC_jll.jl.git")
-Pkg.add("libcxxwrap_julia_jll")
-Pkg.add("CxxWrap")
+Pkg.add(url="https://github.com/TimSiebert1/ADOLC_jll.jl")
 
-using ADOLC_jll
-using libcxxwrap_julia_jll
-
-build_DIR = "build"
-src_DIR = "."
-
-ADOLC_DIR = ADOLC_jll.artifact_dir
-JlCxx_DIR = joinpath(libcxxwrap_julia_jll.artifact_dir, "lib", "cmake", "JlCxx")
-
-Julia_PREFIX = split(Sys.BINDIR, "/bin")[1]
-
-# Build!
-run(`cmake -DADOLC_DIR=$(ADOLC_DIR) -DJlCxx_DIR=$(JlCxx_DIR) -DJulia_PREFIX=$(Julia_PREFIX) -S$(src_DIR) -B$(build_DIR)`)
-run(`cmake --build $(build_DIR)`)
 
 

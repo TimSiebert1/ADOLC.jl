@@ -2,15 +2,15 @@
 
 julia_version = "1.9.3"
 manifest_format = "2.0"
-project_hash = "197423be9493d4a8fb91ecf64f9d6519bf307513"
+project_hash = "672bba83873ddf7ce2da43d3f43639547614f029"
 
 [[deps.ADOLC_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "fd25bf85e52d905d94dbd1ea2d8eb0afdf75ba1e"
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "libcxxwrap_julia_jll", "libjulia_jll"]
+git-tree-sha1 = "3093444ef789d96ef4e537b702146da6c56a57a6"
 repo-rev = "main"
-repo-url = "git@github.com:TimSiebert1/ADOLC_jll.jl.git"
+repo-url = "https://github.com/TimSiebert1/ADOLC_jll.jl"
 uuid = "5f481b30-e4a3-563b-890b-c343462061b6"
-version = "1.0.0+0"
+version = "0.0.1+0"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -21,12 +21,6 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
-
-[[deps.CxxWrap]]
-deps = ["Libdl", "MacroTools", "libcxxwrap_julia_jll"]
-git-tree-sha1 = "3345cb637ca1efb2ebf7f5145558522b92660d1f"
-uuid = "1f15a43c-97ca-5a2a-ae31-89f07a497df4"
-version = "0.14.2"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -50,6 +44,11 @@ git-tree-sha1 = "7e5d6779a1e09a36db2a7b6cff50942a0a7d0fca"
 uuid = "692b3bcd-3c85-4b1f-b108-f13ce0eb3210"
 version = "1.5.0"
 
+[[deps.LLVMLibUnwind_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "47c5dbc3-30ba-59ef-96a6-123e260183d9"
+version = "12.0.1+0"
+
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
@@ -69,17 +68,21 @@ deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
 version = "1.10.2+0"
 
+[[deps.LibUV_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "183b4373-6708-53ba-ad28-60e28bb38547"
+version = "2.0.1+13"
+
+[[deps.LibUnwind_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "745a5e78-f969-53e9-954f-d19f2f74f4e3"
+version = "1.5.0+4"
+
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 
 [[deps.Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
-
-[[deps.MacroTools]]
-deps = ["Markdown", "Random"]
-git-tree-sha1 = "9ee1618cbf5240e6d4e0371d6f24065083f60c48"
-uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.5.11"
 
 [[deps.Markdown]]
 deps = ["Base64"]
@@ -155,9 +158,15 @@ version = "1.2.13+0"
 
 [[deps.libcxxwrap_julia_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "d965520992872a533db8c777f9b4addb5d90bc5b"
+git-tree-sha1 = "3d47ce071d272d2cae9d1bc449c261237e9784f7"
 uuid = "3eaa8342-bff7-56a5-9981-c04077f7cee7"
-version = "0.11.1+0"
+version = "0.11.2+0"
+
+[[deps.libjulia_jll]]
+deps = ["Artifacts", "JLLWrappers", "LLVMLibUnwind_jll", "LibUV_jll", "LibUnwind_jll", "Libdl"]
+git-tree-sha1 = "fe0ec1b667bb0e91902807db38d19a3d8f486240"
+uuid = "5ad3ddd2-0711-543a-b040-befd59781bbf"
+version = "1.10.8+0"
 
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
