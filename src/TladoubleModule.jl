@@ -2,9 +2,7 @@ module TladoubleModule
     using ADOLC_jll
     using CxxWrap
     
-    # one need to specify the location of adolc_wrap.{so, dylib}
-    total_build_dir = joinpath(ADOLC_jll.artifact_dir, "lib64")
-    @wrapmodule(() -> joinpath(total_build_dir,"libadolc_wrap"), :Tladouble_module)
+    @wrapmodule(() -> libadolc_wrap, :Tladouble_module)
     
     function __init__()
       @initcxx
@@ -141,20 +139,6 @@ Base.:<=(x::Bool, a::Tladouble) = Float64(x) <= a.val
 Base.:<=(a::Tladouble, x::Bool) = a.val <= Float64(x)
 
 Base.:<=(a::Tladouble, b::Tladouble) = a.val <= b.val
-
-##############################################################
-
-#--------------- Operation: < -------------------
-Base.:<(x::Float64, a::Tladouble) = x < a.val
-Base.:<(a::Tladouble, x::Float64) = a.val < x
-
-Base.:<(x::Int64, a::Tladouble) = Float64(x) < a.val
-Base.:<(a::Tladouble, x::Int64) = a.val < Float64(x)
-
-Base.:<(x::Bool, a::Tladouble) = Float64(x) < a.val
-Base.:<(a::Tladouble, x::Bool) = a.val < Float64(x)
-
-Base.:<(a::Tladouble, b::Tladouble) = a.val < b.val
 
 ##############################################################
 

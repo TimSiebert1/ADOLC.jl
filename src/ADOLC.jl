@@ -5,9 +5,9 @@ include("AdoubleModule.jl")
 include("TladoubleModule.jl")
 
 
-using Main.ADOLC.array_types
-using Main.ADOLC.AdoubleModule
-using Main.ADOLC.TladoubleModule
+using .array_types
+using .AdoubleModule
+using .TladoubleModule
 
 struct AbsNormalProblem{T}
     m::Int64
