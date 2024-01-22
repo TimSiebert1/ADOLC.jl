@@ -22,7 +22,7 @@ in check_input_taylor_coeff:
 
 in taylor_coeff:
     - test other modes
-    - test mixed deriections
+    - test mixed directions
 
 allow nested gradients
     

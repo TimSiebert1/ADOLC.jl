@@ -2,7 +2,10 @@ module TladoubleModule
     using ADOLC_jll
     using CxxWrap
     
-    @wrapmodule(() -> libadolc_wrap, :Tladouble_module)
+    # one need to specify the location of adolc_wrap.{so, dylib}
+    total_build_dir = joinpath(ADOLC_jll.artifact_dir, "lib64")
+    @wrapmodule(() -> joinpath(total_build_dir,"libadolc_wrap"), :Tladouble_module)
+    #@wrapmodule(() -> libadolc_wrap, :Tladouble_module)
     
     function __init__()
       @initcxx
