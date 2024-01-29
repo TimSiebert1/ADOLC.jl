@@ -1,6 +1,6 @@
-include("../src/ADOLC.jl")
-using .ADOLC.AdoubleModule
-using .ADOLC
+using ADOLC
+using ADOLC.AdoubleModule
+
 
 enableMinMaxUsingAbs()
 
@@ -47,3 +47,5 @@ using Test
 @test abs_normal_problem.L[1, 2] == 0.0
 @test abs_normal_problem.L[2, 1] == 0.0
 @test abs_normal_problem.L[2, 2] == 0.0
+
+print(abs_normal_problem.L[2, 2])

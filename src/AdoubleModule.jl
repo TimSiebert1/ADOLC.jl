@@ -9,7 +9,6 @@ module AdoubleModule
    
     function __init__()
         @initcxx
-        println("init adouble")
     end
 
 # convient inits for vector of independant and dependant 

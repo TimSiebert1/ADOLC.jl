@@ -1,5 +1,5 @@
-include("../src/ADOLC.jl")
-using .ADOLC.AdoubleModule
+
+using ADOLC.AdoubleModule
 
 function chained_lq(x)
     return (
