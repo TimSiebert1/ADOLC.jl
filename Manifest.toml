@@ -6,11 +6,11 @@ project_hash = "9af9a33bae93b0dfe194bcfba4faf0532f5777b1"
 
 [[deps.ADOLC_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "libcxxwrap_julia_jll", "libjulia_jll"]
-git-tree-sha1 = "3093444ef789d96ef4e537b702146da6c56a57a6"
+git-tree-sha1 = "db33f6541a7b2de9d6c8310d431ed9c5b2658fc1"
 repo-rev = "main"
-repo-url = "https://github.com/TimSiebert1/ADOLC_jll.jl"
+repo-url = "git@github.com:TimSiebert1/ADOLC_jll.jl.git"
 uuid = "5f481b30-e4a3-563b-890b-c343462061b6"
-version = "0.0.1+0"
+version = "0.0.2+0"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -176,9 +176,9 @@ version = "0.11.2+0"
 
 [[deps.libjulia_jll]]
 deps = ["Artifacts", "JLLWrappers", "LLVMLibUnwind_jll", "LibUV_jll", "LibUnwind_jll", "Libdl"]
-git-tree-sha1 = "fe0ec1b667bb0e91902807db38d19a3d8f486240"
+git-tree-sha1 = "6fee85adeed88a39aad9950ff9077f8df1c05adb"
 uuid = "5ad3ddd2-0711-543a-b040-befd59781bbf"
-version = "1.10.8+0"
+version = "1.10.7+0"
 
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
