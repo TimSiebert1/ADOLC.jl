@@ -148,7 +148,6 @@ end
 y0, Y = taylor_coeff(func, x0, m, n, derivative_order, num_directions=num_directions, init_series=X) 
 
 
-
 @test y0[1] == -8.0
 @test y0[2] == -1.5
 

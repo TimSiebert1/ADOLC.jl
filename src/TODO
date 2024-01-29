@@ -25,4 +25,4 @@ in taylor_coeff:
     - test mixed directions
 
 allow nested gradients
-    
+add the possibility to use forward and reverse in one function for different aspects
