@@ -1,7 +1,6 @@
-include("../src/ADOLC.jl")
-using .ADOLC
-using .ADOLC.AdoubleModule
-using .ADOLC.array_types
+using ADOLC
+using ADOLC.AdoubleModule
+using ADOLC.array_types
 using Test
 
 
@@ -184,3 +183,5 @@ hov_reverse(tape_num, m, n, d, q, U, Z, nz)
 @test Z[2, 1, 2] == 0.0
 @test Z[2, 2, 2] == -0.25
 @test Z[2, 3, 2] == -0.25
+
+println("Done")

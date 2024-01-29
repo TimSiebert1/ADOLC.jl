@@ -1,6 +1,5 @@
-include("../src/ADOLC.jl")
-using .ADOLC.AdoubleModule
-using .ADOLC
+using ADOLC.AdoubleModule
+using ADOLC
 
 
 

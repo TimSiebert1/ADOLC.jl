@@ -1,5 +1,5 @@
-include("../src/ADOLC.jl")
-using .ADOLC
+
+using ADOLC
 using Test
 # Chained LQ
 
@@ -66,3 +66,5 @@ Z = gradient(func, init_point, num_dependents, mode=:tape_based, derivative_orde
 @test Z[3, 1, 2] == 0.0
 @test Z[3, 2, 2] == -0.25
 @test Z[3, 3, 2] == 0.0
+
+println("Done")

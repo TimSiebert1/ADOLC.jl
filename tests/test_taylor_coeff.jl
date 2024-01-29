@@ -1,6 +1,5 @@
-include("../src/ADOLC.jl")
-using .ADOLC
-using .ADOLC.array_types
+using ADOLC
+using ADOLC.array_types
 using Test
 
 function func(x)
@@ -175,3 +174,5 @@ y0, Y = taylor_coeff(func, x0, m, n, derivative_order, num_directions=num_direct
 @test Y[2, 3, 1] == 0.5
 @test Y[2, 3, 2] == 0.0
 @test Y[2, 3, 3] == 0.0
+
+println("Done")

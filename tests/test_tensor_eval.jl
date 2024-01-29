@@ -1,6 +1,5 @@
-include("../src/ADOLC.jl")
-using .ADOLC
-using .ADOLC.AdoubleModule
+using ADOLC
+using ADOLC.AdoubleModule
 using Test
 
 
@@ -72,3 +71,5 @@ jac = ADOLC.gradient(func, x0, 2, derivative_order=2, compressed_out=false)
 @test jac[1, 3, 2] == 0.0
 @test jac[2, 3, 2] == -0.25
 @test jac[3, 3, 2] == 0.0
+
+println("Done")
