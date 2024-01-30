@@ -43,20 +43,26 @@ getValue(a::Tladouble) = typeof(a.val) == Float64 ? a.val : getValue(a.val)
 
 #--------------- Operation: * -------------------
 
-Base.:*(a::Tladouble, x::Float64) = Tladouble(a.val * x)
-Base.:*(x::Float64, a::Tladouble) = Tladouble(x * a.val)
-
+Base.:*(a::Tladouble, x::Real) = Tladouble(a.val * Float64(x))
+Base.:*(x::Real, a::Tladouble) = Tladouble(Float64(x) * a.val)
+Base.:*(a::Tladouble, b::Tladouble) = Tladouble(a.val * b.val)
+"""
 Base.:*(a::Tladouble, x::Int64) = Tladouble(a.val * Float64(x))
 Base.:*(x::Int64, a::Tladouble) = Tladouble(Float64(x) * a.val)
 
 Base.:*(a::Tladouble, x::Bool) = Tladouble(a.val * Float64(x))
 Base.:*(x::Bool, a::Tladouble) = Tladouble(Float64(x) * a.val)
+"""
 
-Base.:*(a::Tladouble, b::Tladouble) = Tladouble(a.val * b.val)
 
 ##############################################################
 
 #--------------- Operation: + -------------------
+Base.:+(x::Real, a::Tladouble) = Tladouble(Float64(x) + a.val)
+Base.:+(a::Tladouble, x::Real) = Tladouble(a.val + Float64(x))
+Base.:+(a::Tladouble, b::Tladouble) = Tladouble(a.val + b.val)
+
+"""
 Base.:+(x::Float64, a::Tladouble) = Tladouble(x + a.val)
 Base.:+(a::Tladouble, x::Float64) = Tladouble(a.val + x)
 
@@ -66,122 +72,139 @@ Base.:+(a::Tladouble, x::Int64) = Tladouble(a.val + Float64(x))
 Base.:+(x::Bool, a::Tladouble) = Tladouble(Float64(x) + a.val)
 Base.:+(a::Tladouble, x::Bool) = Tladouble(a.val + Float64(x))
 
-Base.:+(a::Tladouble, b::Tladouble) = Tladouble(a.val + b.val)
+
+"""
 
 ##############################################################
 
 #--------------- Operation: - -------------------
-Base.:-(x::Float64, a::Tladouble) = Tladouble(x - a.val)
-Base.:-(a::Tladouble, x::Float64) = Tladouble(a.val - x)
+Base.:-(x::Real, a::Tladouble) = Tladouble(Float64(x) - a.val)
+Base.:-(a::Tladouble, x::Real) = Tladouble(a.val - Float64(x))
+Base.:-(a::Tladouble, b::Tladouble) = Tladouble(a.val - b.val)
 
+Base.:-(a::Tladouble) = (-1) * a
+
+"""
 Base.:-(x::Int64, a::Tladouble) = Tladouble(Float64(x) - a.val)
 Base.:-(a::Tladouble, x::Int64) = Tladouble(a.val - Float64(x))
 
 Base.:-(x::Bool, a::Tladouble) = Tladouble(Float64(x) - a.val)
 Base.:-(a::Tladouble, x::Bool) = Tladouble(a.val - Float64(x))
+"""
 
-Base.:-(a::Tladouble, b::Tladouble) = Tladouble(a.val - b.val)
-
-Base.:-(a::Tladouble) = (-1) * a
 
 ##############################################################
 
 #--------------- Operation: / -------------------
-Base.:/(x::Float64, a::Tladouble) = Tladouble(x / a.val)
-Base.:/(a::Tladouble, x::Float64) = Tladouble(a.val / x)
+Base.:/(x::Real, a::Tladouble) = Tladouble(Float64(x) / a.val)
+Base.:/(a::Tladouble, x::Real) = Tladouble(a.val / Float64(x))
+Base.:/(a::Tladouble, b::Tladouble) = Tladouble(a.val / b.val)
 
+"""
 Base.:/(x::Int64, a::Tladouble) = Tladouble(Float64(x) / a.val)
 Base.:/(a::Tladouble, x::Int64) = Tladouble(a.val / Float64(x))
 
 Base.:/(x::Bool, a::Tladouble) = Tladouble(Float64(x) / a.val)
 Base.:/(a::Tladouble, x::Bool) = Tladouble(a.val / Float64(x))
+"""
 
-Base.:/(a::Tladouble, b::Tladouble) = Tladouble(a.val / b.val)
 
 ##############################################################
 
 #--------------- Operation: >= -------------------
-Base.:>=(x::Float64, a::Tladouble) = x >= a.val
-Base.:>=(a::Tladouble, x::Float64) = a.val >= x
+Base.:>=(x::Real, a::Tladouble) = x >= a.val
+Base.:>=(a::Tladouble, x::Real) = a.val >= x
+Base.:>=(a::Tladouble, b::Tladouble) = a.val >= b.val
 
+"""
 Base.:>=(x::Int64, a::Tladouble) = Float64(x) >= a.val
 Base.:>=(a::Tladouble, x::Int64) = a.val >= Float64(x)
 
 Base.:>=(x::Bool, a::Tladouble) = Float64(x) >= a.val
 Base.:>=(a::Tladouble, x::Bool) = a.val >= Float64(x)
+"""
 
-Base.:>=(a::Tladouble, b::Tladouble) = a.val >= b.val
 
 ##############################################################
 
 #--------------- Operation: > -------------------
-Base.:>(x::Float64, a::Tladouble) = x > a.val
-Base.:>(a::Tladouble, x::Float64) = a.val > x
+Base.:>(x::Real, a::Tladouble) = x > a.val
+Base.:>(a::Tladouble, x::Real) = a.val > x
+Base.:>(a::Tladouble, b::Tladouble) = a.val > b.val
 
+"""
 Base.:>(x::Int64, a::Tladouble) = Float64(x) > a.val
 Base.:>(a::Tladouble, x::Int64) = a.val > Float64(x)
 
 Base.:>(x::Bool, a::Tladouble) = Float64(x) > a.val
 Base.:>(a::Tladouble, x::Bool) = a.val > Float64(x)
+"""
 
-Base.:>(a::Tladouble, b::Tladouble) = a.val > b.val
 
 ##############################################################
 
 #--------------- Operation: <= -------------------
-Base.:<=(x::Float64, a::Tladouble) = x <= a.val
-Base.:<=(a::Tladouble, x::Float64) = a.val <= x
+Base.:<=(x::Real, a::Tladouble) = x <= a.val
+Base.:<=(a::Tladouble, x::Real) = a.val <= x
+Base.:<=(a::Tladouble, b::Tladouble) = a.val <= b.val
 
+"""
 Base.:<=(x::Int64, a::Tladouble) = Float64(x) <= a.val
 Base.:<=(a::Tladouble, x::Int64) = a.val <= Float64(x)
 
 Base.:<=(x::Bool, a::Tladouble) = Float64(x) <= a.val
 Base.:<=(a::Tladouble, x::Bool) = a.val <= Float64(x)
+"""
 
-Base.:<=(a::Tladouble, b::Tladouble) = a.val <= b.val
 
 ##############################################################
 
 #--------------- Operation: < -------------------
-Base.:<(x::Float64, a::Tladouble) = x < a.val
-Base.:<(a::Tladouble, x::Float64) = a.val < x
+Base.:<(x::Real, a::Tladouble) = x < a.val
+Base.:<(a::Tladouble, x::Real) = a.val < x
+Base.:<(a::Tladouble, b::Tladouble) = a.val < b.val
 
+"""
 Base.:<(x::Int64, a::Tladouble) = Float64(x) < a.val
 Base.:<(a::Tladouble, x::Int64) = a.val < Float64(x)
 
 Base.:<(x::Bool, a::Tladouble) = Float64(x) < a.val
 Base.:<(a::Tladouble, x::Bool) = a.val < Float64(x)
+"""
 
-Base.:<(a::Tladouble, b::Tladouble) = a.val < b.val
 
 ##############################################################
 
 #--------------- Operation: == -------------------
-Base.:(==)(x::Float64, a::Tladouble) = x == a.val
-Base.:(==)(a::Tladouble, x::Float64) = a.val == x
+Base.:(==)(x::Real, a::Tladouble) = x == a.val
+Base.:(==)(a::Tladouble, x::Real) = a.val == x
+Base.:(==)(a::Tladouble, b::Tladouble) = a.val == b.val
 
+"""
 Base.:(==)(x::Int64, a::Tladouble) = Float64(x) == a.val
 Base.:(==)(a::Tladouble, x::Int64) = a.val == Float64(x)
 
 Base.:(==)(x::Bool, a::Tladouble) = Float64(x) == a.val
 Base.:(==)(a::Tladouble, x::Bool) = a.val == Float64(x)
+"""
 
-Base.:(==)(a::Tladouble, b::Tladouble) = a.val == b.val
 
 ##############################################################
 
 #-------------- Functions: max -----------------
 
-Base.max(x::Float64, a::Tladouble) = x > a.val ? Tladouble(x) : a
-Base.max(a::Tladouble, x::Float64) = max(x, a)
+Base.max(x::Real, a::Tladouble) = x > a.val ? Tladouble(x) : a
+Base.max(a::Tladouble, x::Real) = max(x, a)
+Base.max(a::Tladouble, b::Tladouble) = b.val > a.val ? b : a
 
+"""
 Base.max(x::Int64, a::Tladouble) = Float64(x) > a.val ? Tladouble(Float64(x)) : a
 Base.max(a::Tladouble, x::Int64) = max(x, a)
 
 Base.max(x::Bool, a::Tladouble) = Float64(x) > a.val ? Tladouble(Float64(x)) : a
 Base.max(a::Tladouble, x::Bool) = max(x, a)
+"""
 
-Base.max(a::Tladouble, b::Tladouble) = b.val > a.val ? b : a
 
 ##############################################################
 
@@ -195,16 +218,17 @@ Base.sqrt(a::Tladouble) = Tladouble(sqrt(a.val))
 
 
 #-------- utilities for type handling ----------
-Base.promote(x::Float64, y::Tladouble) = Tladouble(x, false)
-Base.promote_rule(::Type{Tladouble}, ::Type{Float64}) = Tladouble
+Base.promote(x::Real, y::Tladouble) = Tladouble(Float64(x), false)
+Base.promote_rule(::Type{Tladouble}, ::Type{Real}) = Tladouble
 
 # since every operation where an argument is a adouble have to return a adouble
-Base.promote_op(f::Core.Any, ::Type{Float64}, ::Type{Tladouble}) = Tladouble
+Base.promote_op(f::Core.Any, ::Type{Real}, ::Type{Tladouble}) = Tladouble
 
 
 
-Base.convert(::Type{Tladouble}, x::Float64) = Tladouble(x, false)
-Base.convert(::Type{Tladouble}, x::Int64) = Tladouble(Float64(x), false)
+Base.convert(::Type{Tladouble}, x::Real) = Tladouble(Float64(x), false)
+
+#Base.convert(::Type{Tladouble}, x::Int64) = Tladouble(Float64(x), false)
 
 
 
