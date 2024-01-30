@@ -271,5 +271,5 @@ end
   # current base operations:
   # max, abs, exp, sqrt, *, +, -, ^
   export TladoubleCxx, getADValue, setADValue, getValue, tl_init_for_gradient, getindex_tl, tladouble_vector_init, Tladouble, get_gradient
-
+  export sin, erf
 end # module adouble
