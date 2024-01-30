@@ -20,16 +20,16 @@ module TladoubleModule
                 to have containers of type Tladouble but without allocating 
                 an element which has to be differentiated. 
     """
-    val:: Union{Float64, TladoubleModule.TladoubleCxxAllocated}
+    val:: Union{Real, TladoubleModule.TladoubleCxxAllocated}
     Tladouble() = new(TladoubleCxx())
-    function Tladouble(x::Float64, isadouble::Bool)
+    function Tladouble(x::Real, isadouble::Bool)
         """
         The idea behind this is that when a floating point number is promoted to 
         a adouble e.g. in vcat, then we dont want to create a new adouble since 
         this would require a new derivative calculation.
         """
         if isadouble
-            return new(TladoubleCxx(x))
+            return new(TladoubleCxx(Float64(x)))
         end
         return new(x)
     end
@@ -219,6 +219,10 @@ Base.sqrt(a::Tladouble) = Tladouble(sqrt(a.val))
 
 #-------- utilities for type handling ----------
 Base.promote(x::Real, y::Tladouble) = Tladouble(Float64(x), false)
+
+# not sure if needed 
+Base.promote(x::Tladouble, y::Tladouble) = x
+
 Base.promote_rule(::Type{Tladouble}, ::Type{Real}) = Tladouble
 
 # since every operation where an argument is a adouble have to return a adouble
@@ -228,7 +232,10 @@ Base.promote_op(f::Core.Any, ::Type{Real}, ::Type{Tladouble}) = Tladouble
 
 Base.convert(::Type{Tladouble}, x::Real) = Tladouble(Float64(x), false)
 
-#Base.convert(::Type{Tladouble}, x::Int64) = Tladouble(Float64(x), false)
+
+# this is called e.g. when creating a vector of Tladoubles ... not sure why
+Base.convert(::Type{Tladouble}, x::Tladouble) = x
+
 
 
 

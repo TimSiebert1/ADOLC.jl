@@ -28,3 +28,15 @@ b = Tladouble(-3.6)
 @test isapprox(getValue((a + b).val), -0.6)
 @test typeof((a + b).val) == TladoubleModule.TladoubleCxxAllocated
 @test typeof((a + b)) == Tladouble
+
+
+c = [Tladouble(float(i)) for i in 1:10]
+setindex!(A::Vector{Tladouble}, x::Tladouble, i1::Int64)
+
+Tladouble(float(1))
+
+
+
+include("/Users/timsiebert/.julia/packages/SpecialFunctions/QH8rV/src/erf.jl")
+using ForwardDiff
+ForwardDiff.gradient(erfc, [3.0])
