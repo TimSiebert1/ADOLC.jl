@@ -1,5 +1,4 @@
 module ADOLC
-export ADOLC
 include("array_types.jl")
 include("AdoubleModule.jl")
 include("TladoubleModule.jl")
