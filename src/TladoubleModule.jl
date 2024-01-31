@@ -215,7 +215,8 @@ Base.exp(a::Tladouble) = Tladouble(exp(a.val))
 Base.sqrt(a::Tladouble) = Tladouble(sqrt(a.val))
 
 erf(a::Tladouble) = Tladouble(erf(a.val))
-_erfc(a::Tladouble) = erf(a)
+
+
 ##############################################################
 
 

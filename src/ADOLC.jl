@@ -488,3 +488,8 @@ export _higher_order, tensor_address2, build_tensor, create_cxx_identity
 export taylor_coeff, check_input_taylor_coeff
 
 end # module ADOLC
+
+
+#### SpecialFunctions
+using SpecialFunctions
+SpecialFunctions.erfc(a::Tladouble) = ADOLC.TladoubleModule.erf(a)
