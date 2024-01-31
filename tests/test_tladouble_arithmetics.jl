@@ -36,7 +36,5 @@ setindex!(A::Vector{Tladouble}, x::Tladouble, i1::Int64)
 Tladouble(float(1))
 
 
-
-include("/Users/timsiebert/.julia/packages/SpecialFunctions/QH8rV/src/erf.jl")
-using ForwardDiff
-ForwardDiff.gradient(erfc, [3.0])
+sinh(a.val)
+TladoubleModule.erf(a.val)

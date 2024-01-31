@@ -208,11 +208,13 @@ Base.max(a::Tladouble, x::Bool) = max(x, a)
 
 ##############################################################
 
-#-------------- Functions: abs, exp, sqrt -----------------
+#-------------- unary Functions
 
 Base.abs(a::Tladouble) = a.val >= 0 ? a : Tladouble(abs(a.val))
 Base.exp(a::Tladouble) = Tladouble(exp(a.val))
 Base.sqrt(a::Tladouble) = Tladouble(sqrt(a.val))
+
+erf(a::Tladouble) = Tladouble(erf(a.val))
 
 ##############################################################
 
