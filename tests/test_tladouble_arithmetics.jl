@@ -38,3 +38,16 @@ Tladouble(float(1))
 
 sinh(a.val)
 TladoubleModule.erf(a.val)
+
+
+
+using ADOLC
+using ADOLC.TladoubleModule
+
+_erfc(x::Tladouble) = erf(x)
+
+
+using StatsFuns
+
+a = Tladouble(4.0, true)
+normcdf(a)
