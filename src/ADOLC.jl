@@ -492,4 +492,4 @@ end # module ADOLC
 
 #### SpecialFunctions
 using SpecialFunctions
-SpecialFunctions.erfc(a::Tladouble) = ADOLC.TladoubleModule.erf(a)
+SpecialFunctions.erfc(a::ADOLC.TladoubleModule.Tladouble) = ADOLC.TladoubleModule.erf(a)
