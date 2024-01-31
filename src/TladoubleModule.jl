@@ -49,10 +49,10 @@ Base.:*(a::Tladouble, b::Tladouble) = Tladouble(a.val * b.val)
 """
 Base.:*(a::Tladouble, x::Int64) = Tladouble(a.val * Float64(x))
 Base.:*(x::Int64, a::Tladouble) = Tladouble(Float64(x) * a.val)
-
+"""
 Base.:*(a::Tladouble, x::Bool) = Tladouble(a.val * Float64(x))
 Base.:*(x::Bool, a::Tladouble) = Tladouble(Float64(x) * a.val)
-"""
+
 
 
 ##############################################################
@@ -276,3 +276,4 @@ end
   export TladoubleCxx, getADValue, setADValue, getValue, tl_init_for_gradient, getindex_tl, tladouble_vector_init, Tladouble, get_gradient
   export sin, erf, _erfc
 end # module adouble
+
