@@ -483,6 +483,10 @@ function taylor_coeff(func,
     end
 end
 
+#### SpecialFunctions
+using SpecialFunctions
+SpecialFunctions.erfc(a::TladoubleModule.Tladouble) = TladoubleModule.erf(a)
+
 export abs_normal!, AbsNormalProblem, gradient, _gradient_tape_based, _gradient_tape_less
 export _higher_order, tensor_address2, build_tensor, create_cxx_identity
 export taylor_coeff, check_input_taylor_coeff
@@ -490,6 +494,3 @@ export taylor_coeff, check_input_taylor_coeff
 end # module ADOLC
 
 
-#### SpecialFunctions
-using SpecialFunctions
-SpecialFunctions.erfc(a::ADOLC.TladoubleModule.Tladouble) = ADOLC.TladoubleModule.erf(a)
