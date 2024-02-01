@@ -200,15 +200,15 @@ Base.:(==)(a::Tladouble, x::Bool) = a.val == Float64(x)
 
 #-------------- Functions: max -----------------
 
-Base.max(x::Real, a::Tladouble) = Tladouble(max(a, x))
-Base.max(a::Tladouble, x::Real) = Tladouble(max(x, a))
-Base.max(a::Tladouble, b::Tladouble) = Tladouble(max(a, b))
+Base.max(x::Real, a::Tladouble) = Tladouble(max(a.val, x))
+Base.max(a::Tladouble, x::Real) = Tladouble(max(x, a.val))
+Base.max(a::Tladouble, b::Tladouble) = Tladouble(max(a.val, b.val))
 
 # ------------ Functions: min -----------
 
-Base.min(x::Real, a::Tladouble) = Tladouble(min(a, x))
-Base.min(a::Tladouble, x::Real) = Tladouble(min(x, a))
-Base.min(a::Tladouble, b::Tladouble) = Tladouble(min(a, b))
+Base.min(x::Real, a::Tladouble) = Tladouble(min(a.val, x))
+Base.min(a::Tladouble, x::Real) = Tladouble(min(x, a.val))
+Base.min(a::Tladouble, b::Tladouble) = Tladouble(min(a.val, b.val))
 
 
 ##############################################################
@@ -304,9 +304,7 @@ function get_gradient(a::Tladouble, num_independent::Int64)
 end
 
 
-  # current base operations:
-  # max, abs, exp, sqrt, *, +, -, ^
   export TladoubleCxx, getADValue, setADValue, getValue, tl_init_for_gradient, getindex_tl, tladouble_vector_init, Tladouble, get_gradient
-  export sin, erf, tanh
+  export erf
 end # module adouble
 
