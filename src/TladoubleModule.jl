@@ -200,29 +200,54 @@ Base.:(==)(a::Tladouble, x::Bool) = a.val == Float64(x)
 
 #-------------- Functions: max -----------------
 
-Base.max(x::Real, a::Tladouble) = x > a.val ? Tladouble(x) : a
-Base.max(a::Tladouble, x::Real) = max(x, a)
-Base.max(a::Tladouble, b::Tladouble) = b.val > a.val ? b : a
+Base.max(x::Real, a::Tladouble) = Tladouble(max(a, x))
+Base.max(a::Tladouble, x::Real) = Tladouble(max(x, a))
+Base.max(a::Tladouble, b::Tladouble) = Tladouble(max(a, b))
 
-"""
-Base.max(x::Int64, a::Tladouble) = Float64(x) > a.val ? Tladouble(Float64(x)) : a
-Base.max(a::Tladouble, x::Int64) = max(x, a)
+# ------------ Functions: min -----------
 
-Base.max(x::Bool, a::Tladouble) = Float64(x) > a.val ? Tladouble(Float64(x)) : a
-Base.max(a::Tladouble, x::Bool) = max(x, a)
-"""
+Base.min(x::Real, a::Tladouble) = Tladouble(min(a, x))
+Base.min(a::Tladouble, x::Real) = Tladouble(min(x, a))
+Base.min(a::Tladouble, b::Tladouble) = Tladouble(min(a, b))
 
 
 ##############################################################
 
 #-------------- unary Functions
 
-Base.abs(a::Tladouble) = a.val >= 0 ? a : Tladouble(abs(a.val))
-Base.exp(a::Tladouble) = Tladouble(exp(a.val))
+Base.abs(a::Tladouble) = Tladouble(abs(a.val))
 Base.sqrt(a::Tladouble) = Tladouble(sqrt(a.val))
+Base.exp(a::Tladouble) = Tladouble(exp(a.val))
+Base.log(a::Tladouble) = Tladouble(log(a.val))
+
+Base.sin(a::Tladouble) = Tladouble(sin(a.val))
+Base.cos(a::Tladouble) = Tladouble(cos(a.val))
+Base.tan(a::Tladouble) = Tladouble(tan(a.val))
+
+Base.asin(a::Tladouble) = Tladouble(asin(a.val))
+Base.acos(a::Tladouble) = Tladouble(acos(a.val))
+Base.atan(a::Tladouble) = Tladouble(atan(a.val))
+
+Base.log10(a::Tladouble) = Tladouble(log10(a.val))
+
+Base.sinh(a::Tladouble) = Tladouble(sinh(a.val))
+Base.cosh(a::Tladouble) = Tladouble(cosh(a.val))
+Base.tanh(a::Tladouble) = Tladouble(tanh(a.val))
+
+Base.asinh(a::Tladouble) = Tladouble(asinh(a.val))
+Base.acosh(a::Tladouble) = Tladouble(acosh(a.val))
+Base.atanh(a::Tladouble) = Tladouble(atanh(a.val))
+
+Base.ceil(a::Tladouble) = Tladouble(ceil(a.val))
+Base.floor(a::Tladouble) = Tladouble(floor(a.val))
+
+
+
+Base.ldexp(a::Tladouble) = Tladouble(ldexp(a.val))
+Base.frexp(a::Tladouble) = Tladouble(frexp(a.val))
+
 
 erf(a::Tladouble) = Tladouble(erf(a.val))
-
 
 ##############################################################
 
