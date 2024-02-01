@@ -242,7 +242,7 @@ end
 function _gradient_tape_less(func, init_point::Vector{Float64})
     a = TladoubleModule.tladouble_vector_init(init_point)
     b = func(a)
-    return TladoubleModule.get_gradient(b, length(init_point))
+    return TladoubleModule.get_gradient(b, length(init_point)), getValue(b)
 end
 
 function _gradient_tape_based(func, 

@@ -40,7 +40,12 @@ module TladoubleModule
 end
 
 getValue(a::Tladouble) = typeof(a.val) == Float64 ? a.val : getValue(a.val)
-
+function getValue(a::Vector{Tladouble})
+  res = Vector{Float64}(undef, length(a))
+  for i in eachindex(a)
+    res[i] = getValue(a[i])
+  return res
+  
 #--------------- Operation: * -------------------
 
 Base.:*(a::Tladouble, x::Real) = Tladouble(a.val * Float64(x))
@@ -270,6 +275,7 @@ function get_gradient(a::Tladouble, num_independent::Int64)
   end
   return grad
 end
+
 
   # current base operations:
   # max, abs, exp, sqrt, *, +, -, ^
