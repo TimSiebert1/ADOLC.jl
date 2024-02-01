@@ -44,7 +44,9 @@ function getValue(a::Vector{Tladouble})
   res = Vector{Float64}(undef, length(a))
   for i in eachindex(a)
     res[i] = getValue(a[i])
+  end
   return res
+end
   
 #--------------- Operation: * -------------------
 
@@ -280,6 +282,6 @@ end
   # current base operations:
   # max, abs, exp, sqrt, *, +, -, ^
   export TladoubleCxx, getADValue, setADValue, getValue, tl_init_for_gradient, getindex_tl, tladouble_vector_init, Tladouble, get_gradient
-  export sin, erf, _erfc
+  export sin, erf, tanh
 end # module adouble
 
