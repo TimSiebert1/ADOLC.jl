@@ -253,20 +253,20 @@ erf(a::Tladouble) = Tladouble(erf(a.val))
 
 
 #-------- utilities for type handling ----------
-Base.promote(x::Real, y::Tladouble) = Tladouble(Float64(x), false)
+Base.promote(x::T, y::Tladouble) where T <: Real = Tladouble(Float64(x), false)
 
 # not sure if needed 
 Base.promote(x::Tladouble, y::Tladouble) = x
 
-Base.promote_rule(::Type{Tladouble}, ::Type{Real}) = Tladouble
+Base.promote_rule(::Type{Tladouble}, ::Type{T}) where T <: Real = Tladouble
 
 # since every operation where an argument is a adouble have to return a adouble
-Base.promote_op(f::Core.Any, ::Type{Real}, ::Type{Tladouble}) = Tladouble
-Base.promote_op(f::Core.Any, ::Type{Tladouble}, ::Type{Real}) = Tladouble
+Base.promote_op(f::Core.Any, ::Type{T}, ::Type{Tladouble}) where T <: Real = Tladouble
+Base.promote_op(f::Core.Any, ::Type{Tladouble}, ::Type{T}) where T <: Real = Tladouble
 
 
 
-Base.convert(::Type{Tladouble}, x::Real) = Tladouble(Float64(x), false)
+Base.convert(::Type{Tladouble}, x::T) where T <: Real = Tladouble(Float64(x), false)
 
 
 # this is called e.g. when creating a vector of Tladoubles ... not sure why
