@@ -261,6 +261,7 @@ Base.promote(x::Tladouble, y::Tladouble) = x
 Base.promote_rule(::Type{Tladouble}, ::Type{T}) where T <: Real = Tladouble
 
 # since every operation where an argument is a adouble have to return a adouble
+Base.promote_op(f, ::Type{Tladouble}, ::Type{Tladouble}) = Tladouble
 Base.promote_op(f::Core.Any, ::Type{T}, ::Type{Tladouble}) where T <: Real = Tladouble
 Base.promote_op(f::Core.Any, ::Type{Tladouble}, ::Type{T}) where T <: Real = Tladouble
 
