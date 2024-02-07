@@ -1,7 +1,10 @@
 This package wraps the C/C++ automatic differentation library [ADOL-C](https://github.com/coin-or/ADOL-C) for the usage in [Julia](https://julialang.org/). 
-
 ## How to use this package?
+First, you have to get the C++ binaries from:
 ```] add git@github.com:TimSiebert1/ADOLC_jll.jl.git```
+Then you can add the ADOLC.jl package
+```] add git@github.com:TimSiebert1/ADOLC.jl.git```
+
 
 ## Example
 After including the package,
