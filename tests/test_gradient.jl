@@ -11,7 +11,7 @@ function chained_lq(x)
 end
 
 x = [0.0, 2.0, -1.0]
-g = gradient(chained_lq, x, 1)
+g, _ = gradient(chained_lq, x, 1)
 
 @test g[1]==-1.0
 @test g[2]==6.0
