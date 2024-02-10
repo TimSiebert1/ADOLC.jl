@@ -5,14 +5,14 @@ include("TladoubleModule.jl")
 
 
 using .array_types
-using .AdoubleModule
+using .TbadoubleModule
 using .TladoubleModule
 
 
 Tb = TbadoubleModule.Tbadouble
 Tl = TladoubleModule.Tladouble
 
-TbAlloc = AdoubleModule.AdoubleCxxAllocated
+TbAlloc = TbadoubleModule.AdoubleCxxAllocated
 TlAlloc = TladoubleModule.TladoubleCxxAllocated
 
 include("Adouble.jl")
@@ -42,7 +42,7 @@ struct AbsNormalProblem{T}
 
     function AbsNormalProblem{T}(tape_num::Int64, m::Int64, n::Int64, x::Vector{T}, y::Vector{T}) where T <: Real
         
-        num_switches = AdoubleModule.get_num_switches(tape_num)
+        num_switches = TbadoubleModule.get_num_switches(tape_num)
         z = CxxVector{Float64}(num_switches)
 
         cz = CxxVector{Float64}(num_switches)
@@ -102,7 +102,7 @@ function _abs_normal!(
     Z = Z_cxx.data
     L = L_cxx.data
 
-    AdoubleModule.abs_normal(tape_num, m, n, num_switches, x, y, z, cz, cy, Y, J, Z, L)
+    TbadoubleModule.abs_normal(tape_num, m, n, num_switches, x, y, z, cz, cy, Y, J, Z, L)
 end
 
 
