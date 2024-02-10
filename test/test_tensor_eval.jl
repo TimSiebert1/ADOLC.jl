@@ -15,7 +15,7 @@ init_point = [-1.0, 2.0, -1.0]
 num_independent = length(init_point)
 num_dependent = 2
 y = Vector{Float64}(undef, num_dependent)
-a = [AdoubleModule.AdoubleCxx() for _ in 1:num_independent]
+a = [Adouble{TbAlloc}() for _ in 1:num_independent]
 tape_num = 1
 keep = 1
 trace_on(tape_num, keep)
