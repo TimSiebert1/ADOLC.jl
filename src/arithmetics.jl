@@ -1,5 +1,51 @@
 
 
+
+# ----- only Adouble{TbAlloc} 
+
+function check_input(a, x)
+    if length(a) > length(x)
+        throw("DimensionMismatch: Length of a should be less equal lenght of x!")
+    end
+    if length(a) < length(x)
+        println("Warning: length of a is less than length of x. Initialize the derivative values 
+                    up to length of a!")
+    end
+end
+
+# convient inits for vector of independant and dependant 
+function Base.:<<(a::Vector{Adouble{TbAlloc}}, x::AbstractVector)
+    check_input(a, x)
+    for i in eachindex(x)
+        a.val[i] << x[i]
+    end
+  end
+  
+  
+  function Base.:>>(a::Vector{Adouble{TbAlloc}}, x::AbstractVector)
+    check_input(a, x)
+    for i in eachindex(x)
+        a.val[i] >> x[i]
+    end
+  end
+  
+  function Base.:>>(a::Adouble{TbAlloc}, x::Vector{Float64})
+    if length(x) != 1
+      throw("DimensionMismatch: Length of x ($x) should be 1!")
+    end
+    return [a] >> x
+  end
+  
+  function Base.:>>(a::Vector{Adouble{TbAlloc}}, x::Float64)
+    if length(a) != 1
+      throw("DimensionMismatch: Length of a ($a) should be 1!")
+    end
+    return a >> [x]
+  end
+
+
+
+
 #--------------- Operation: * -------------------
 
 function Base.:*(a::T, x::AbstractVector{Float64}) where T <: Union{TbAlloc, TlAlloc}
