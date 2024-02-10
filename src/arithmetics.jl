@@ -17,7 +17,7 @@ end
 function Base.:<<(a::Vector{Adouble{TbAlloc}}, x::AbstractVector)
     check_input(a, x)
     for i in eachindex(x)
-        a.val[i] << x[i]
+        a[i].val << x[i]
     end
   end
   
@@ -25,7 +25,7 @@ function Base.:<<(a::Vector{Adouble{TbAlloc}}, x::AbstractVector)
   function Base.:>>(a::Vector{Adouble{TbAlloc}}, x::AbstractVector)
     check_input(a, x)
     for i in eachindex(x)
-        a.val[i] >> x[i]
+        a[i].val >> x[i]
     end
   end
   
