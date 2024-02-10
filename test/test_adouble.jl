@@ -1,7 +1,7 @@
 
 using ADOLC
 using ADOLC.TladoubleModule
-using ADOLC.AdoubleModule
+using ADOLC.TbadoubleModule
 
 using Test
 
