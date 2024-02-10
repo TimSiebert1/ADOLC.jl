@@ -1,7 +1,5 @@
 
 using ADOLC
-using ADOLC.TladoubleModule
-using ADOLC.TbadoubleModule
 
 using Test
 
@@ -25,14 +23,14 @@ A = Adouble{TlAlloc}()
 
 
 # test tballoc constructor
-a = AdoubleCxx(3.0)
+a = ADOLC.AdoubleCxx(3.0)
 A = Adouble{TbAlloc}(a)
 
 @test a === A.val
 @test typeof(A) == Adouble{TbAlloc}
 
 # test tlalloc constructor
-a = TladoubleCxx(3.0)
+a = ADOLC.TladoubleCxx(3.0)
 A = Adouble{TlAlloc}(a)
 
 @test a === A.val

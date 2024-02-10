@@ -32,7 +32,7 @@ function Adouble{TbAlloc}(val::V, isadouble::Bool) where V <: Real
     return Adouble{TbAlloc}(val)
 end
 
-Adouble{TbAlloc}(val::Bool, isadouble::Bool) = Tbadouble{TbAlloc}(float(val), isadouble)
+Adouble{TbAlloc}(val::Bool, isadouble::Bool) = Adouble{TbAlloc}(float(val), isadouble)
 
 
 function Adouble{TlAlloc}(val::V, isadouble::Bool) where V <: Real

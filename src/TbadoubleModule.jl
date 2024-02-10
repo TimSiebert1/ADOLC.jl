@@ -25,7 +25,7 @@ module TbadoubleModule
 
 
   # C++ version of adouble
-  export AdoubleCxx, getValue
+  export AdoubleCxx #, getValue
 
   # general adolc
   export trace_on, trace_off, ad_forward, ad_reverse, gradient
