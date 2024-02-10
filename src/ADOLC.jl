@@ -498,7 +498,7 @@ end
 
 #### SpecialFunctions
 using SpecialFunctions
-SpecialFunctions.erfc(a::TladoubleModule.Tladouble) = 1.0 - TladoubleModule.erf(a)
+SpecialFunctions.erfc(a::Adouble{TlAlloc}) = 1.0 - TladoubleModule.erf(a)
 
 export abs_normal!, AbsNormalProblem, gradient, _gradient_tape_based, _gradient_tape_less
 export _higher_order, tensor_address2, build_tensor, create_cxx_identity
