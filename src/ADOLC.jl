@@ -8,6 +8,20 @@ using .array_types
 using .AdoubleModule
 using .TladoubleModule
 
+
+Tb = TbadoubleModule.Tbadouble
+Tl = TladoubleModule.Tladouble
+
+TbAlloc = AdoubleModule.AdoubleCxxAllocated
+TlAlloc = TladoubleModule.TladoubleCxxAllocated
+
+include("Adouble.jl")
+export Tb, Tl, TbAlloc, TlAlloc, Adouble, getValue, get_gradient
+
+
+include("arithmetics.jl")
+
+
 struct AbsNormalProblem{T}
     m::Int64
     n::Int64
@@ -240,9 +254,9 @@ function _higher_order(
 end
 
 function _gradient_tape_less(func, init_point::Vector{Float64})
-    a = TladoubleModule.tladouble_vector_init(init_point)
+    a = Adouble{TlAlloc}(init_point)
     b = func(a)
-    return TladoubleModule.get_gradient(b, length(init_point)), TladoubleModule.getValue(b)
+    return get_gradient(b, length(init_point)), getValue(b)
 end
 
 function _gradient_tape_based(func, 
@@ -255,7 +269,7 @@ function _gradient_tape_based(func,
 
     num_independents = length(init_point)
     y = Vector{Float64}(undef, num_dependents)
-    a = [AdoubleModule.AdoubleCxx() for _ in 1:num_independents]
+    a = [Adouble{TbAlloc}() for _ in 1:num_independents]
     tape_num = 1
     keep = 1
     trace_on(tape_num, keep)
@@ -270,7 +284,7 @@ function _gradient_tape_based(func,
                           num_dependents,
                           num_independents, 
                           num_directions=num_dependents,
-                          seed=seed)
+                          seed=seed), getValue(b)
         else
             return _higher_order(tape_num, 
                             init_point, 
@@ -279,7 +293,7 @@ function _gradient_tape_based(func,
                             derivative_order,
                             num_directions=num_independents,
                             seed=seed,
-                            compressed_out=compressed_out)
+                            compressed_out=compressed_out), getValue(b)
         end
     else 
         if derivative_order == 1
@@ -287,7 +301,7 @@ function _gradient_tape_based(func,
                             num_dependents,
                             num_independents, 
                             num_directions=num_directions,
-                            seed=seed)
+                            seed=seed), getValue(b)
         else                 
             return _higher_order(tape_num, 
                                 init_point, 
@@ -296,7 +310,7 @@ function _gradient_tape_based(func,
                                 derivative_order,
                                 num_directions=num_directions, 
                                 seed=seed,
-                                compressed_out=compressed_out)
+                                compressed_out=compressed_out), getValue(b)
         end
     end
 end
