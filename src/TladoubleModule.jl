@@ -16,7 +16,6 @@ module TladoubleModule
 
 
 
-  export TladoubleCxx, getADValue, setADValue, getValue, tl_init_for_gradient, getindex_tl, tladouble_vector_init, Tladouble, get_gradient
-  export erf
+  export TladoubleCxx, getADValue, setADValue, getValue, tl_init_for_gradient, getindex_tl
 end # module adouble
 

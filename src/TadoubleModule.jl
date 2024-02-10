@@ -2,7 +2,7 @@ module TbadoubleModule
     using ADOLC_jll
     using CxxWrap
     
-    @wrapmodule(() -> libadolc_wrap, :Tbadouble_module)
+    @wrapmodule(() -> libadolc_wrap, :Adouble_module)
    
     function __init__()
         @initcxx
@@ -24,6 +24,7 @@ module TbadoubleModule
   end
 
 
+  # C++ version of adouble
   export AdoubleCxx, getValue
 
   # general adolc
