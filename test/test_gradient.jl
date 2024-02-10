@@ -31,7 +31,7 @@ end
 
 init_point = [-1.0, 2.0, -1.0]
 num_dependents = 2
-Z = gradient(func, init_point, num_dependents, mode=:tape_based)
+Z, _ = gradient(func, init_point, num_dependents, mode=:tape_based)
 
 @test Z[1, 1] == 8.0
 @test Z[2, 1] == 1.0
@@ -40,7 +40,7 @@ Z = gradient(func, init_point, num_dependents, mode=:tape_based)
 @test Z[1, 3] == 0.0
 @test Z[2, 3] == 0.5
 
-Z = gradient(func, init_point, num_dependents, mode=:tape_based, derivative_order=2, compressed_out=false)
+Z, _ = gradient(func, init_point, num_dependents, mode=:tape_based, derivative_order=2, compressed_out=false)
 
 
 @test Z[1, 1, 1] == 0.0

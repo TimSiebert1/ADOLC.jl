@@ -1,5 +1,5 @@
 using ADOLC
-using ADOLC.AdoubleModule
+using ADOLC.TbadoubleModule
 using Test
 
 
@@ -46,7 +46,7 @@ end
 
 x0 = [-1.0, 2.0, -1.0]
 
-jac = ADOLC.gradient(func, x0, 2, derivative_order=2, compressed_out=false)
+jac, _ = ADOLC.gradient(func, x0, 2, derivative_order=2, compressed_out=false)
 
 @test jac[1, 1, 1] == 0.0
 @test jac[1, 2, 1] == 12.0

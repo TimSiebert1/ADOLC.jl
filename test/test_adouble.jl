@@ -181,18 +181,5 @@ c = false * a
 
 # test operation: * 
 
-function Adouble{TlAlloc}(data::Vector{Float64}) 
-    """
-    Create a vector of Tladouble with val = tladouble(data_entry). 
-    """
-  
-    # c++ function
-    tl_a = tl_init_for_gradient(data, length(data))
-  
-    tl_a_vec = Vector{Adouble{TlAlloc}}(undef, length(data))
-    for i in 1:length(data)
-      tl_a_vec[i] = Adouble{TlAlloc}(tl_a[i])
-    end
-    return tl_a_vec
-  
-end
+
+
