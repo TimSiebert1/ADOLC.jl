@@ -9,14 +9,13 @@ using .TbadoubleModule
 using .TladoubleModule
 
 
-Tb = TbadoubleModule.Tbadouble
-Tl = TladoubleModule.Tladouble
+
 
 TbAlloc = TbadoubleModule.AdoubleCxxAllocated
 TlAlloc = TladoubleModule.TladoubleCxxAllocated
 
 include("Adouble.jl")
-export Tb, Tl, TbAlloc, TlAlloc, Adouble, getValue, get_gradient
+export TbAlloc, TlAlloc, Adouble, getValue, get_gradient
 
 
 include("arithmetics.jl")
