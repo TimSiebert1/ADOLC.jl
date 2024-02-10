@@ -1,6 +1,6 @@
 module ADOLC
 include("array_types.jl")
-include("AdoubleModule.jl")
+include("TbadoubleModule.jl")
 include("TladoubleModule.jl")
 
 
