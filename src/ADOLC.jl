@@ -413,7 +413,7 @@ function taylor_coeff(func,
                     init_series=nothing)
 
 
-    a = [AdoubleCxx() for _ in eachindex(init_point)]
+    a = [Adouble{TbAlloc}() for _ in eachindex(init_point)]
     y0 = Vector{Float64}(undef, num_dependents)
     tape_num = 1
     keep = 0

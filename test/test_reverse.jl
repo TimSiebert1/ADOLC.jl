@@ -1,5 +1,5 @@
 using ADOLC
-using ADOLC.AdoubleModule
+using ADOLC.TbadoubleModule
 using ADOLC.array_types
 using Test
 
@@ -13,7 +13,7 @@ function func(x)
 end
 
 x0 = [-1.0, 2.0, -1.0]
-a = [AdoubleCxx() for _ in eachindex(x0)]
+a = [Adouble{TbAlloc}() for _ in eachindex(x0)]
 y0 = Vector{Float64}(undef, 2)
 n = length(x0)
 m = length(y0)
