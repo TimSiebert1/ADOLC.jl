@@ -48,12 +48,9 @@ function Base.:<<(a::Vector{Adouble{TbAlloc}}, x::AbstractVector)
 
 #--------------- Operation: * -------------------
 
-function Base.:*(a::T, x::AbstractVector{Float64}) where T <: Union{TbAlloc, TlAlloc}
+function Base.:*(a::Adouble{T}, x::AbstractVector{Float64}) where T <: Union{TbAlloc, TlAlloc}
     return map((x_i)->a*x_i, x)
 end
-
-Base.:*(a::T, x::AbstractVector{Float64}) where T <: Union{Tb, Tl} = a.val * x
-
 
 
 Base.:*(a::Adouble{T}, x::V) where {T <: Union{TbAlloc, TlAlloc}, V<:Real}  = Adouble{T}(a.val * Float64(x))
