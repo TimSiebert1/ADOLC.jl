@@ -9,7 +9,7 @@ struct Adouble{T<:Union{TbAlloc, TlAlloc}} <: AbstractFloat
     val:: Union{Real, T}
 
 
-    Adouble{TbAlloc}() = new{TbAlloc}(TbadoubleModule.AdoubleCxx())
+    Adouble{TbAlloc}() = new{TbAlloc}(TbadoubleModule.TbadoubleCxx())
     Adouble{TlAlloc}() = new{TlAlloc}(TladoubleModule.TladoubleCxx())
 
     Adouble{TbAlloc}(a::TbAlloc) = new{TbAlloc}(a)
@@ -27,7 +27,7 @@ function Adouble{TbAlloc}(val::V, isadouble::Bool) where V <: Real
     this would require a new derivative calculation.
     """
     if isadouble
-        return Adouble{TbAlloc}(TbadoubleModule.AdoubleCxx(val))
+        return Adouble{TbAlloc}(TbadoubleModule.TbadoubleCxx(val))
     end
     return Adouble{TbAlloc}(val)
 end

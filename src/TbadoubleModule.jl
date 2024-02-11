@@ -4,7 +4,7 @@ module TbadoubleModule
     
     @wrapmodule(() -> libadolc_wrap, :Tbadouble_module)
     function __init__()
-        @initcxx
+      @initcxx
     end
 
 

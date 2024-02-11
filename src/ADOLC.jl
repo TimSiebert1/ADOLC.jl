@@ -1,6 +1,6 @@
 module ADOLC
 include("array_types.jl")
-#include("TbadoubleModule.jl")
+include("TbadoubleModule.jl")
 include("TladoubleModule.jl")
 
 
@@ -12,7 +12,7 @@ using .TladoubleModule
 
 
 
-TbAlloc = TbadoubleModule.AdoubleCxxAllocated
+TbAlloc = TbadoubleModule.TbadoubleCxxAllocated
 TlAlloc = TladoubleModule.TladoubleCxxAllocated
 
 include("Adouble.jl")

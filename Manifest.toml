@@ -6,11 +6,11 @@ project_hash = "eea38f8e6f0d73b85c2b971b6925f85284479f57"
 
 [[deps.ADOLC_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "libcxxwrap_julia_jll", "libjulia_jll"]
-git-tree-sha1 = "1f62aeda5f9b39ce0e3cae1c8ee6c2b2154e648e"
+git-tree-sha1 = "d8de90ffc1fe89cfb3c625c26a590594a237fd4e"
 repo-rev = "main"
 repo-url = "git@github.com:TimSiebert1/ADOLC_jll.jl.git"
 uuid = "5f481b30-e4a3-563b-890b-c343462061b6"
-version = "0.0.12+0"
+version = "0.0.21+0"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
