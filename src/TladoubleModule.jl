@@ -3,7 +3,7 @@ module TladoubleModule
     using CxxWrap
     
     @wrapmodule(() -> libadolc_wrap, :Tladouble_module)
-    
+    println("hiiii")
     function __init__()
       @initcxx
     end
