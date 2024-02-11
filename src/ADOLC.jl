@@ -498,6 +498,7 @@ end
 
 #### SpecialFunctions
 using SpecialFunctions
+SpecialFunctions.erfc(a::Adouble{TbAlloc}) = 1.0 - TbadoubleModule.erf(a)
 SpecialFunctions.erfc(a::Adouble{TlAlloc}) = 1.0 - TladoubleModule.erf(a)
 
 export abs_normal!, AbsNormalProblem, gradient, _gradient_tape_based, _gradient_tape_less
