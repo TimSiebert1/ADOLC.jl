@@ -11,6 +11,6 @@ module TladoubleModule
   # it returns eps
   Base.getindex(a::CxxWrap.CxxWrapCore.CxxPtr{TladoubleCxx}, i::Int64) = getindex_tl(a, i)
 
-  export TladoubleCxx, getADValue, setADValue, tl_init_for_gradient, getindex_tl # getValue,
+  export TladoubleCxx, getADValue, setADValue, tl_init_for_gradient, getindex_tl, erf, cbrt
 end # module adouble
 

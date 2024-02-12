@@ -42,7 +42,7 @@ module TbadoubleModule
 
   # point-wise smooth utils 
   export enableMinMaxUsingAbs, get_num_switches, zos_pl_forward, fos_pl_forward, fov_pl_forward, abs_normal
-  # current base operations:
-  # max, abs, exp, sqrt, *, +, -, ^
+
+  export cbrt, erf
 
 end # module adouble

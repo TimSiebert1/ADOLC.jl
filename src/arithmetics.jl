@@ -162,7 +162,8 @@ Base.ldexp(a::Adouble{T}) where T <: Union{TbAlloc, TlAlloc} = Adouble{T}(ldexp(
 Base.frexp(a::Adouble{T}) where T <: Union{TbAlloc, TlAlloc} = Adouble{T}(frexp(a.val))
 
 
-erf(a::Adouble{T}) where T <: Union{TbAlloc, TlAlloc} = Adouble{T}(erf(a.val))
+erf(a::Adouble{TbAlloc}) = Adouble{TbAlloc}(TbadoubleModule.erf(a.val))
+erf(a::Adouble{TlAlloc}) = Adouble{TlAlloc}(TladoubleModule.erf(a.val))
 
 ##############################################################
 

@@ -502,9 +502,12 @@ import SpecialFunctions
 SpecialFunctions.erfc(a::Adouble{TbAlloc}) = 1.0 - TbadoubleModule.erf(a)
 SpecialFunctions.erfc(a::Adouble{TlAlloc}) = 1.0 - TladoubleModule.erf(a)
 
+#export erfc
+
 export abs_normal!, AbsNormalProblem, gradient, _gradient_tape_based, _gradient_tape_less
 export _higher_order, tensor_address2, build_tensor, create_cxx_identity
 export taylor_coeff, check_input_taylor_coeff
+export erf
 
 end # module ADOLC
 
