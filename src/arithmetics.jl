@@ -169,7 +169,7 @@ erf(a::Adouble{TlAlloc}) = Adouble{TlAlloc}(TladoubleModule.erf(a.val))
 import SpecialFunctions
 
 SpecialFunctions.erf(a::Adouble{T}) where T <: Union{TbAlloc, TlAlloc} = erf(a)
-SpecialFunctions.erfc(a::Adouble{T}) where T<: Union{TbAlloc, TlAlloc} = 1.0 - erf(a.val)
+SpecialFunctions.erfc(a::Adouble{T}) where T<: Union{TbAlloc, TlAlloc} = 1.0 - erf(a)
 
 ##############################################################
 
