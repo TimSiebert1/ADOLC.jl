@@ -498,7 +498,7 @@ function taylor_coeff(func,
 end
 
 #### SpecialFunctions
-using SpecialFunctions
+import SpecialFunctions
 SpecialFunctions.erfc(a::Adouble{TbAlloc}) = 1.0 - TbadoubleModule.erf(a)
 SpecialFunctions.erfc(a::Adouble{TlAlloc}) = 1.0 - TladoubleModule.erf(a)
 
