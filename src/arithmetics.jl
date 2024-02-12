@@ -161,15 +161,14 @@ Base.floor(a::Adouble{T}) where T <: Union{TbAlloc, TlAlloc} = Adouble{T}(floor(
 Base.ldexp(a::Adouble{T}) where T <: Union{TbAlloc, TlAlloc} = Adouble{T}(ldexp(a.val))
 Base.frexp(a::Adouble{T}) where T <: Union{TbAlloc, TlAlloc} = Adouble{T}(frexp(a.val))
 
+erf(a::Adouble{TbAlloc}) = Adouble{TbAlloc}(TbadoubleModule.erf(a.val))
+erf(a::Adouble{TlAlloc}) = Adouble{TlAlloc}(TladoubleModule.erf(a.val))
+
+
 #### SpecialFunctions
 import SpecialFunctions
-
-
-SpecialFunctions.erf(a::Adouble{TbAlloc}) = Adouble{TbAlloc}(TbadoubleModule.erf(a.val))
-SpecialFunctions.erf(a::Adouble{TlAlloc}) = Adouble{TlAlloc}(TladoubleModule.erf(a.val))
-
-SpecialFunctions.erfc(a::Adouble{TbAlloc}) = 1.0 - TbadoubleModule.erf(a)
-SpecialFunctions.erfc(a::Adouble{TlAlloc}) = 1.0 - TladoubleModule.erf(a)
+SpecialFunctions.erfc(a::Adouble{TbAlloc}) = 1.0 - TbadoubleModule.erf(a.val)
+SpecialFunctions.erfc(a::Adouble{TlAlloc}) = 1.0 - TladoubleModule.erf(a.val)
 
 
 
