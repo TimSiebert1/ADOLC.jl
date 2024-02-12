@@ -17,8 +17,10 @@ struct Adouble{T<:Union{TbAlloc, TlAlloc}} <: AbstractFloat
 
     Adouble{T}(val::V) where {T<:Union{TbAlloc, TlAlloc}, V<:Real} = new(Float64(val))
 
-end
 
+end
+Adouble{TbAlloc}(a::Adouble{TbAlloc}) = Adouble{TbAlloc}(a.val)
+Adouble{TlAlloc}(a::Adouble{TlAlloc}) = Adouble{TlAlloc}(a.val)
 
 function Adouble{TbAlloc}(val::V, isadouble::Bool) where V <: Real
     """
