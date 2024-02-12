@@ -6,7 +6,7 @@ struct Adouble{T<:Union{TbAlloc, TlAlloc}} <: AbstractFloat
                 to have containers of type adouble but without allocating 
                 an element which has to be differentiated. 
     """
-    val:: Union{Real, T}
+    val:: Union{Float64, T}
 
 
     Adouble{TbAlloc}() = new{TbAlloc}(TbadoubleModule.TbadoubleCxx())
@@ -15,7 +15,7 @@ struct Adouble{T<:Union{TbAlloc, TlAlloc}} <: AbstractFloat
     Adouble{TbAlloc}(a::TbAlloc) = new{TbAlloc}(a)
     Adouble{TlAlloc}(a::TlAlloc) = new{TlAlloc}(a)
 
-    Adouble{T}(val::V) where {T<:Union{TbAlloc, TlAlloc}, V<:Real} = new(val)
+    Adouble{T}(val::V) where {T<:Union{TbAlloc, TlAlloc}, V<:Real} = new(Float64(val))
 
 end
 
