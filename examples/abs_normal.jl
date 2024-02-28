@@ -1,5 +1,5 @@
 using ADOLC
-using ADOLC.AdoubleModule
+using ADOLC.TbadoubleModule
 
 
 enableMinMaxUsingAbs()
@@ -12,8 +12,8 @@ x = [-0.500000, -0.500000, -0.500000]
 n = length(x)
 y = Vector{Float64}(undef, 1)
 m = length(y)
-a = [AdoubleCxx() for _ in 1:length(x)]
-b = [AdoubleCxx() for _ in 1:length(y)]
+a = [Adouble{TbAlloc}() for _ in 1:length(x)]
+b = [Adouble{TbAlloc}() for _ in 1:length(y)]
 
 tape_num = 0
 trace_on(tape_num, 1)
