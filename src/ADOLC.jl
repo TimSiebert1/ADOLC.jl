@@ -35,7 +35,7 @@ function abs_normal_finalizer(x)
     finalize(L)
 
     @async println("abs-norm finalized")
-
+end
 mutable struct AbsNormalProblem{T}
     m::Int64
     n::Int64
