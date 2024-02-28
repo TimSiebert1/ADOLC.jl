@@ -33,7 +33,7 @@ Base.setindex!(X::CxxPtr{Cshort}, val::Cshort, row::Int64) = setindex_vec(X, val
 
 ###### double** wrappe #########################
 
-struct CxxMatrix{T} <: AbstractMatrix{T} 
+mutable struct CxxMatrix{T} <: AbstractMatrix{T} 
     """
     Wrapper for c++ double** data
     """
