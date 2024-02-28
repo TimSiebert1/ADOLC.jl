@@ -30,7 +30,7 @@ Base.setindex!(X::CxxPtr{Cshort}, val::Cshort, row::Int64) = setindex_vec(X, val
 
 function cxx_mat_finalizer(t)
     myfree2(t.data)
-    @async println("mat_finalized")
+    # @async println("mat_finalized")
 end
 
 
@@ -93,7 +93,7 @@ alloc_vec(::Type{Cshort}, n::Integer) = alloc_vec_short(n)
 
 function cxx_vec_finalizer(x)
     free_vec_double(x.data)
-    @async println("free_vec")
+    # @async println("free_vec")
 end
 
 mutable struct CxxVector{T} <: AbstractVector{T}
