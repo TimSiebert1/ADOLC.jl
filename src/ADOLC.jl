@@ -21,18 +21,18 @@ export TbAlloc, TlAlloc, Adouble, getValue, get_gradient
 
 include("arithmetics.jl")
 
-function abs_normal_finalizer(x)
-    finalize(x)
-    finalize(y)
-    finalize(z)
+function abs_normal_finalizer(problem)
+    finalize(problem.x)
+    finalize(problem.y)
+    finalize(problem.z)
 
-    finalize(cz)
-    finalize(cy)
+    finalize(problem.cz)
+    finalize(problem.cy)
 
-    finalize(Y)
-    finalize(J)
-    finalize(Z)
-    finalize(L)
+    finalize(problem.Y)
+    finalize(problem.J)
+    finalize(problem.Z)
+    finalize(problem.L)
 
     @async println("abs-norm finalized")
 end
@@ -67,8 +67,8 @@ mutable struct AbsNormalProblem{T}
         Z = CxxMatrix{Float64}(num_switches, length(x))
         L = CxxMatrix{Float64}(num_switches, num_switches)
 
-        x = new{T}(m, n, num_switches, CxxVector{T}(x), CxxVector{T}(y), z, cz, cy, Y, J, Z, L)
-        finalizer(abs_normal_finalizer, x)
+        problem = new{T}(m, n, num_switches, CxxVector{T}(x), CxxVector{T}(y), z, cz, cy, Y, J, Z, L)
+        finalizer(abs_normal_finalizer, problem)
     end
 end
 function abs_normal!(abs_normal_problem::AbsNormalProblem{T}, tape_num::Int64) where T <: Real
