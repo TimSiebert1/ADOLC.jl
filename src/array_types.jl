@@ -43,7 +43,7 @@ mutable struct CxxMatrix{T} <: AbstractMatrix{T}
     function CxxMatrix{T}(n::Integer, m::Integer) where T <: Real
         check_type_mat(T)
         new{T}(alloc_mat(T, n, m), n, m)
-        function f(x::CxxMatrix{T})
+        function f(x::CxxMatrix{T}) where T
             myfree2(x.data)
             @async println("finelized")
         end
