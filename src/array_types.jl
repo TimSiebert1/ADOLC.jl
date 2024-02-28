@@ -43,8 +43,8 @@ mutable struct CxxMatrix{T} <: AbstractMatrix{T}
     function CxxMatrix{T}(n::Integer, m::Integer) where T <: Real
         check_type_mat(T)
         x = new{T}(alloc_mat(T, n, m), n, m)
-        #f(t) = myfree2(t.data); @async println("finelized")
-        #finalizer(f, x)
+        f(t) = myfree2(t.data); @async println("finelized")
+        finalizer(f, x)
     end
     function CxxMatrix{T}(Y::Matrix{T}) where T <: Real
         check_type_mat(T)
@@ -58,9 +58,6 @@ mutable struct CxxMatrix{T} <: AbstractMatrix{T}
         return X
     end
 end
-
-
-function finalizer()
 
 function check_type_mat(::Type{T}) where T <: Real
     if !(T <: Union{Cdouble})
