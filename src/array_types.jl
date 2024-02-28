@@ -122,5 +122,5 @@ Base.getindex(X::CxxVector{T}, row::Int64) where T <: Real = getindex(X.data, ro
 Base.setindex!(X::CxxVector{T}, val::T, row::Int64) where T <: Real = setindex!(X.data, val, row)
 
 export CxxMatrix, CxxVector, myalloc3, myalloc2, myalloc1, alloc_vec_double, alloc_vec_short, alloc_vec, alloc_mat_short
-
+export myfree3, myfree2, myfree1, free_vec_double, free_vec_short, free_mat_short
 end # module arry_types
