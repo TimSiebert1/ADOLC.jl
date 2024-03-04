@@ -29,7 +29,6 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - uses: webfactory/ssh-agent@v0.5.4
       - name: build-project
         run: julia -e 'using Pkg; Pkg.add(url="git@github.com:TimSiebert1/ADOLC_jll.jl.git")'
       
