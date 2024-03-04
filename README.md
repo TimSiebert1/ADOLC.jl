@@ -1,4 +1,4 @@
-![example workflow](https://github.com/TimSiebert1/ADOLC.jl/actions/workflows/lcov.info/badge.svg)
+![example workflow](https://github.com/TimSiebert1/ADOLC.jl/actions/workflows/ci.yml/badge.svg)
 
 :warning: :warning: :warning:  
 Under development
