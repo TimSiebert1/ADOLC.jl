@@ -1,6 +1,3 @@
-using ADOLC
-using ADOLC.array_types
-using Test
 
 function func(x)
     return [

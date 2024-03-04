@@ -1,7 +1,3 @@
-using ADOLC
-using ADOLC.TbadoubleModule
-using Test
-
 
 function func(x)
     return [

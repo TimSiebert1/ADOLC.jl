@@ -1,8 +1,3 @@
-using ADOLC
-using ADOLC.TbadoubleModule
-
-
-
 enableMinMaxUsingAbs()
 
 function func_eval(x)

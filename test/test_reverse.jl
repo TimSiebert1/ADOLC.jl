@@ -1,10 +1,3 @@
-using ADOLC
-using ADOLC.TbadoubleModule
-using ADOLC.array_types
-using Test
-
-
-
 function func(x)
     return [
         x[1] * x[2]^3,
