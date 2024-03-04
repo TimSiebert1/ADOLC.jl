@@ -1,3 +1,5 @@
+![example workflow](https://github.com/TimSiebert1/ADOLC.jl/actions/workflows/lcov.info/badge.svg)
+
 :warning: :warning: :warning:  
 Under development
   
