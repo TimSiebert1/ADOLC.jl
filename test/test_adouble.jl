@@ -18,7 +18,7 @@ A = Adouble{TlAlloc}()
 
 
 # test tballoc constructor
-a = ADOLC.AdoubleCxx(3.0)
+a = ADOLC.TbadoubleCxx(3.0)
 A = Adouble{TbAlloc}(a)
 
 @test a === A.val
