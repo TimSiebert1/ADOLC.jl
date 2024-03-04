@@ -1,16 +1,16 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.9.4"
+julia_version = "1.9.3"
 manifest_format = "2.0"
 project_hash = "eea38f8e6f0d73b85c2b971b6925f85284479f57"
 
 [[deps.ADOLC_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "libcxxwrap_julia_jll", "libjulia_jll"]
-git-tree-sha1 = "d8de90ffc1fe89cfb3c625c26a590594a237fd4e"
+git-tree-sha1 = "152d9f12fc9566dcd5e3d8822e15dbbf20984e27"
 repo-rev = "main"
 repo-url = "git@github.com:TimSiebert1/ADOLC_jll.jl.git"
 uuid = "5f481b30-e4a3-563b-890b-c343462061b6"
-version = "0.0.21+0"
+version = "0.0.22+0"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -74,12 +74,12 @@ version = "12.0.1+0"
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
-version = "0.6.4"
+version = "0.6.3"
 
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "8.4.0+0"
+version = "7.84.0+0"
 
 [[deps.LibGit2]]
 deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
@@ -88,7 +88,7 @@ uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 [[deps.LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
-version = "1.11.0+1"
+version = "1.10.2+0"
 
 [[deps.LibUV_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -109,9 +109,9 @@ uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[deps.LogExpFunctions]]
 deps = ["DocStringExtensions", "IrrationalConstants", "LinearAlgebra"]
-git-tree-sha1 = "7d6dd4e9212aebaeed356de34ccf262a3cd415aa"
+git-tree-sha1 = "18144f3e9cbe9b15b070288eef858f71b291ce37"
 uuid = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
-version = "0.3.26"
+version = "0.3.27"
 
     [deps.LogExpFunctions.extensions]
     LogExpFunctionsChainRulesCoreExt = "ChainRulesCore"
@@ -239,9 +239,9 @@ version = "5.8.0+0"
 
 [[deps.libcxxwrap_julia_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "3d47ce071d272d2cae9d1bc449c261237e9784f7"
+git-tree-sha1 = "02d0a0a623248c709727088aaf722ab14f1463a5"
 uuid = "3eaa8342-bff7-56a5-9981-c04077f7cee7"
-version = "0.11.2+0"
+version = "0.11.2+1"
 
 [[deps.libjulia_jll]]
 deps = ["Artifacts", "JLLWrappers", "LLVMLibUnwind_jll", "LibUV_jll", "LibUnwind_jll", "Libdl"]
@@ -252,7 +252,7 @@ version = "1.10.7+0"
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
-version = "1.52.0+1"
+version = "1.48.0+0"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "Libdl"]

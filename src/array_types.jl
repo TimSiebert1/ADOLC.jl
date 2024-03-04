@@ -28,12 +28,15 @@ Base.setindex!(X::CxxPtr{Cshort}, val::Cshort, row::Int64) = setindex_vec(X, val
 
 ################################################
 
-
+function cxx_mat_finalizer(t)
+    myfree2(t.data)
+    # @async println("mat_finalized")
+end
 
 
 ###### double** wrappe #########################
 
-struct CxxMatrix{T} <: AbstractMatrix{T} 
+mutable struct CxxMatrix{T} <: AbstractMatrix{T} 
     """
     Wrapper for c++ double** data
     """
@@ -42,7 +45,8 @@ struct CxxMatrix{T} <: AbstractMatrix{T}
     m::Int64
     function CxxMatrix{T}(n::Integer, m::Integer) where T <: Real
         check_type_mat(T)
-        new{T}(alloc_mat(T, n, m), n, m)
+        x = new{T}(alloc_mat(T, n, m), n, m)
+        finalizer(cxx_mat_finalizer, x)
     end
     function CxxMatrix{T}(Y::Matrix{T}) where T <: Real
         check_type_mat(T)
@@ -53,7 +57,7 @@ struct CxxMatrix{T} <: AbstractMatrix{T}
                 X[i, j] = Y[i, j]
             end
         end
-        return X
+        finalizer(cxx_mat_finalizer, X)
     end
 end
 
@@ -87,12 +91,18 @@ Base.setindex!(X::CxxMatrix{T}, val::T, row::Int64, col::Int64) where T <: Real 
 alloc_vec(::Type{Cdouble}, n::Integer) = alloc_vec_double(n)
 alloc_vec(::Type{Cshort}, n::Integer) = alloc_vec_short(n)
 
-struct CxxVector{T} <: AbstractVector{T}
+function cxx_vec_finalizer(x)
+    free_vec_double(x.data)
+    # @async println("free_vec")
+end
+
+mutable struct CxxVector{T} <: AbstractVector{T}
     data::CxxPtr{T}
     n::Int64 
     function CxxVector{T}(n::Integer) where T <: Real
         check_type_vec(T)
-        new{T}(alloc_vec(T, n), n)
+        x = new{T}(alloc_vec(T, n), n)
+        finalizer(cxx_vec_finalizer, x)
     end
     function CxxVector{T}(y::Vector{T}) where T <: Real
         check_type_vec(T)
@@ -101,7 +111,7 @@ struct CxxVector{T} <: AbstractVector{T}
         for i in 1:n
             x[i] = y[i]
         end   
-        return x
+        finalizer(cxx_vec_finalizer, x)
     end
     
 end
@@ -121,6 +131,6 @@ Base.size(X::CxxVector{T}) where T <: Real = X.n
 Base.getindex(X::CxxVector{T}, row::Int64) where T <: Real = getindex(X.data, row)
 Base.setindex!(X::CxxVector{T}, val::T, row::Int64) where T <: Real = setindex!(X.data, val, row)
 
-export CxxMatrix, CxxVector, myalloc3, myalloc2, myalloc1, alloc_vec_double, alloc_vec_short, alloc_vec, alloc_mat_short
-
+export CxxMatrix, CxxVector, myalloc3, myalloc2, alloc_vec_double, alloc_vec_short, alloc_vec, alloc_mat_short
+export myfree3, myfree2, free_vec_double, free_vec_short, free_mat_short
 end # module arry_types
