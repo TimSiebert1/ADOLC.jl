@@ -8,7 +8,7 @@ project_hash = "eea38f8e6f0d73b85c2b971b6925f85284479f57"
 deps = ["Artifacts", "JLLWrappers", "Libdl", "libcxxwrap_julia_jll", "libjulia_jll"]
 git-tree-sha1 = "152d9f12fc9566dcd5e3d8822e15dbbf20984e27"
 repo-rev = "main"
-repo-url = "git@github.com:TimSiebert1/ADOLC_jll.jl.git"
+repo-url = "https://github.com/TimSiebert1/ADOLC_jll.jl.git"
 uuid = "5f481b30-e4a3-563b-890b-c343462061b6"
 version = "0.0.22+0"
 
