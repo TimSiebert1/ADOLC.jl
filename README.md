@@ -1,4 +1,5 @@
-![example workflow](https://github.com/TimSiebert1/ADOLC.jl/actions/workflows/ci.yml/badge.svg)
+![Build Status](https://github.com/TimSiebert1/ADOLC.jl/actions/workflows/ci.yml/badge.svg)
+![Coverage Status](https://codecov.io/github/TimSiebert1/ADOLC.jl/coverage.svg?branch=master)
 
 :warning: :warning: :warning:  
 Under development
