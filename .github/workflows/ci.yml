@@ -16,13 +16,16 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.9.3' # Replace this with the minimum Julia version that your package supports. E.g. if your package requires Julia 1.5 or higher, change this to '1.5'.
-          #- '1'   # Leave this line unchanged. '1' will automatically expand to the latest stable 1.x release of Julia.
-          #- 'nightly' 
+          - '1.9'
+          - '1.10' 
         os:
           - ubuntu-latest
+          - macOS-latest
+          - windows-latest
         arch:
           - x64
+          - x86
+
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
@@ -45,6 +48,3 @@ jobs:
       - uses: codecov/codecov-action@v2
         with:
           files: lcov.info
-      #- name: build-project
-      #  run: julia --project -e 'using Pkg; Pkg.instantiate()'
-      
