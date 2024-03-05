@@ -38,7 +38,7 @@ A = Adouble{TlAlloc}(a)
 # test int constructor Tballoc
 a = Adouble{TbAlloc}(1)
 
-@test typeof(a.val) == Int64
+@test typeof(a.val) == Float64
 @test typeof(a) == Adouble{TbAlloc}
 @test a.val == 1
 
@@ -53,7 +53,7 @@ a = Adouble{TbAlloc}(-1.2)
 # test int constructor Tlalloc
 a = Adouble{TlAlloc}(1)
 
-@test typeof(a.val) == Int64
+@test typeof(a.val) == Float64
 @test typeof(a) == Adouble{TlAlloc}
 @test a.val == 1
 
