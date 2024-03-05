@@ -16,3 +16,6 @@ cpp_examples/
 src/TODO
 
 my_examples
+
+Manifest.toml
+test/Manifest.toml
