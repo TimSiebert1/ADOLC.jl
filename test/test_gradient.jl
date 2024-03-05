@@ -7,7 +7,7 @@ function chained_lq(x)
 end
 
 x = [0.0, 2.0, -1.0]
-g, _ = gradient(chained_lq, x, 1)
+g, _ = ADOLC.gradient(chained_lq, x, 1)
 
 @test g[1]==-1.0
 @test g[2]==6.0
@@ -27,7 +27,7 @@ end
 
 init_point = [-1.0, 2.0, -1.0]
 num_dependents = 2
-Z, _ = gradient(func, init_point, num_dependents, mode=:tape_based)
+Z, _ = ADOLC.gradient(func, init_point, num_dependents, mode=:tape_based)
 
 @test Z[1, 1] == 8.0
 @test Z[2, 1] == 1.0
@@ -36,7 +36,7 @@ Z, _ = gradient(func, init_point, num_dependents, mode=:tape_based)
 @test Z[1, 3] == 0.0
 @test Z[2, 3] == 0.5
 
-Z, _ = gradient(func, init_point, num_dependents, mode=:tape_based, derivative_order=2, compressed_out=false)
+Z, _ = ADOLC.gradient(func, init_point, num_dependents, mode=:tape_based, derivative_order=2, compressed_out=false)
 
 
 @test Z[1, 1, 1] == 0.0
