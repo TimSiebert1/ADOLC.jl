@@ -7,16 +7,6 @@ using LinearAlgebra
 using BandedMatrices
 using ForwardDiff
 
-struct SetUp
-    n
-    m
-    x
-    y
-    a
-    b
-    derivative_init
-    derivative_vec
-end
 
 function speelpenning(x)
     y = x[1]
