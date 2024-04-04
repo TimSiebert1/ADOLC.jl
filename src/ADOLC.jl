@@ -517,7 +517,7 @@ end
 export abs_normal!, AbsNormalProblem, gradient, _gradient_tape_based, _gradient_tape_less
 export _higher_order, tensor_address2, build_tensor, create_cxx_identity
 export taylor_coeff, check_input_taylor_coeff
-export erf
+export erf, eps
 
 end # module ADOLC
 

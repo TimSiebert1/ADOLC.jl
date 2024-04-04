@@ -20,13 +20,14 @@ function Base.:<<(a::Vector{Adouble{TbAlloc}}, x::AbstractVector)
         a[i].val << x[i]
     end
   end
-  
+
   
   function Base.:>>(a::Vector{Adouble{TbAlloc}}, x::AbstractVector)
     check_input(a, x)
     for i in eachindex(x)
         a[i].val >> x[i]
     end
+    return x
   end
   
   function Base.:>>(a::Adouble{TbAlloc}, x::Vector{Float64})
@@ -43,6 +44,13 @@ function Base.:<<(a::Vector{Adouble{TbAlloc}}, x::AbstractVector)
     return a >> [x]
   end
 
+  function Base.:>>(a::Adouble{TbAlloc}, x::Float64)
+    return a.val >> x
+  end
+
+  function Base.:<<(a::Adouble{TbAlloc}, x::Float64)
+    a.val << x
+  end
 
 
 
@@ -165,6 +173,7 @@ erf(a::Adouble{TbAlloc}) = Adouble{TbAlloc}(TbadoubleModule.erf(a.val))
 erf(a::Adouble{TlAlloc}) = Adouble{TlAlloc}(TladoubleModule.erf(a.val))
 
 
+Base.eps(::Type{Adouble{T}}) where T <: Union{TbAlloc, TlAlloc} = eps(Float64)
 #### SpecialFunctions
 import SpecialFunctions
 

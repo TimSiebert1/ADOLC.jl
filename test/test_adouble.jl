@@ -173,6 +173,7 @@ c = false * a
 
 
 # test operation: * 
-
+a = Adouble{TlAlloc}(5.0, true)
+b = Adouble{TlAlloc}(5.0, false)
 
 
