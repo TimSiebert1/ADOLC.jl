@@ -84,7 +84,17 @@ function getValue(a::Vector{Adouble{T}}) where T <: Union{TbAlloc, TlAlloc}
     function get_gradient(a::Adouble{TlAlloc}, num_independent::Int64)
         grad = Vector{Float64}(undef, num_independent)
         for i in 1:num_independent
-        grad[i] = getADValue(a.val, i)
+            grad[i] = getADValue(a.val, i)
+        end
+        return grad
+    end
+
+    function get_gradient(a::Vector{Adouble{TlAlloc}}, num_independent::Int64)
+        grad = Matrix{Float64}(undef, length(a), num_independent)
+        for i in 1:length(a)
+            for j in 1:num_independent
+                grad[i, j] = getADValue(a[i].val, i)
+            end
         end
         return grad
     end
