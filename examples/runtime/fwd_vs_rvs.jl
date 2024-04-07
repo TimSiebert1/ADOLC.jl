@@ -170,7 +170,7 @@ function run_mode(experiment, mode, dim)
 
     else throw("$mode is not implemented!")
     end
-    time = minimum(time.times)
+    time = median(time.times)
     return time
 end
 

@@ -129,7 +129,7 @@ end
         #build_tensor(derivative_order, num_dependents, num_independents, CxxTensor)
         myfree2(seed)
         myfree2(CxxTensor)
-        time = minimum(time.times)
+        time = median(time.times)
         return time
     end
     
@@ -156,12 +156,12 @@ end
             end
         end
 
-        plot_fixed_dim_p(suite, 10, [1, 5, 10])
+        plot_fixed_dim_p(suite, 10, [1, 2, 3])
         plot_fixed_dim_d(suite, [10, 30, 50], [1, 5, 10])
         return suite
     end
     
     
-    result = runner([10, 30, 50], 1:1:10, 1:1:10)
+    result = runner([10, 30, 50], [1, 2, 3, 4, 5, 10], 1:1:10)
     
     
