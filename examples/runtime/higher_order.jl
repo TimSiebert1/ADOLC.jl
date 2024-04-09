@@ -45,11 +45,11 @@ function plot_fixed_dim_p(suite::Dict, fixed_dim, fixed_ps)
         for fixed_p in fixed_ps
             derviative_orders_sorted = sort(collect(keys(suite[experiment][fixed_dim])))
             time_vals = [suite[experiment][fixed_dim][d][fixed_p] for d in derviative_orders_sorted]
-            Plots.plot!(p, derviative_orders_sorted, time_vals / base_time, label="dim=$fixed_dim, p=$fixed_p")
+            Plots.plot!(p, derviative_orders_sorted, time_vals / base_time, label="n=$fixed_dim, p=$fixed_p")
         end
         Plots.plot!(p, legend = :topleft, yformatter=:scientific)
-        xlabel!(p, "derivative order")
-        ylabel!(p, "time")
+        xlabel!(p, "derivative-order")
+        ylabel!(p, "runtime-ratio")
         Plots.savefig(p, "higher_order_$(experiment)_dim=$(fixed_dim)_I.pdf")
     end 
 end
@@ -63,7 +63,7 @@ function plot_fixed_dim_d(suite::Dict, fixed_dims, fixed_ds)
                 directions_sorted = sort(collect(keys(suite[experiment][fixed_dim][fixed_d])))
                 base_time = suite[experiment]["base_time"][fixed_dim]
                 time_vals = [suite[experiment][fixed_dim][fixed_d][p] for p in directions_sorted]
-                Plots.plot!(p, directions_sorted, time_vals / base_time, label="dim=$fixed_dim, d=$fixed_d", legendfontsize=5)
+                Plots.plot!(p, directions_sorted, time_vals / base_time, label="n=$fixed_dim, d=$fixed_d", legendfontsize=5)
                 Plots.plot!(p, yformatter=:scientific, guidefontsize=5, xtickfontsize=5, ytickfontsize=5)
                 xlabel!(p, "num directions")
                 ylabel!(p, "time")
@@ -87,7 +87,7 @@ function run_base_time(experiment, dim)
 
     else throw("$expriment not implemented!")
     end
-    time = minimum(time.times)
+    time = median(time.times)
     return time
 end
     
