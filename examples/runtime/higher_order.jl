@@ -66,7 +66,7 @@ function plot_fixed_dim_d(suite::Dict, fixed_dims, fixed_ds)
                 Plots.plot!(p, directions_sorted, time_vals / base_time, label="n=$fixed_dim, d=$fixed_d", legendfontsize=5)
                 Plots.plot!(p, yformatter=:scientific, guidefontsize=5, xtickfontsize=5, ytickfontsize=5)
                 xlabel!(p, "num directions")
-                ylabel!(p, "time")
+                ylabel!(p, "runtime-ratio")
                 push!(plots, p)
             end
         end
