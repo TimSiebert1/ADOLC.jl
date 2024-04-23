@@ -51,20 +51,9 @@ end
 
 Adouble{TlAlloc}(val::Bool, isadouble::Bool) = Adouble{TlAlloc}(float(val), isadouble)
 
-getValue(a::Adouble{TbAlloc}) = typeof(a.val) == Float64 ? a.val : TbadoubleModule.getValue(a.val)
-getValue(a::Adouble{TlAlloc}) = typeof(a.val) == Float64 ? a.val : TladoubleModule.getValue(a.val)
 
 
-function getValue(a::Vector{Adouble{T}}) where T <: Union{TbAlloc, TlAlloc}
-    res = Vector{Float64}(undef, length(a))
-    for i in eachindex(a)
-      res[i] = getValue(a[i])
-    end
-    return res
-  end
-  
-
-  function Adouble{TlAlloc}(data::Vector{Float64}) 
+function Adouble{TlAlloc}(data::Vector{Float64}) 
     """
     Create a vector of Tladouble with val = tladouble(data_entry). 
     """
@@ -79,6 +68,21 @@ function getValue(a::Vector{Adouble{T}}) where T <: Union{TbAlloc, TlAlloc}
     return tl_a_vec
   
     end
+
+
+
+getValue(a::Adouble{TbAlloc}) = typeof(a.val) == Float64 ? a.val : TbadoubleModule.getValue(a.val)
+getValue(a::Adouble{TlAlloc}) = typeof(a.val) == Float64 ? a.val : TladoubleModule.getValue(a.val)
+
+
+function getValue(a::Vector{Adouble{T}}) where T <: Union{TbAlloc, TlAlloc}
+    res = Vector{Float64}(undef, length(a))
+    for i in eachindex(a)
+      res[i] = getValue(a[i])
+    end
+    return res
+  end
+  
 
 
     function get_gradient(a::Adouble{TlAlloc}, num_independent::Int64)
