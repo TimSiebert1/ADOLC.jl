@@ -9,20 +9,6 @@ module TbadoubleModule
 
 
 
-  function gradient(tape_num::Int64, x::Vector{Float64})
-    num_ind = length(x)
-    g = Vector{Float64}(undef, num_ind)
-    gradient(tape_num, num_ind, x, g)
-    return g
-  end
-
-  function gradient(tape_num::Int64, num_ind::Int64, x::Vector{Float64})
-    g = Vector{Float64}(undef, num_ind)
-    gradient(tape_num, num_ind, x, g)
-    return g
-  end
-
-
   # C++ version of adouble
   export TbadoubleCxx #, getValue
 
@@ -40,7 +26,7 @@ module TbadoubleModule
   export   jacobian, hessian, vec_jac, jac_vec, hess_vec, hess_mat, lagra_hess_vec, jac_solv
 
 
-  # point-wise smooth utils 
+  # abs-smooth utils 
   export enableMinMaxUsingAbs, get_num_switches, zos_pl_forward, fos_pl_forward, fov_pl_forward, abs_normal
 
   export cbrt, erf
