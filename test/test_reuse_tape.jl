@@ -114,12 +114,12 @@ function create_abs_normal()
         AbsNormalProblem{Float64}(tape_id, m, n, x, y)
 
     for _ in 1:10
-        abs_normal!(abs_normal_problem, tape_id)
+        abs_normal!(abs_normal_problem)
     end
     return abs_normal_problem
 end 
 
-function test_reuse_abs_normal()
+@testset "reuse_abs_normal" begin
     abs_normal_problem = create_abs_normal()
     @test abs_normal_problem.Y[1, 1] == -1.5
     @test abs_normal_problem.Y[1, 2] == -3.0
@@ -141,20 +141,6 @@ function test_reuse_abs_normal()
     @test abs_normal_problem.L[2, 2] == 0.0
 end
 
-test_reuse_abs_normal()
 
 
-"""
-res = test_reuse_tape_local(10)
 
-for i in 1:10
-    println(res[i])
-end
-
-
-res = test_reuse_tape_outside(10)
-
-for i in 1:10
-    println(res[i])
-end
-"""
