@@ -15,6 +15,7 @@
     @test res[3] == 1.0
 end
 
+
 @testset "reuse_jac" begin
     # m = 1
     function f(x)
@@ -34,6 +35,22 @@ end
     @test res[3] == 1.0
 end
 
+@testset "jac" begin
+    # m > 1, n / 2 < m
+    function f(x)
+        return [x[1]^2 + x[2], x[3]^3]
+    end
+    res = myalloc2(2, 3)
+    derivative(f, 2, 3, [1.0, 1.0, 2.0], :jac, res=res)
+
+    @test res[1, 1] == 2.0
+    @test res[1, 2] == 1.0
+    @test res[1, 3] == 0.0
+
+    @test res[2, 1] == 0.0
+    @test res[2, 2] == 0.0
+    @test res[2, 3] == 12.0
+end
 
 @testset "jac" begin
     # m > 1, n / 2 >= m
@@ -412,31 +429,50 @@ end
     @test abs_normal_problem.L[2, 1] == 0.0
     @test abs_normal_problem.L[2, 2] == 0.0
 end
+
+
+
 """
-function test_first_order_jac()
-    # m > 1, n / 2 < m
-    function f(x)
-        return [x[1]^2 + x[2], x[3]^3]
-    end
-    res = myalloc2(2, 3)
-    derivative(f, 2, 3, [1.0, 1.0, 2.0], :jac, res)
-
-    @test res[1, 1] = 2.0
-    @test res[1, 2] = 1.0
-    @test res[1, 3] = 0.0
-
-    @test res[2, 1] = 0.0
-    @test res[2, 2] = 0.0
-    @test res[2, 3] = 12.0
-end
-
-
 ######### second_order ########
 
 
-function test_second_order_hess()
-    derivative(f, 2, 3, [1.0, 1.0, 2.0], :hess, [-1.0, 1.0], res)
+@testset "hess" begin
+    function f(x) 
+        return [x[1]^3 + x[2]^2, 3*x[3]^3]
+    end
+    res = myalloc3(2, 3, 3)
+    derivative(f, 2, 3, [-1.0, 1.0, 2.0], :hess, res=res)
+
+    @test res[1, 1, 1] == -6.0
+    @test res[1, 2, 1] == 0.0
+    @test res[1, 3, 1] == 0.0
+
+    @test res[1, 1, 2] == 0.0
+    @test res[1, 2, 2] == 2.0
+    @test res[1, 3, 2] == 0.0
+
+    @test res[1, 1, 3] == 0.0
+    @test res[1, 2, 3] == 0.0
+    @test res[1, 3, 3] == 0.0
+
+
+
+    @test res[2, 1, 1] == 0.0
+    @test res[2, 2, 1] == 0.0
+    @test res[2, 3, 1] == 0.0
+
+    @test res[2, 1, 2] == 0.0
+    @test res[2, 2, 2] == 0.0
+    @test res[2, 3, 2] == 0.0
+
+    @test res[2, 1, 3] == 0.0
+    @test res[2, 2, 3] == 0.0
+    @test res[2, 3, 3] == 36.0
+
 end
+
+
+
 
 function test_second_order_hess_vec()
     derivative(f, 2, 3, [1.0, 1.0, 2.0], :hess_vec, [-1.0, 1.0], res)
