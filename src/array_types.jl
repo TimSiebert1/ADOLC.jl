@@ -122,7 +122,25 @@ function check_type_vec(::Type{T}) where T <: Real
     end
 end
 
+function mat_to_cxx(cxx_mat::CxxMatrix{Float64}, mat::Matrix{Float64})
+    if cxx_mat.n != size(mat, 1) || cxx_mat.m != size(mat, 2)
+        throw("dimension mistmatch!")
+    end
+    for i in 1:size(mat, 1)
+        for j in 1:size(mat, 2)
+            cxx_mat[i, j] = mat[i, j]
+        end
+    end
+end
 
+function vec_to_cxx(cxx_vec::CxxVector{Float64}, vec::Vector{Float64})
+    if cxx_vec.n != size(vec, 1) 
+        throw("dimension mistmatch!")
+    end
+    for i in 1:size(vec, 1)
+        cxx_vec[i] = vec[i]
+    end
+end
 
 Base.axes(X::CxxVector{T}, n::Int64) where T <: Real = n == 1 ? Base.OneTo(X.n) : Base.OneTo(1)
 Base.axes(X::CxxVector{T}) where T <: Real = (Base.OneTo(X.n),)
