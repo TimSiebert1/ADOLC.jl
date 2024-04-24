@@ -10,11 +10,13 @@ function derivative(
     weights::Union{Vector{Float64},Matrix{Float64}}=Vector{Float64}(),
     partials::Vector{Int64}=Vector{Int64}(),
     tape_id::Int64=0,
-    res::Union{Vector{Float64},CxxPtr{Float64},CxxPtr{CxxPtr{Float64}},AbsNormalProblem}=Vector{Float64}(),
+    res=Vector{Float64}(),
     reuse_tape::Bool=false
 )
     if d == 1
         first_order(f, m, n, x, mode, dir, weights, tape_id, res, reuse_tape)
+    elseif d == 2
+        second_order(f, m, n, x, mode, dir, weights, tape_id, res, reuse_tape)
     else
         throw("derivative_order: $d not implemented!")
     end
@@ -46,9 +48,10 @@ function first_order(
     elseif mode === :abs_normal
         abs_normal(f, m, n, x, tape_id, reuse_tape, res)
     else
-        throw("mode: $mode not implemented!")
+        throw("first_order mode: $mode not implemented!")
     end
 end
+
 
 
 function jac(f, m::Int64, n::Int64, x::Union{Float64,Vector{Float64}}, tape_id::Int64, res, reuse_tape)
@@ -56,8 +59,7 @@ function jac(f, m::Int64, n::Int64, x::Union{Float64,Vector{Float64}}, tape_id::
         gradient(f, n, x, tape_id, res, reuse_tape)
     else
         if n / 2 < m
-            throw("track not implemented!")
-            #tape_less_forward()
+            tape_less_forward(f, n, x, res)
         else
             weights = create_cxx_identity(m, m)
             fov_reverse(f, m, n, m, x, weights, tape_id, res, reuse_tape)
@@ -72,7 +74,13 @@ function gradient(f, n::Int64, x::Union{Float64,Vector{Float64}}, tape_id::Int64
     ADOLC.TbadoubleModule.gradient(tape_id, n, x, res)
 end
 
-
+function tape_less_forward(f, n::Int64, x::Union{Float64,Vector{Float64}}, res)
+    ADOLC.TladoubleModule.set_num_dir(n)
+    a = Adouble{TlAlloc}(x, true)
+    ADOLC.init_gradient(a)
+    b = f(a)
+    ADOLC.gradient(n, b, res)
+end
 
 function fos_reverse(
     f,
@@ -252,6 +260,40 @@ function tape_less_forward(func, init_point::Vector{Float64})
     return get_gradient(b, length(init_point)), getValue(b)
 end
 """
+
+
+
+
+function second_order(f::Function,
+    m::Int64,
+    n::Int64,
+    x::Union{Float64,Vector{Float64}},
+    mode::Symbol;
+    d::Int64,
+    dir::Union{Vector{Float64},Matrix{Float64}},
+    weights::Union{Vector{Float64},Matrix{Float64}},
+    tape_id::Int64,
+    res::Union{Vector{Float64},CxxPtr{Float64},CxxPtr{CxxPtr{Float64}}, CxxPtr{CxxPtr{CxxPtr{Float64}}}},
+    reuse_tape::Bool)
+
+    if mode === :hess
+        hessian(f, m, n, x, tape_id, res, reuse_tape)
+    else
+        throw("second_order mode: $mode not implemented")
+    end
+end
+
+function hessian(f::Function, m::Int64, n::Int64, x::Union{Float64,Vector{Float64}}, tape_id::Int64, res::Union{Vector{Float64},CxxPtr{Float64},CxxPtr{CxxPtr{Float64}}, CxxPtr{CxxPtr{CxxPtr{Float64}}}}, reuse_tape::Bool)
+    if !reuse_tape
+        _ = create_tape(f, m, n, x, tape_id)
+    end
+    for i in 1:m
+        ADOLC.TbadoubleModule.hessian(tape_id, n, x, res[i])
+    end
+end
+
+
+
 function create_tape(
     f,
     m::Int64,

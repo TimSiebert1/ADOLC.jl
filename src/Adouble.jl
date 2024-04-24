@@ -53,27 +53,33 @@ Adouble{TlAlloc}(val::Bool, isadouble::Bool) = Adouble{TlAlloc}(float(val), isad
 
 
 
-function Adouble{TlAlloc}(data::Vector{Float64}) 
+function Adouble{TbAlloc}(vals::Vector{V}, isadouble::Bool) where V <: Real
     """
-    Create a vector of Tladouble with val = tladouble(data_entry). 
+    The idea behind this is that when a floating point number is promoted to 
+    a adouble e.g. in vcat, then we dont want to create a new "real" adouble since 
+    this would require a new derivative calculation.
     """
-  
-    # c++ function
-    tl_a = tl_init_for_gradient(data, length(data))
-  
-    tl_a_vec = Vector{Adouble{TlAlloc}}(undef, length(data))
-    for i in 1:length(data)
-      tl_a_vec[i] = Adouble{TlAlloc}(tl_a[i])
+    if isadouble
+        return [Adouble{TbAlloc}(TladoubleModule.TbadoubleCxx(val)) for val in vals]
     end
-    return tl_a_vec
-  
-    end
+    return [Adouble{TbAlloc}(val) for val in vals]
+end
 
+function Adouble{TlAlloc}(vals::Vector{V}, isadouble::Bool) where V <: Real
+    """
+    The idea behind this is that when a floating point number is promoted to 
+    a adouble e.g. in vcat, then we dont want to create a new "real" adouble since 
+    this would require a new derivative calculation.
+    """
+    if isadouble
+        return [Adouble{TlAlloc}(TladoubleModule.TladoubleCxx(val)) for val in vals]
+    end
+    return [Adouble{TlAlloc}(val) for val in vals]
+end
 
 
 getValue(a::Adouble{TbAlloc}) = typeof(a.val) == Float64 ? a.val : TbadoubleModule.getValue(a.val)
 getValue(a::Adouble{TlAlloc}) = typeof(a.val) == Float64 ? a.val : TladoubleModule.getValue(a.val)
-
 
 function getValue(a::Vector{Adouble{T}}) where T <: Union{TbAlloc, TlAlloc}
     res = Vector{Float64}(undef, length(a))
@@ -84,22 +90,27 @@ function getValue(a::Vector{Adouble{T}}) where T <: Union{TbAlloc, TlAlloc}
   end
   
 
+function getADValue(a::Adouble{TlAlloc}, i::Int64)
+    return TladoubleModule.getADValue(a.val, i)
+end
 
-    function get_gradient(a::Adouble{TlAlloc}, num_independent::Int64)
-        grad = Vector{Float64}(undef, num_independent)
-        for i in 1:num_independent
-            grad[i] = getADValue(a.val, i)
-        end
-        return grad
-    end
-
-    function get_gradient(a::Vector{Adouble{TlAlloc}}, num_independent::Int64)
-        grad = Matrix{Float64}(undef, length(a), num_independent)
-        for i in 1:length(a)
-            for j in 1:num_independent
-                grad[i, j] = getADValue(a[i].val, i)
-            end
-        end
-        return grad
-    end
     
+function gradient(n::Int64, a::Adouble{TlAlloc}, res)
+    for i in 1:n
+        res[i] = getADValue(a, i)
+    end
+end
+
+function gradient(n::Int64, a::Vector{Adouble{TlAlloc}}, res)
+    for i in 1:length(a)
+        for j in 1:n
+            res[i, j] = getADValue(a[i], j)
+        end
+    end
+end
+
+function init_gradient(a::Vector{Adouble{TlAlloc}})
+    for i in eachindex(a)
+        TladoubleModule.setADValue(a[i].val, 1.0, i)
+    end
+end

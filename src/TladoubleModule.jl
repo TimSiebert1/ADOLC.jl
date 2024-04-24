@@ -7,10 +7,6 @@ module TladoubleModule
       @initcxx
     end
 
-  # need to handle c++ opbjec tladouble* (array of tladoubles), if the access is over the bound
-  # it returns eps
-  Base.getindex(a::CxxWrap.CxxWrapCore.CxxPtr{TladoubleCxx}, i::Int64) = getindex_tl(a, i)
-
-  export TladoubleCxx, getADValue, setADValue, tl_init_for_gradient, getindex_tl, erf, cbrt
+  export TladoubleCxx, getADValue, setADValue, erf, cbrt, set_num_dir
 end # module adouble
 
