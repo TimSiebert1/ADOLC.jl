@@ -12,6 +12,8 @@ module array_types
 
 ##### raw CxxPtr utilities ###################
 
+
+Base.getindex(X::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64) = getindex_tens(X, dim)
 Base.getindex(X::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64, row::Int64, col::Int64) = getindex_tens(X, dim, row, col)
 Base.setindex!(X::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, val::Cdouble, dim::Int64, row::Int64, col::Int64) = setindex_tens(X, val, dim, row, col)
 
