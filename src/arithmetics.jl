@@ -14,7 +14,7 @@ function check_input(a, x)
 end
 
 # convient inits for vector of independant and dependant 
-function Base.:<<(a::Vector{Adouble{TbAlloc}}, x::AbstractVector)
+function Base.:<<(a::Vector{Adouble{TbAlloc}}, x::Vector{Float64})
     check_input(a, x)
     for i in eachindex(x)
         a[i].val << x[i]
@@ -22,7 +22,7 @@ function Base.:<<(a::Vector{Adouble{TbAlloc}}, x::AbstractVector)
   end
 
   
-  function Base.:>>(a::Vector{Adouble{TbAlloc}}, x::AbstractVector)
+  function Base.:>>(a::Vector{Adouble{TbAlloc}}, x::Vector{Float64})
     check_input(a, x)
     for i in eachindex(x)
         a[i].val >> x[i]
