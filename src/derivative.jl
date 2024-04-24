@@ -1,5 +1,4 @@
-using ADOLC, ADOLC.array_types, ADOLC.TbadoubleModule, CxxWrap
-
+using CxxWrap
 function derivative(
     f::Function,
     m::Int64,
@@ -12,32 +11,15 @@ function derivative(
     partials::Vector{Int64}=Vector{Int64}(),
     tape_id::Int64=0,
     res::Union{Vector{Float64},CxxPtr{Float64},CxxPtr{CxxPtr{Float64}},AbsNormalProblem}=Vector{Float64}(),
+    reuse_tape::Bool=false
 )
     if d == 1
-        first_order(f, m, n, x, mode, dir, weights, tape_id, res)
+        first_order(f, m, n, x, mode, dir, weights, tape_id, res, reuse_tape)
     else
         throw("derivative_order: $d not implemented!")
     end
 end
 
-function derivative(
-    tape_id::Int64,
-    m::Int64,
-    n::Int64,
-    x::Union{Float64,Vector{Float64}},
-    mode::Symbol;    
-    d::Int64=1,
-    dir::Union{Vector{Float64},Matrix{Float64}}=Vector{Float64}(),
-    weights::Union{Vector{Float64},Matrix{Float64}}=Vector{Float64}(),
-    partials::Vector{Int64}=Vector{Int64}(),
-    res::Union{Vector{Float64},CxxPtr{Float64},CxxPtr{CxxPtr{Float64}},AbsNormalProblem}=Vector{Float64}(),
-)
-    if d == 1
-        first_order(tape_id, m, n, x, mode, dir, weights, res)
-    else
-        throw("derivative_order: $d not implemented!")
-    end
-end
 
 function first_order(
     f,
@@ -49,61 +31,47 @@ function first_order(
     weights::Union{Vector{Float64},Matrix{Float64}},
     tape_id::Int64,
     res,
+    reuse_tape::Bool
 )
     if mode === :jac
-        jac(f, m, n, x, tape_id, res)
+        jac(f, m, n, x, tape_id, res, reuse_tape)
     elseif mode === :jac_vec
-        fos_forward(f, m, n, x, dir, tape_id, res)
+        fos_forward(f, m, n, x, dir, tape_id, res, reuse_tape)
     elseif mode === :jac_mat
-        fov_forward(f, m, n, x, dir, tape_id, res)
+        fov_forward(f, m, n, x, dir, tape_id, res, reuse_tape)
     elseif mode === :vec_jac
-        fos_reverse(f, m, n, x, weights, tape_id, res)
+        fos_reverse(f, m, n, x, weights, tape_id, res, reuse_tape)
     elseif mode === :mat_jac
-        fov_reverse(f, m, n, x, weights, tape_id, res)
+        fov_reverse(f, m, n, x, weights, tape_id, res, reuse_tape)
     elseif mode === :abs_normal
-        abs_normal(f, m, n, x, tape_id)
-    else
-        throw("mode: $mode not implemented!")
-    end
-end
-
-function first_order(
-    tape_id::Int64,
-    m::Int64,
-    n::Int64,
-    x::Union{Float64,Vector{Float64}},
-    mode::Symbol,
-    dir::Union{Vector{Float64},Matrix{Float64}},
-    weights::Union{Vector{Float64},Matrix{Float64}},
-    res,
-)
-    if mode === :abs_normal
-        abs_normal(tape_id, m, n, x, res)
+        abs_normal(f, m, n, x, tape_id, reuse_tape, res)
     else
         throw("mode: $mode not implemented!")
     end
 end
 
 
-function jac(f, m::Int64, n::Int64, x::Union{Float64,Vector{Float64}}, tape_id::Int64, res)
+function jac(f, m::Int64, n::Int64, x::Union{Float64,Vector{Float64}}, tape_id::Int64, res, reuse_tape)
     if m == 1
-        gradient(f, n, x, tape_id, res)
+        gradient(f, n, x, tape_id, res, reuse_tape)
     else
         if n / 2 < m
             throw("track not implemented!")
             #tape_less_forward()
         else
             weights = create_cxx_identity(m, m)
-            fov_reverse(f, m, n, m, x, weights, tape_id, res)
+            fov_reverse(f, m, n, m, x, weights, tape_id, res, reuse_tape)
         end
     end
 end
 
-
-function gradient(f, n::Int64, x::Union{Float64,Vector{Float64}}, tape_id::Int64, res)
-    _ = create_tape(f, 1, n, x, tape_id)
+function gradient(f, n::Int64, x::Union{Float64,Vector{Float64}}, tape_id::Int64, res, reuse_tape)
+    if !reuse_tape
+        _ = create_tape(f, 1, n, x, tape_id)
+    end
     ADOLC.TbadoubleModule.gradient(tape_id, n, x, res)
 end
+
 
 
 function fos_reverse(
@@ -114,11 +82,15 @@ function fos_reverse(
     weights::Vector{Float64},
     tape_id::Int64,
     res,
+    reuse_tape
 )
-    _ = create_tape(f, m, n, x, tape_id, keep = 1)
+    if !reuse_tape
+        _ = create_tape(f, m, n, x, tape_id, keep = 1)
+    else
+        ADOLC.TbadoubleModule.zos_forward(tape_id, m, n, 1, x, [0.0 for _ in 1:m])
+    end
     ADOLC.TbadoubleModule.fos_reverse(tape_id, m, n, weights, res)
 end
-
 
 
 function fov_reverse(
@@ -129,6 +101,7 @@ function fov_reverse(
     weights::Matrix{Float64},
     tape_id::Int64,
     res,
+    reuse_tape
 )
     num_dir = size(weights, 2)
     weights_cxx = myalloc2(size(weights)...)
@@ -137,7 +110,7 @@ function fov_reverse(
             weights_cxx[i, j] = weights[i, j]
         end
     end
-    fov_reverse(f, m, n, num_dir, x, weights_cxx, tape_id, res)
+    fov_reverse(f, m, n, num_dir, x, weights_cxx, tape_id, res, reuse_tape)
     myfree2(weights_cxx)
 end
 
@@ -150,8 +123,14 @@ function fov_reverse(
     weights::CxxPtr{CxxPtr{Float64}},
     tape_id::Int64,
     res,
+    reuse_tape
 )
-    _ = create_tape(f, m, n, x, tape_id, keep = 1)
+    if !reuse_tape
+        _ = create_tape(f, m, n, x, tape_id, keep = 1)
+    else 
+        ADOLC.TbadoubleModule.zos_forward(tape_id, m, n, 1, x, [0.0 for _ in 1:m])
+    end
+
     ADOLC.TbadoubleModule.fov_reverse(tape_id, m, n, num_dir, weights, res)
 end
 
@@ -162,10 +141,15 @@ function fos_forward(
     n::Int64,
     x::Union{Float64,Vector{Float64}},
     dir::Vector{Float64},
-    tape_id,
+    tape_id::Int64,
     res,
+    reuse_tape
 )
-    y = create_tape(f, m, n, x, tape_id)
+    if !reuse_tape
+        y = create_tape(f, m, n, x, tape_id)
+    else
+        y = m == 1 ? 0.0 : [0.0 for _ = 1:m]
+    end
     ADOLC.TbadoubleModule.fos_forward(tape_id, m, n, 0, x, dir, y, res)
 end
 
@@ -178,6 +162,7 @@ function fov_forward(
     dir::Matrix{Float64},
     tape_id,
     res,
+    reuse_tape
 )
     num_dir = size(dir, 2)
     dir_cxx = myalloc2(size(dir)...)
@@ -186,10 +171,9 @@ function fov_forward(
             dir_cxx[i, j] = dir[i, j]
         end
     end
-    fov_forward(f, m, n, num_dir, x, dir_cxx, tape_id, res)
+    fov_forward(f, m, n, num_dir, x, dir_cxx, tape_id, res, reuse_tape)
     myfree2(dir_cxx)
 end
-
 
 function fov_forward(
     f,
@@ -200,25 +184,16 @@ function fov_forward(
     dir::CxxPtr{CxxPtr{Float64}},
     tape_id,
     res,
+    reuse_tape
 )
-    y = create_tape(f, m, n, x, tape_id)
+    if !reuse_tape
+        y = create_tape(f, m, n, x, tape_id)
+    else
+        y = m == 1 ? 0.0 : [0.0 for _ = 1:m]
+    end
     ADOLC.TbadoubleModule.fov_forward(tape_id, m, n, num_dir, x, dir, y, res)
 end
 
-
-
-function abs_normal(
-    f,
-    m::Int64,
-    n::Int64,
-    x::Union{Float64,Vector{Float64}},
-    tape_id::Int64,
-)
-    y = create_tape(f, m, n, x, tape_id, enableMinMaxUsingAbs = true)
-    abs_normal_problem = ADOLC.AbsNormalProblem{Float64}(tape_id, m, n, x, m == 1 ? [y] : y)
-    ADOLC.abs_normal!(abs_normal_problem)
-    return abs_normal_problem
-end
 
 function check_resue_abs_normal_problem(
     tape_id::Int64,
@@ -248,16 +223,25 @@ function check_resue_abs_normal_problem(
     end
 end
 
+
 function abs_normal(
-    tape_id::Int64,
+    f,
     m::Int64,
     n::Int64,
     x::Union{Float64,Vector{Float64}},
-    abs_normal_problem::AbsNormalProblem,
+    tape_id::Int64,
+    reuse_tape,
+    abs_normal_problem
 )
-    check_resue_abs_normal_problem(tape_id, m, n, abs_normal_problem)
-    ADOLC.array_types.vec_to_cxx(abs_normal_problem.x, x)
+    if !reuse_tape
+        y = create_tape(f, m, n, x, tape_id, enableMinMaxUsingAbs = true)
+        abs_normal_problem = ADOLC.AbsNormalProblem{Float64}(tape_id, m, n, x, m == 1 ? [y] : y)
+    else 
+        check_resue_abs_normal_problem(tape_id, m, n, abs_normal_problem)
+        ADOLC.array_types.vec_to_cxx(abs_normal_problem.x, x)
+    end
     ADOLC.abs_normal!(abs_normal_problem)
+    return abs_normal_problem
 end
 
 

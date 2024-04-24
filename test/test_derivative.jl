@@ -15,6 +15,25 @@
     @test res[3] == 1.0
 end
 
+@testset "reuse_jac" begin
+    # m = 1
+    function f(x)
+        return x[1]^2 + x[2] * x[3]
+    end
+    res = alloc_vec_double(3)
+    derivative(f, 1, 3, [1.0, 1.0, 2.0], :jac, res=res)
+
+    @test res[1] == 2.0
+    @test res[2] == 2.0
+    @test res[3] == 1.0
+
+    derivative(f, 1, 3, [1.0, 1.0, 0.0], :jac, res=res, reuse_tape=true)
+
+    @test res[1] == 2.0
+    @test res[2] == 0.0
+    @test res[3] == 1.0
+end
+
 
 @testset "jac" begin
     # m > 1, n / 2 >= m
@@ -26,6 +45,40 @@ end
     derivative(f, 2, 4, [1.0, 1.0, 2.0, -1.0], :jac, res=res)
 
     @test res[1, 1] == 2.0
+    @test res[1, 2] == 1.0
+    @test res[1, 3] == 0.0
+    @test res[1, 4] == 0.0
+
+    @test res[2, 1] == 0.0
+    @test res[2, 2] == 0.0
+    @test res[2, 3] == -4.0
+    @test res[2, 4] == 4.0
+
+end
+
+
+@testset "reuse_jac" begin
+    # m > 1, n / 2 >= m
+    function f(x)
+        return [x[1]^2 + x[2], x[3]^2 * x[4]]
+    end
+    res = myalloc2(2, 4)
+
+    derivative(f, 2, 4, [1.0, 1.0, 2.0, -1.0], :jac, res=res)
+
+    @test res[1, 1] == 2.0
+    @test res[1, 2] == 1.0
+    @test res[1, 3] == 0.0
+    @test res[1, 4] == 0.0
+
+    @test res[2, 1] == 0.0
+    @test res[2, 2] == 0.0
+    @test res[2, 3] == -4.0
+    @test res[2, 4] == 4.0
+
+    derivative(f, 2, 4, [0.0, 1.0, 2.0, -1.0], :jac, res=res, reuse_tape=true)
+
+    @test res[1, 1] == 0.0
     @test res[1, 2] == 1.0
     @test res[1, 3] == 0.0
     @test res[1, 4] == 0.0
@@ -50,6 +103,29 @@ end
     @test res[1] == -1.0
     @test res[2] == 0.0
 end
+
+
+@testset "reuse_jac_vec" begin
+    function f(x)
+        return [x[1]^2 + x[2], x[3]^3]
+    end
+    res = alloc_vec_double(2)
+    derivative(f, 2, 3, [1.0, 1.0, 2.0], :jac_vec, dir=[-1.0, 1.0, 0.0], res=res)
+
+    @test res[1] == -1.0
+    @test res[2] == 0.0
+
+    derivative(f, 2, 3, [2.0, 1.0, 2.0], :jac_vec, dir=[-1.0, 1.0, 0.0], res=res, reuse_tape=true)
+
+    @test res[1] == -3.0
+    @test res[2] == 0.0
+
+    derivative(f, 2, 3, [2.0, 1.0, 2.0], :jac_vec, dir=[0.0, 1.0, 0.0], res=res, reuse_tape=true)
+
+    @test res[1] == 1.0
+    @test res[2] == 0.0
+end
+
 
 @testset "jac_mat" begin
     function f(x)
@@ -79,6 +155,58 @@ end
 end
 
 
+
+@testset "reuse_jac_mat" begin
+    function f(x)
+        return [x[1]^2 + x[2], x[3]^3]
+    end
+    res = myalloc2(2, 3)
+    dir = Matrix{Float64}(undef, 3, 3)
+    for i in 1:3
+        for j in 1:3
+            dir[i, j] = 0.0
+            if i == j
+                dir[i, i] = 1.0
+            end
+        end
+    end
+    dir[1, 2] = -1.0
+
+    derivative(f, 2, 3, [1.0, 1.0, 2.0], :jac_mat, dir=dir, res=res)
+
+    @test res[1, 1] == 2.0
+    @test res[1, 2] == -1.0
+    @test res[1, 3] == 0.0
+
+    @test res[2, 1] == 0.0
+    @test res[2, 2] == 0.0
+    @test res[2, 3] == 12.0
+
+
+    derivative(f, 2, 3, [2.0, 1.0, 2.0], :jac_mat, dir=dir, res=res, reuse_tape=true)
+
+    @test res[1, 1] == 4.0
+    @test res[1, 2] == -3.0
+    @test res[1, 3] == 0.0
+
+    @test res[2, 1] == 0.0
+    @test res[2, 2] == 0.0
+    @test res[2, 3] == 12.0
+
+
+
+    dir[1, 1] = 0.0
+    derivative(f, 2, 3, [2.0, 1.0, 2.0], :jac_mat, dir=dir, res=res, reuse_tape=true)
+
+    @test res[1, 1] == 0.0
+    @test res[1, 2] == -3.0
+    @test res[1, 3] == 0.0
+
+    @test res[2, 1] == 0.0
+    @test res[2, 2] == 0.0
+    @test res[2, 3] == 12.0
+end
+
 @testset "vec_jac" begin
     function f(x)
         return [x[1]^2 + x[2], x[3]^3]
@@ -90,6 +218,31 @@ end
     @test res[2] == -1
     @test res[3] == 12
 end
+
+@testset "reuse_vec_jac" begin
+    function f(x)
+        return [x[1]^2 + x[2], x[3]^3]
+    end
+    res = alloc_vec_double(3)
+    derivative(f, 2, 3, [1.0, 1.0, 2.0], :vec_jac, weights=[-1.0, 1.0], res=res)
+
+    @test res[1] == -2
+    @test res[2] == -1
+    @test res[3] == 12
+
+    derivative(f, 2, 3, [2.0, 1.0, 2.0], :vec_jac, weights=[-1.0, 1.0], res=res, reuse_tape=true)
+
+    @test res[1] == -4
+    @test res[2] == -1
+    @test res[3] == 12
+
+    derivative(f, 2, 3, [2.0, 1.0, 2.0], :vec_jac, weights=[0.0, 1.0], res=res, reuse_tape=true)
+
+    @test res[1] == 0.0
+    @test res[2] == 0.0
+    @test res[3] == 12
+end
+
 
 
 
@@ -115,6 +268,69 @@ end
 
     @test res[1, 1] == 2.0
     @test res[1, 2] == 1.0
+    @test res[1, 3] == -12.0
+
+    @test res[2, 1] == 0.0
+    @test res[2, 2] == 0.0
+    @test res[2, 3] == 12.0
+
+    @test res[3, 1] == 0.0
+    @test res[3, 2] == 0.0
+    @test res[3, 3] == 0.0
+end
+
+@testset "reuse_mat_jac" begin
+    function f(x)
+        return [x[1]^2 + x[2], x[3]^3]
+    end
+
+    weights = Matrix{Float64}(undef, 3, 2)
+    for i in 1:3
+        for j in 1:2
+            weights[i, j] = 0.0
+            if i == j
+                weights[i, i] = 1.0
+            end
+        end
+    end
+    weights[1, 2] = -1.0
+
+
+    res = myalloc2(3, 3)
+    derivative(f, 2, 3, [1.0, 1.0, 2.0], :mat_jac, weights=weights, res=res)
+
+    @test res[1, 1] == 2.0
+    @test res[1, 2] == 1.0
+    @test res[1, 3] == -12.0
+
+    @test res[2, 1] == 0.0
+    @test res[2, 2] == 0.0
+    @test res[2, 3] == 12.0
+
+    @test res[3, 1] == 0.0
+    @test res[3, 2] == 0.0
+    @test res[3, 3] == 0.0
+
+
+    derivative(f, 2, 3, [2.0, 1.0, 2.0], :mat_jac, weights=weights, res=res, reuse_tape=true)
+    @test res[1, 1] == 4.0
+    @test res[1, 2] == 1.0
+    @test res[1, 3] == -12.0
+
+    @test res[2, 1] == 0.0
+    @test res[2, 2] == 0.0
+    @test res[2, 3] == 12.0
+
+    @test res[3, 1] == 0.0
+    @test res[3, 2] == 0.0
+    @test res[3, 3] == 0.0
+
+
+    weights[1, 1] = 0.0
+
+    derivative(f, 2, 3, [2.0, 1.0, 2.0], :mat_jac, weights=weights, res=res, reuse_tape=true)
+    @test res[1, 1] == 0.0
+    @test res[1, 2] == 0.0
     @test res[1, 3] == -12.0
 
     @test res[2, 1] == 0.0
@@ -166,10 +382,16 @@ end
     x = [-1.5, -1.5, -1.5]
 
     abs_normal_problem = derivative(f, 1, 3, x, :abs_normal)
+    y = f(x)
+
+    @test abs_normal_problem.y[1] == y
 
     x = [-0.5, -0.5, -0.5]
     # reuse abs_normal_problem with same id and without retaping
-    derivative(abs_normal_problem.tape_id, 1, 3, x, :abs_normal, res=abs_normal_problem)
+    derivative(f, 1, 3, x, :abs_normal, tape_id=abs_normal_problem.tape_id, res=abs_normal_problem, reuse_tape=true)
+    y = f(x)
+
+    @test abs_normal_problem.y[1] == y
 
     @test abs_normal_problem.Y[1, 1] == -1.5
     @test abs_normal_problem.Y[1, 2] == -3.0
