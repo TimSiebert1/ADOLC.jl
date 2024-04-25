@@ -1,4 +1,3 @@
-
 function speelpenning(x::Vector{Adouble{T}}) where T<:Union{TbAlloc, TlAlloc}
     y = Adouble{T}(1.0, true)
     for i in eachindex(x)
@@ -110,35 +109,35 @@ function create_abs_normal()
     y = create_tape_abs_norm(tape_id, func_eval, x) 
     n = length(x)
     m = length(y)
-    abs_normal_problem =
-        AbsNormalProblem{Float64}(tape_id, m, n, x, y)
+    abs_normal_form =
+        ADOLC.AbsNormalForm(tape_id, m, n, x, y)
 
     for _ in 1:10
-        abs_normal!(abs_normal_problem)
+        abs_normal!(abs_normal_form)
     end
-    return abs_normal_problem
+    return abs_normal_form
 end 
 
 @testset "reuse_abs_normal" begin
-    abs_normal_problem = create_abs_normal()
-    @test abs_normal_problem.Y[1, 1] == -1.5
-    @test abs_normal_problem.Y[1, 2] == -3.0
-    @test abs_normal_problem.Y[1, 3] == -1.5
+    abs_normal_form = create_abs_normal()
+    @test abs_normal_form.Y[1, 1] == -1.5
+    @test abs_normal_form.Y[1, 2] == -3.0
+    @test abs_normal_form.Y[1, 3] == -1.5
 
-    @test abs_normal_problem.J[1, 1] == 0.5
-    @test abs_normal_problem.J[1, 2] == 0.5
+    @test abs_normal_form.J[1, 1] == 0.5
+    @test abs_normal_form.J[1, 2] == 0.5
 
-    @test abs_normal_problem.Z[1, 1] == -1.0
-    @test abs_normal_problem.Z[1, 2] == -1.0
-    @test abs_normal_problem.Z[1, 3] == 0.0
-    @test abs_normal_problem.Z[2, 1] == 0.0
-    @test abs_normal_problem.Z[2, 2] == -1.0
-    @test abs_normal_problem.Z[2, 3] == -1.0
+    @test abs_normal_form.Z[1, 1] == -1.0
+    @test abs_normal_form.Z[1, 2] == -1.0
+    @test abs_normal_form.Z[1, 3] == 0.0
+    @test abs_normal_form.Z[2, 1] == 0.0
+    @test abs_normal_form.Z[2, 2] == -1.0
+    @test abs_normal_form.Z[2, 3] == -1.0
 
-    @test abs_normal_problem.L[1, 1] == 0.0
-    @test abs_normal_problem.L[1, 2] == 0.0
-    @test abs_normal_problem.L[2, 1] == 0.0
-    @test abs_normal_problem.L[2, 2] == 0.0
+    @test abs_normal_form.L[1, 1] == 0.0
+    @test abs_normal_form.L[1, 2] == 0.0
+    @test abs_normal_form.L[2, 1] == 0.0
+    @test abs_normal_form.L[2, 2] == 0.0
 end
 
 

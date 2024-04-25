@@ -93,21 +93,21 @@ function copy(a::AbsNormalForm, b::AbsNormalForm)
     a.Z = b.Z
     a.L = b.L
 end
-function abs_normal!(abs_normal_problem::AbsNormalForm)
+function abs_normal!(abs_normal_form::AbsNormalForm)
     _abs_normal!(
-    abs_normal_problem.tape_id,
-    abs_normal_problem.z,
-    abs_normal_problem.cz,
-    abs_normal_problem.cy,
-    abs_normal_problem.Y, 
-    abs_normal_problem.J,
-    abs_normal_problem.Z, 
-    abs_normal_problem.L,
-    abs_normal_problem.m,
-    abs_normal_problem.n,
-    abs_normal_problem.num_switches,
-    abs_normal_problem.x,
-    abs_normal_problem.y)
+    abs_normal_form.tape_id,
+    abs_normal_form.z,
+    abs_normal_form.cz,
+    abs_normal_form.cy,
+    abs_normal_form.Y, 
+    abs_normal_form.J,
+    abs_normal_form.Z, 
+    abs_normal_form.L,
+    abs_normal_form.m,
+    abs_normal_form.n,
+    abs_normal_form.num_switches,
+    abs_normal_form.x,
+    abs_normal_form.y)
 end
 
 function _abs_normal!(
