@@ -8,7 +8,7 @@
         return x[1]^2 + x[2] * x[3]
     end
     res = alloc_vec_double(3)
-    derivative(f, 1, 3, [1.0, 1.0, 2.0], :jac, res=res)
+    derivative!(res, f, 1, 3, [1.0, 1.0, 2.0], :jac)
 
     @test res[1] == 2.0
     @test res[2] == 2.0
@@ -22,13 +22,13 @@ end
         return x[1]^2 + x[2] * x[3]
     end
     res = alloc_vec_double(3)
-    derivative(f, 1, 3, [1.0, 1.0, 2.0], :jac, res=res)
+    derivative!(res, f, 1, 3, [1.0, 1.0, 2.0], :jac)
 
     @test res[1] == 2.0
     @test res[2] == 2.0
     @test res[3] == 1.0
 
-    derivative(f, 1, 3, [1.0, 1.0, 0.0], :jac, res=res, reuse_tape=true)
+    derivative!(res, f, 1, 3, [1.0, 1.0, 0.0], :jac, reuse_tape=true)
 
     @test res[1] == 2.0
     @test res[2] == 0.0
@@ -41,7 +41,7 @@ end
         return [x[1]^2 + x[2], x[3]^3]
     end
     res = myalloc2(2, 3)
-    derivative(f, 2, 3, [1.0, 1.0, 2.0], :jac, res=res)
+    derivative!(res, f, 2, 3, [1.0, 1.0, 2.0], :jac)
 
     @test res[1, 1] == 2.0
     @test res[1, 2] == 1.0
@@ -59,7 +59,7 @@ end
     end
     res = myalloc2(2, 4)
 
-    derivative(f, 2, 4, [1.0, 1.0, 2.0, -1.0], :jac, res=res)
+    derivative!(res, f, 2, 4, [1.0, 1.0, 2.0, -1.0], :jac)
 
     @test res[1, 1] == 2.0
     @test res[1, 2] == 1.0
@@ -81,7 +81,7 @@ end
     end
     res = myalloc2(2, 4)
 
-    derivative(f, 2, 4, [1.0, 1.0, 2.0, -1.0], :jac, res=res)
+    derivative!(res, f, 2, 4, [1.0, 1.0, 2.0, -1.0], :jac)
 
     @test res[1, 1] == 2.0
     @test res[1, 2] == 1.0
@@ -93,7 +93,7 @@ end
     @test res[2, 3] == -4.0
     @test res[2, 4] == 4.0
 
-    derivative(f, 2, 4, [0.0, 1.0, 2.0, -1.0], :jac, res=res, reuse_tape=true)
+    derivative!(res, f, 2, 4, [0.0, 1.0, 2.0, -1.0], :jac, reuse_tape=true)
 
     @test res[1, 1] == 0.0
     @test res[1, 2] == 1.0
@@ -115,7 +115,7 @@ end
         return [x[1]^2 + x[2], x[3]^3]
     end
     res = alloc_vec_double(2)
-    derivative(f, 2, 3, [1.0, 1.0, 2.0], :jac_vec, dir=[-1.0, 1.0, 0.0], res=res)
+    derivative!(res, f, 2, 3, [1.0, 1.0, 2.0], :jac_vec, dir=[-1.0, 1.0, 0.0])
 
     @test res[1] == -1.0
     @test res[2] == 0.0
@@ -127,17 +127,17 @@ end
         return [x[1]^2 + x[2], x[3]^3]
     end
     res = alloc_vec_double(2)
-    derivative(f, 2, 3, [1.0, 1.0, 2.0], :jac_vec, dir=[-1.0, 1.0, 0.0], res=res)
+    derivative!(res, f, 2, 3, [1.0, 1.0, 2.0], :jac_vec, dir=[-1.0, 1.0, 0.0])
 
     @test res[1] == -1.0
     @test res[2] == 0.0
 
-    derivative(f, 2, 3, [2.0, 1.0, 2.0], :jac_vec, dir=[-1.0, 1.0, 0.0], res=res, reuse_tape=true)
+    derivative!(res, f, 2, 3, [2.0, 1.0, 2.0], :jac_vec, dir=[-1.0, 1.0, 0.0], reuse_tape=true)
 
     @test res[1] == -3.0
     @test res[2] == 0.0
 
-    derivative(f, 2, 3, [2.0, 1.0, 2.0], :jac_vec, dir=[0.0, 1.0, 0.0], res=res, reuse_tape=true)
+    derivative!(res, f, 2, 3, [2.0, 1.0, 2.0], :jac_vec, dir=[0.0, 1.0, 0.0], reuse_tape=true)
 
     @test res[1] == 1.0
     @test res[2] == 0.0
@@ -160,7 +160,7 @@ end
     end
     dir[1, 2] = -1.0
 
-    derivative(f, 2, 3, [1.0, 1.0, 2.0], :jac_mat, dir=dir, res=res)
+    derivative!(res, f, 2, 3, [1.0, 1.0, 2.0], :jac_mat, dir=dir)
 
     @test res[1, 1] == 2.0
     @test res[1, 2] == -1.0
@@ -189,7 +189,7 @@ end
     end
     dir[1, 2] = -1.0
 
-    derivative(f, 2, 3, [1.0, 1.0, 2.0], :jac_mat, dir=dir, res=res)
+    derivative!(res, f, 2, 3, [1.0, 1.0, 2.0], :jac_mat, dir=dir)
 
     @test res[1, 1] == 2.0
     @test res[1, 2] == -1.0
@@ -200,7 +200,7 @@ end
     @test res[2, 3] == 12.0
 
 
-    derivative(f, 2, 3, [2.0, 1.0, 2.0], :jac_mat, dir=dir, res=res, reuse_tape=true)
+    derivative!(res, f, 2, 3, [2.0, 1.0, 2.0], :jac_mat, dir=dir, reuse_tape=true)
 
     @test res[1, 1] == 4.0
     @test res[1, 2] == -3.0
@@ -213,7 +213,7 @@ end
 
 
     dir[1, 1] = 0.0
-    derivative(f, 2, 3, [2.0, 1.0, 2.0], :jac_mat, dir=dir, res=res, reuse_tape=true)
+    derivative!(res, f, 2, 3, [2.0, 1.0, 2.0], :jac_mat, dir=dir, reuse_tape=true)
 
     @test res[1, 1] == 0.0
     @test res[1, 2] == -3.0
@@ -229,7 +229,7 @@ end
         return [x[1]^2 + x[2], x[3]^3]
     end
     res = alloc_vec_double(3)
-    derivative(f, 2, 3, [1.0, 1.0, 2.0], :vec_jac, weights=[-1.0, 1.0], res=res)
+    derivative!(res, f, 2, 3, [1.0, 1.0, 2.0], :vec_jac, weights=[-1.0, 1.0])
 
     @test res[1] == -2
     @test res[2] == -1
@@ -241,19 +241,19 @@ end
         return [x[1]^2 + x[2], x[3]^3]
     end
     res = alloc_vec_double(3)
-    derivative(f, 2, 3, [1.0, 1.0, 2.0], :vec_jac, weights=[-1.0, 1.0], res=res)
+    derivative!(res, f, 2, 3, [1.0, 1.0, 2.0], :vec_jac, weights=[-1.0, 1.0])
 
     @test res[1] == -2
     @test res[2] == -1
     @test res[3] == 12
 
-    derivative(f, 2, 3, [2.0, 1.0, 2.0], :vec_jac, weights=[-1.0, 1.0], res=res, reuse_tape=true)
+    derivative!(res, f, 2, 3, [2.0, 1.0, 2.0], :vec_jac, weights=[-1.0, 1.0], reuse_tape=true)
 
     @test res[1] == -4
     @test res[2] == -1
     @test res[3] == 12
 
-    derivative(f, 2, 3, [2.0, 1.0, 2.0], :vec_jac, weights=[0.0, 1.0], res=res, reuse_tape=true)
+    derivative!(res, f, 2, 3, [2.0, 1.0, 2.0], :vec_jac, weights=[0.0, 1.0], reuse_tape=true)
 
     @test res[1] == 0.0
     @test res[2] == 0.0
@@ -281,7 +281,7 @@ end
 
 
     res = myalloc2(3, 3)
-    derivative(f, 2, 3, [1.0, 1.0, 2.0], :mat_jac, weights=weights, res=res)
+    derivative!(res, f, 2, 3, [1.0, 1.0, 2.0], :mat_jac, weights=weights)
 
     @test res[1, 1] == 2.0
     @test res[1, 2] == 1.0
@@ -314,7 +314,7 @@ end
 
 
     res = myalloc2(3, 3)
-    derivative(f, 2, 3, [1.0, 1.0, 2.0], :mat_jac, weights=weights, res=res)
+    derivative!(res, f, 2, 3, [1.0, 1.0, 2.0], :mat_jac, weights=weights)
 
     @test res[1, 1] == 2.0
     @test res[1, 2] == 1.0
@@ -329,7 +329,7 @@ end
     @test res[3, 3] == 0.0
 
 
-    derivative(f, 2, 3, [2.0, 1.0, 2.0], :mat_jac, weights=weights, res=res, reuse_tape=true)
+    derivative!(res, f, 2, 3, [2.0, 1.0, 2.0], :mat_jac, weights=weights, reuse_tape=true)
     @test res[1, 1] == 4.0
     @test res[1, 2] == 1.0
     @test res[1, 3] == -12.0
@@ -345,7 +345,7 @@ end
 
     weights[1, 1] = 0.0
 
-    derivative(f, 2, 3, [2.0, 1.0, 2.0], :mat_jac, weights=weights, res=res, reuse_tape=true)
+    derivative!(res, f, 2, 3, [2.0, 1.0, 2.0], :mat_jac, weights=weights, reuse_tape=true)
     @test res[1, 1] == 0.0
     @test res[1, 2] == 0.0
     @test res[1, 3] == -12.0
@@ -367,7 +367,8 @@ end
     
     x = [-0.5, -0.5, -0.5]
 
-    abs_normal_problem = derivative(f, 1, 3, x, :abs_normal)
+    abs_normal_problem = ADOLC.AbsNormalForm()
+    derivative!(abs_normal_problem, f, 1, 3, x, :abs_normal)
 
     @test abs_normal_problem.Y[1, 1] == -1.5
     @test abs_normal_problem.Y[1, 2] == -3.0
@@ -398,14 +399,15 @@ end
     
     x = [-1.5, -1.5, -1.5]
 
-    abs_normal_problem = derivative(f, 1, 3, x, :abs_normal)
+    abs_normal_problem = ADOLC.AbsNormalForm()
+    derivative!(abs_normal_problem, f, 1, 3, x, :abs_normal)
     y = f(x)
 
     @test abs_normal_problem.y[1] == y
 
     x = [-0.5, -0.5, -0.5]
     # reuse abs_normal_problem with same id and without retaping
-    derivative(f, 1, 3, x, :abs_normal, tape_id=abs_normal_problem.tape_id, res=abs_normal_problem, reuse_tape=true)
+    derivative!(abs_normal_problem, f, 1, 3, x, :abs_normal, tape_id=abs_normal_problem.tape_id, reuse_tape=true)
     y = f(x)
 
     @test abs_normal_problem.y[1] == y
@@ -432,11 +434,37 @@ end
 
 
 
-"""
+
 ######### second_order ########
 
 
-@testset "hess" begin
+
+@testset "hess_1D" begin
+    function f(x) 
+        return x[1]^3 + x[2]^2
+    end
+    res = myalloc2(3, 3)
+    derivative!(res, f, 1, 3, [-1.0, 1.0, 2.0], :hess)
+
+    @test res[1, 1] == -6.0
+    @test res[2, 1] == 0.0
+    @test res[3, 1] == 0.0
+
+    @test res[1, 2] == 0.0
+    @test res[2, 2] == 2.0
+    @test res[3, 2] == 0.0
+
+    @test res[1, 3] == 0.0
+    @test res[2, 3] == 0.0
+    @test res[3, 3] == 0.0
+
+
+end
+
+
+"""
+
+@testset "hess_2D" begin
     function f(x) 
         return [x[1]^3 + x[2]^2, 3*x[3]^3]
     end
