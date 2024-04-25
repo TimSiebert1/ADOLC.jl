@@ -35,7 +35,7 @@ function abs_normal_finalizer(problem)
     finalize(problem.L)
 
 end
-mutable struct AbsNormalProblem{T}
+mutable struct AbsNormalForm
 
     tape_id::Int64 
 
@@ -43,20 +43,20 @@ mutable struct AbsNormalProblem{T}
     n::Int64
     num_switches::Int32
 
-    x::CxxVector{T}
-    y::CxxVector{T}
-    z::CxxVector{T}
+    x::CxxVector{Float64}
+    y::CxxVector{Float64}
+    z::CxxVector{Float64}
 
-    cz::CxxVector{T}
-    cy::CxxVector{T}
+    cz::CxxVector{Float64}
+    cy::CxxVector{Float64}
 
-    Y::CxxMatrix{T} 
-    J::CxxMatrix{T}
-    Z::CxxMatrix{T} 
-    L::CxxMatrix{T}
+    Y::CxxMatrix{Float64} 
+    J::CxxMatrix{Float64}
+    Z::CxxMatrix{Float64} 
+    L::CxxMatrix{Float64}
 
 
-    function AbsNormalProblem{T}(tape_id::Int64, m::Int64, n::Int64, x::Vector{T}, y::Vector{T}) where T <: Real
+    function AbsNormalForm(tape_id::Int64, m::Int64, n::Int64, x::Vector{Float64}, y::Vector{Float64})
         
         num_switches = TbadoubleModule.get_num_switches(tape_id)
         z = CxxVector{Float64}(num_switches)
@@ -69,11 +69,31 @@ mutable struct AbsNormalProblem{T}
         Z = CxxMatrix{Float64}(num_switches, length(x))
         L = CxxMatrix{Float64}(num_switches, num_switches)
 
-        problem = new{T}(tape_id, m, n, num_switches, CxxVector{T}(x), CxxVector{T}(y), z, cz, cy, Y, J, Z, L)
+        problem = new(tape_id, m, n, num_switches, CxxVector{Float64}(x), CxxVector{Float64}(y), z, cz, cy, Y, J, Z, L)
         finalizer(abs_normal_finalizer, problem)
     end
+    AbsNormalForm() = new()
 end
-function abs_normal!(abs_normal_problem::AbsNormalProblem{T}) where T <: Real
+function copy(a::AbsNormalForm, b::AbsNormalForm)
+    a.tape_id = b.tape_id
+
+    a.m = b.m
+    a.n = b.n
+    a.num_switches = b.num_switches
+
+    a.x = b.x
+    a.y = b.y
+    a.z = b.z
+
+    a.cz = b.cz
+    a.cy = b.cy
+
+    a.Y = b.Y
+    a.J = b.J
+    a.Z = b.Z
+    a.L = b.L
+end
+function abs_normal!(abs_normal_problem::AbsNormalForm)
     _abs_normal!(
     abs_normal_problem.tape_id,
     abs_normal_problem.z,
@@ -92,19 +112,19 @@ end
 
 function _abs_normal!(
     tape_id::Int64,
-    z_cxx::CxxVector{T},
-    cz_cxx::CxxVector{T},
-    cy_cxx::CxxVector{T},
-    Y_cxx::CxxMatrix{T}, 
-    J_cxx::CxxMatrix{T},
-    Z_cxx::CxxMatrix{T}, 
-    L_cxx::CxxMatrix{T},
+    z_cxx::CxxVector{Float64},
+    cz_cxx::CxxVector{Float64},
+    cy_cxx::CxxVector{Float64},
+    Y_cxx::CxxMatrix{Float64}, 
+    J_cxx::CxxMatrix{Float64},
+    Z_cxx::CxxMatrix{Float64}, 
+    L_cxx::CxxMatrix{Float64},
     m::Int64,
     n::Int64,
     num_switches::Int32,
-    x_cxx::CxxVector{T},
-    y_cxx::CxxVector{T}
-) where T <: Real
+    x_cxx::CxxVector{Float64},
+    y_cxx::CxxVector{Float64}
+)
 
     # use c++ double*
     cz = cz_cxx.data
@@ -515,7 +535,7 @@ function taylor_coeff(func,
 end
 
 include("derivative.jl")
-export derivative
+export derivative!
 
 export abs_normal!, AbsNormalProblem, gradient, _gradient_tape_based, _gradient_tape_less
 export _higher_order, tensor_address2, build_tensor, create_cxx_identity
