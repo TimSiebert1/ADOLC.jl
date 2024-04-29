@@ -29,4 +29,7 @@ add the possibility to use forward and reverse in one function for different asp
 add output of function for reverse
 add log2
 
+
 update the Tladouble type with bounds for the derivative coords
+
+add more versions of the derivative low level functions for convenience
