@@ -74,25 +74,7 @@ mutable struct AbsNormalForm
     end
     AbsNormalForm() = new()
 end
-function copy(a::AbsNormalForm, b::AbsNormalForm)
-    a.tape_id = b.tape_id
 
-    a.m = b.m
-    a.n = b.n
-    a.num_switches = b.num_switches
-
-    a.x = b.x
-    a.y = b.y
-    a.z = b.z
-
-    a.cz = b.cz
-    a.cy = b.cy
-
-    a.Y = b.Y
-    a.J = b.J
-    a.Z = b.Z
-    a.L = b.L
-end
 function abs_normal!(abs_normal_form::AbsNormalForm)
     _abs_normal!(
     abs_normal_form.tape_id,
