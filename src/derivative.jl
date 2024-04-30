@@ -35,6 +35,8 @@ function derivative!(
         vec_hess_vec!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
     elseif mode === :mat_hess_vec
         mat_hess_vec!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
+    elseif mode === :vec_hess
+        vec_hess!(res, f, m, n, x, weights, tape_id, reuse_tape)
     else
         throw("mode $mode not implemented!")
     end
@@ -294,13 +296,16 @@ function hessian!(
     tape_id::Int64,
     reuse_tape::Bool,
 )
+    if !reuse_tape
+        create_tape(f, m, n, x, tape_id)
+    end
     weights = create_cxx_identity(m, m)
     res_tmp = myalloc2(m, n)
     for i = 1:n
         dir = zeros(Float64, n)
         dir[i] = 1.0
 
-        mat_hess_vec!(res_tmp, f, 2, 3, x, dir, weights, m, tape_id, reuse_tape)
+        mat_hess_vec!(res_tmp, f, 2, 3, x, dir, weights, m, tape_id, true)
         for j = 1:m
             for k = 1:n
                 res[j, k, i] = res_tmp[j, k]
@@ -503,6 +508,23 @@ function mat_hess_vec!(
     free_vec_double(tmp)
 end
 
+function vec_hess!(res::CxxPtr{CxxPtr{Float64}}, f, m::Int64, n::Int64, x::Union{Float64, Vector{Float64}}, weights::Vector{Float64}, tape_id::Int64, reuse_tape::Bool)
+    if !(reuse_tape)
+        create_tape(f, m, n, x, tape_id)
+    end
+
+    res_tmp = alloc_vec_double(n)
+    dir = zeros(Float64, n)
+    for i = 1:n
+        dir[i] = 1.0
+        vec_hess_vec!(res_tmp, f, m, n, x, dir, weights, tape_id, true)
+        for j in 1:n
+            res[j, i] = res_tmp[j]
+        end
+        dir[i] = 0.0
+    end
+    free_vec_double(res_tmp)
+end
 
 function create_tape(
     f,
