@@ -18,7 +18,7 @@ function speelpenning(x)
     return y
 end
 
-function speelpenning(x::Vector{Adouble{T}}) where T<:Union{TbAlloc, TlAlloc}
+function speelpenning(x::Vector{Adouble{T}}) where {T<:Union{TbAlloc,TlAlloc}}
     y = Adouble{T}(1.0, true)
     for i in eachindex(x)
         y *= x[i]
@@ -27,10 +27,10 @@ function speelpenning(x::Vector{Adouble{T}}) where T<:Union{TbAlloc, TlAlloc}
 end
 
 function build_banded_matrix(dim)
-    h = 1/dim
-    A = BandedMatrix{Float64}(undef, (dim, dim), (1,1))
-    A[band(0)] .= -2/h^2
-    A[band(1)] .= A[band(-1)] .= 1/h^2
+    h = 1 / dim
+    A = BandedMatrix{Float64}(undef, (dim, dim), (1, 1))
+    A[band(0)] .= -2 / h^2
+    A[band(1)] .= A[band(-1)] .= 1 / h^2
     return Matrix(A)
 end
 
@@ -48,7 +48,7 @@ function plot(suite::Dict)
                 dims_sorted = sort(collect(keys(suite[experiment][mode])))
                 mode_vals = [suite[experiment][mode][key] for key in dims_sorted]
                 base_times = [suite[experiment]["base_time"][key] for key in dims_sorted]
-                Plots.plot!(p, dims_sorted, mode_vals ./ base_times, label="$mode")
+                Plots.plot!(p, dims_sorted, mode_vals ./ base_times, label = "$mode")
             end
         end
         Plots.plot!(p, legend = :topleft)
@@ -61,23 +61,27 @@ end
 
 function run_base_time(experiment, dim)
     if experiment === speelpenning
-        x = [(i+1.0)/(2.0+i) for i = 1:dim]
+        x = [(i + 1.0) / (2.0 + i) for i = 1:dim]
         time = @benchmark speelpenning($x)
 
     elseif experiment === lin_solve
-        x = [(i+1.0)/(2.0+i) for i = 1:dim]
+        x = [(i + 1.0) / (2.0 + i) for i = 1:dim]
         A = build_banded_matrix(dim)
         time = @benchmark lin_solve($A, $x)
 
-    else throw("$expriment not implemented!")
+    else
+        throw("$expriment not implemented!")
     end
     time = median(time.times)
     return time
 end
 
 function run_mode(experiment, mode, dim)
-    x = [(i+1.0)/(2.0+i) for i = 1:dim]
-    if mode != "ReverseDiff" && mode != "Forward" && mode != "ForwardDiff" && experiment === speelpenning
+    x = [(i + 1.0) / (2.0 + i) for i = 1:dim]
+    if mode != "ReverseDiff" &&
+       mode != "Forward" &&
+       mode != "ForwardDiff" &&
+       experiment === speelpenning
         a = [Adouble{TbAlloc}() for _ in eachindex(x)]
         b = [Adouble{TbAlloc}()]
         y = 0.0
@@ -88,10 +92,13 @@ function run_mode(experiment, mode, dim)
         trace_off()
 
     end
-    if mode != "ReverseDiff" && mode != "Forward" && mode != "ForwardDiff" && experiment === lin_solve
+    if mode != "ReverseDiff" &&
+       mode != "Forward" &&
+       mode != "ForwardDiff" &&
+       experiment === lin_solve
         A = build_banded_matrix(dim)
-        a = [Adouble{TbAlloc}() for _ in 1:dim]
-        b = [Adouble{TbAlloc}() for _ in 1:dim]
+        a = [Adouble{TbAlloc}() for _ = 1:dim]
+        b = [Adouble{TbAlloc}() for _ = 1:dim]
         y = Vector{Float64}(undef, dim)
 
         trace_on(0)
@@ -104,7 +111,7 @@ function run_mode(experiment, mode, dim)
     if mode == "Forward"
         a = Adouble{TlAlloc}(x)
         if experiment == speelpenning
-            time = @benchmark speelpenning($a)        
+            time = @benchmark speelpenning($a)
         else
             A = build_banded_matrix(dim)
             time = @benchmark lin_solve($A, $a)
@@ -117,37 +124,28 @@ function run_mode(experiment, mode, dim)
             A = build_banded_matrix(dim)
             time = @benchmark ForwardDiff.jacobian(Base.Fix1(lin_solve, $A), $x)
         end
-    
+
     elseif mode == "ReverseDiff"
         if experiment == speelpenning
             time = @benchmark ReverseDiff.gradient(speelpenning, $x)
         else
             A = build_banded_matrix(dim)
             time = @benchmark ReverseDiff.jacobian(Base.Fix1(lin_solve, $A), $x)
-        end  
+        end
     elseif mode == "Forward_TB"
         m = length(y)
         x_tangent = myalloc2(dim, dim)
-        for i in 1:dim
-            for j in 1:dim
+        for i = 1:dim
+            for j = 1:dim
                 x_tangent[i, j] = 0.0
-                if i == j 
+                if i == j
                     x_tangent[i, i] = 1.0
                 end
             end
         end
         y_tangent = myalloc2(m, dim)
 
-        time = @benchmark fov_forward(
-                0,
-                $m,
-                $dim,
-                $dim,
-                $x,
-                $x_tangent,
-                $y,
-                $y_tangent,
-        )
+        time = @benchmark fov_forward(0, $m, $dim, $dim, $x, $x_tangent, $y, $y_tangent)
 
         myfree2(x_tangent)
         myfree2(y_tangent)
@@ -155,10 +153,10 @@ function run_mode(experiment, mode, dim)
     elseif mode == "Reverse"
         m = length(y)
         weights = myalloc2(m, m)
-        for i in 1:m
-            for j in 1:m
+        for i = 1:m
+            for j = 1:m
                 weights[i, j] = 0.0
-                if i == j 
+                if i == j
                     weights[i, i] = 1.0
                 end
             end
@@ -169,27 +167,34 @@ function run_mode(experiment, mode, dim)
         myfree2(weights)
         myfree2(jacobian)
 
-    else throw("$mode is not implemented!")
+    else
+        throw("$mode is not implemented!")
     end
     time = median(time.times)
     return time
 end
 
-function run_benchmark(max_dim, steps) 
+function run_benchmark(max_dim, steps)
     suite = Dict()
     modes = ("Forward", "Reverse", "ForwardDiff", "Forward_TB", "ReverseDiff")
     #modes = ("Forward", "Reverse")
     experiments = [speelpenning, lin_solve]
-    dims = Dict(speelpenning => [1, 100:steps:max_dim...], lin_solve => [1, 100:steps:max_dim...])
+    dims = Dict(
+        speelpenning => [1, 100:steps:max_dim...],
+        lin_solve => [1, 100:steps:max_dim...],
+    )
 
     for experiment in experiments
         println("Running $experiment ...")
         suite[experiment] = Dict()
-        suite[experiment]["base_time"] = Dict(dim => run_base_time(experiment, dim) for dim in dims[experiment])
+        suite[experiment]["base_time"] =
+            Dict(dim => run_base_time(experiment, dim) for dim in dims[experiment])
         for mode in modes
             suite[experiment][mode] = Dict()
             for dim in dims[experiment]
-                println("Running $mode - $(indexin(dim, dims[experiment])[1])/$(length(dims[experiment])) ... ")
+                println(
+                    "Running $mode - $(indexin(dim, dims[experiment])[1])/$(length(dims[experiment])) ... ",
+                )
                 suite[experiment][mode][dim] = run_mode(experiment, mode, dim)
             end
         end
@@ -207,7 +212,8 @@ function compute_slope(suite)
         for mode in keys(suite[experiment])
             if mode != "base_time"
                 dims_sorted = sort(collect(keys(suite[experiment][mode])))
-                mode_vals = [suite[experiment][mode][key] ./ base_times[key] for key in dims_sorted]
+                mode_vals =
+                    [suite[experiment][mode][key] ./ base_times[key] for key in dims_sorted]
                 dim_diff = dims_sorted[2:end] - dims_sorted[1:end-1]
                 mode_val_diff = mode_vals[2:end] - mode_vals[1:end-1]
                 diff_quotient = mode_val_diff ./ dim_diff
@@ -247,7 +253,7 @@ function print_experiment(experiment, suite)
         print("$i     |")
         for mode in modes
             @printf "    %.2f|" suite[mode][i] ./ base_times[i]
-        end   
+        end
         println("")
     end
 end

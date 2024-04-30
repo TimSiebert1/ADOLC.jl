@@ -124,16 +124,16 @@
 
 
     # test getValue vector Adouble{TbAlloc}
-    A = [Adouble{TbAlloc}(i, true) for i=1:10]
+    A = [Adouble{TbAlloc}(i, true) for i = 1:10]
 
-    @test [float(i) for i=1:10] == getValue(A)
+    @test [float(i) for i = 1:10] == getValue(A)
     @test typeof(A) == Vector{Adouble{TbAlloc}}
 
 
     # test getValue vector Adouble{TlAlloc}
-    A = [Adouble{TlAlloc}(i, true) for i=1:10]
+    A = [Adouble{TlAlloc}(i, true) for i = 1:10]
 
-    @test [float(i) for i=1:10] == getValue(A)
+    @test [float(i) for i = 1:10] == getValue(A)
     @test typeof(A) == Vector{Adouble{TlAlloc}}
 
 
