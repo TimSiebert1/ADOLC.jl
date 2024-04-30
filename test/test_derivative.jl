@@ -461,42 +461,49 @@ end
 
 end
 
-"""
 @testset "hess_2D" begin
+
+
+
     function f(x) 
         return [x[1]^3 + x[2]^2, 3*x[3]^3]
     end
+
+    x = [-1.0, 2.0, 2.0]
     res = myalloc3(2, 3, 3)
-    derivative!(res, f, 2, 3, [-1.0, 1.0, 2.0], :hess)
+    derivative!(res, f, 2, 3, x, :hess, tape_id=1)
 
     @test res[1, 1, 1] == -6.0
     @test res[1, 2, 1] == 0.0
     @test res[1, 3, 1] == 0.0
-
-    @test res[1, 1, 2] == 0.0
-    @test res[1, 2, 2] == 2.0
-    @test res[1, 3, 2] == 0.0
-
-    @test res[1, 1, 3] == 0.0
-    @test res[1, 2, 3] == 0.0
-    @test res[1, 3, 3] == 0.0
-
 
 
     @test res[2, 1, 1] == 0.0
     @test res[2, 2, 1] == 0.0
     @test res[2, 3, 1] == 0.0
 
+
+    @test res[1, 1, 2] == 0.0
+    @test res[1, 2, 2] == 2.0
+    @test res[1, 3, 2] == 0.0
+
+
     @test res[2, 1, 2] == 0.0
     @test res[2, 2, 2] == 0.0
     @test res[2, 3, 2] == 0.0
+
+
+    @test res[1, 1, 3] == 0.0
+    @test res[1, 2, 3] == 0.0
+    @test res[1, 3, 3] == 0.0
+
 
     @test res[2, 1, 3] == 0.0
     @test res[2, 2, 3] == 0.0
     @test res[2, 3, 3] == 36.0
 end
 
-"""
+
 
 
 @testset "hess_vec" begin
@@ -552,13 +559,6 @@ end
     # 0  0   0 
     # 12 0   12
 
-    # -2.0 -2.0 0.0
-    # 36.0 0.0 24.0 
-
-
-    # -2.0 -2.0 0.0
-    # 36.0 0.0 24.0
-    # -36.0 0.0 -24.0 
     x = [1.0, 2.0, 2.0]
     dir = [-1.0, 1.0, 3.0]
     weights = Matrix{Float64}(undef, 3, 2)
@@ -589,30 +589,22 @@ end
 
 
 
-
-
-
-"""
-
 @testset "1D_hess_mat" begin()
     function f(x)
         return x[1]*x[3]^3
     end
-    # 0  0   12
-    # 0  0   0 
-    # 12 0   12
 
     x = [1.0, 2.0, 2.0]
     dir = Matrix{Float64}(undef, 3, 2)
     for i in 1:3
         for j in 1:2
-            weights[i, j] = 0.0
+            dir[i, j] = 0.0
             if i == j
-                weights[i, i] = 1.0
+                dir[i, i] = 1.0
             end
         end
     end
-    weights[3, 2] = -1.0
+    dir[3, 2] = -1.0
     res = myalloc2(3, 2)
     derivative!(res, f, 1, 3, x, :hess_mat, dir=dir)
 
@@ -623,16 +615,60 @@ end
     @test res[2, 2] == 0.0
 
     @test res[3, 1] == 12.0
-    @test res[3, 2] == 0.0
+    @test res[3, 2] == -12.0
 
 end
 
 
 
 
+@testset "2D_hess_mat" begin()
+    function f(x)
+        return [x[1]^2*x[2], x[1]*x[3]^3]
+    end
+
+    # 4 2 0 
+    # 2 0 0 
+    # 0 0 0
+    
+    # 0  0   12
+    # 0  0   0 
+    # 12 0   12
+
+    x = [1.0, 2.0, 2.0]
+    dir = [-1.0, 1.0, 3.0]
+    weights = Matrix{Float64}(undef, 3, 2)
+    for i in 1:3
+        for j in 1:2
+            weights[i, j] = 0.0
+            if i == j
+                weights[i, i] = 1.0
+            end
+        end
+    end
+    weights[3, 2] = -1.0
+    res = myalloc2(3, 3)
+    derivative!(res, f, 2, 3, x, :mat_hess_vec, dir=dir, weights=weights)
+
+    @test res[1, 1] == -2.0
+    @test res[1, 2] == -2.0
+    @test res[1, 3] == 0.0
+
+    @test res[2, 1] == 36.0
+    @test res[2, 2] == 0.0
+    @test res[2, 3] == 24.0
+
+    @test res[3, 1] == -36.0
+    @test res[3, 2] == 0.0
+    @test res[3, 3] == -24.0
+end
+
+"""
 function test_second_order_vec_hess()
     derivative(f, 2, 3, [1.0, 1.0, 2.0], :vec_hess, [-1.0, 1.0], res)
 end
+
+"""
 function test_second_order_mat_hess()
     derivative(f, 2, 3, [1.0, 1.0, 2.0], :mat_hess, [-1.0, 1.0], res)
 end
