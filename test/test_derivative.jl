@@ -663,9 +663,70 @@ end
     @test res[3, 3] == -24.0
 end
 
-"""
-function test_second_order_vec_hess()
-    derivative(f, 2, 3, [1.0, 1.0, 2.0], :vec_hess, [-1.0, 1.0], res)
+
+
+@testset "1D_vec_hess" begin()
+    function f(x)
+        return x[1]*x[3]^3
+    end
+
+    # 0.0 0.0 12.0
+    # 0.0 0.0 0.0
+    # 12.0 0.0 12.0
+
+    # 
+    x = [1.0, 2.0, 2.0]
+    weights = [-1.0]
+    res = myalloc2(3, 3)
+    derivative!(res, f, 1, 3, x, :vec_hess, weights=weights)
+
+    @test res[1, 1] == 0.0
+    @test res[1, 2] == 0.0
+    @test res[1, 3] == -12.0
+
+    @test res[2, 1] == 0.0
+    @test res[2, 2] == 0.0
+    @test res[2, 3] == 0.0
+
+    @test res[3, 1] == -12.0
+    @test res[3, 2] == 0.0
+    @test res[3, 3] == -12.0
+
+end
+
+
+
+
+@testset "2D_vec_hess" begin()
+    function f(x)
+        return [x[1]^2*x[2], x[1]*x[3]^3]
+    end
+
+    # 4 2 0 
+    # 2 0 0 
+    # 0 0 0
+    
+    # 0  0   12
+    # 0  0   0 
+    # 12 0   12
+
+    x = [1.0, 2.0, 2.0]
+    weights = [-1.0, 1.0]
+
+    res = myalloc2(3, 3)
+    derivative!(res, f, 2, 3, x, :vec_hess, weights=weights)
+
+    @test res[1, 1] == -4.0
+    @test res[1, 2] == -2.0
+    @test res[1, 3] == 12.0
+
+    @test res[2, 1] == -2.0
+    @test res[2, 2] == 0.0
+    @test res[2, 3] == 0.0
+
+    @test res[3, 1] == 12.0
+    @test res[3, 2] == 0.0
+    @test res[3, 3] == 12.0
 end
 
 """
