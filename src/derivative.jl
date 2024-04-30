@@ -164,7 +164,7 @@ function fov_forward!(
             dir_cxx[i, j] = dir[i, j]
         end
     end
-    fov_forward!(res, f, m, n, num_dir, x, dir_cxx, tape_id, reuse_tape)
+    fov_forward!(res, f, m, n, x, dir_cxx, num_dir, tape_id, reuse_tape)
     myfree2(dir_cxx)
 end
 
@@ -173,9 +173,9 @@ function fov_forward!(
     f,
     m::Int64,
     n::Int64,
-    num_dir::Int64,
     x::Union{Float64,Vector{Float64}},
     dir::CxxPtr{CxxPtr{Float64}},
+    num_dir::Int64,
     tape_id,
     reuse_tape
 )
@@ -234,7 +234,7 @@ function abs_normal!(
 end
 
 
-function init_abs_normal_form(f, m, n, x; tape_id = 0)
+function init_abs_normal_form(f, m::Int64, n::Int64, x::Union{Float64, Vector{Float64}}; tape_id::Int64=0)
     create_tape(f, m, n, x, tape_id, enableMinMaxUsingAbs=true)
     return ADOLC.AbsNormalForm(tape_id, m, n, x, [0.0 for _ in 1:m])
 end
@@ -247,46 +247,25 @@ function hessian!(res::CxxPtr{CxxPtr{Float64}}, f::Function, m::Int64, n::Int64,
     ADOLC.TbadoubleModule.hessian(tape_id, n, x, res)
 end
 
-"""
 function hessian!(res::CxxPtr{CxxPtr{CxxPtr{Float64}}}, f::Function, m::Int64, n::Int64, x::Union{Float64,Vector{Float64}}, tape_id::Int64, reuse_tape::Bool)
-    if !(reuse_tape)
-        create_tape(f, m, n, x, tape_id)
-    end
-    degree = 1
-    keep = degree + 1
-
     weights = create_cxx_identity(m, m)
-    dir = myalloc3(n, n, degree)
+    res_tmp = myalloc2(m, n)
     for i in 1:n
-        for j in 1:n
-            dir[i, j, 1] = 0.0
-            if i == j
-                dir[i, i, 1] = 1.0
+        dir = zeros(Float64, n)
+        dir[i] = 1.0
+
+        mat_hess_vec!(res_tmp, f, 2, 3, x, dir, weights, m, tape_id, reuse_tape)
+        for j in 1:m
+            for k in 1:n
+                res[j, k, i] = res_tmp[j, k]
+                res_tmp[j, k] = 0.0
             end
         end
     end
-
-    tmp = myalloc3(m, n, degree)
-    nz = ADOLC.array_types.alloc_mat_short(m, n)
-    res_tmp = ADOLC.array_types.myalloc3(m, n, n, degree + 1)
-    ADOLC.TbadoubleModule.hov_wk_forward(tape_id, m, n, degree, keep, n, x, dir, [0.0 for _ in 1:m], tmp)
-    ADOLC.TbadoubleModule.hov_reverse(tape_id, m, n, degree, m, weights, res_tmp, nz)
-
-    for i in 1:m
-        for j in 1:n
-            for k in 1:n
-            res[i, j, k] = res_tmp[i, j, k, degree + 1]
-        end
-    end
-
-    free_mat_short(nz, m)
-    myfree3(dir)
     myfree2(weights)
-    myfree3(tmp)
-    myfree3(res_tmp)
-
+    myfree2(res_tmp)
 end
-"""
+
 
 
 function hess_vec!(res, f, m::Int64, n::Int64, x::Union{Float64,Vector{Float64}}, dir::Vector{Float64}, tape_id::Int64, reuse_tape::Bool)
@@ -319,48 +298,44 @@ function hess_vec!(res, f, m::Int64, n::Int64, x::Union{Float64,Vector{Float64}}
 end
 
 
-function hess_mat!(res, f, m::Int64, n::Int64, x::Union{Float64,Vector{Float64}}, dir::Vector{Float64}, tape_id::Int64, reuse_tape::Bool)
+function hess_mat!(res::CxxPtr{CxxPtr{Float64}}, f, m::Int64, n::Int64, x::Union{Float64,Vector{Float64}}, dir::Matrix{Float64}, tape_id::Int64, reuse_tape::Bool)
+
+    num_dir = size(dir, 2)
+    dir_cxx = myalloc2(size(dir)...)
+    for i in 1:size(dir, 1)
+        for j in 1:size(dir, 2)
+            dir_cxx[i, j] = dir[i, j]
+        end
+    end
+    hess_mat!(res, f, m, n, x, dir_cxx, num_dir, tape_id, reuse_tape)
+    myfree2(dir_cxx)
+end
+
+function hess_mat!(res::CxxPtr{CxxPtr{Float64}}, f, m::Int64, n::Int64, x::Union{Float64,Vector{Float64}}, dir::CxxPtr{CxxPtr{Float64}},num_dir::Int64, tape_id::Int64, reuse_tape::Bool)
     if !(reuse_tape)
         create_tape(f, m, n, x, tape_id)
     end
-    if m == 1
-        hess_mat_1D!(res, f, n, x, dir, tape_id::Int64)
-    else
-        throw("not implemented")
-    end
-
-    ADOLC.TbadoubleModule.lagra_hess_vec(tape_id, m, n, x, dir, weights, res)
+    ADOLC.TbadoubleModule.hess_mat(tape_id, n, num_dir, x, dir, res)
 end
 
-
-function hess_mat_1D!(res, f, n::Int64, x::Union{Float64,Vector{Float64}}, dir::Vector{Float64}, tape_id::Int64)
-    
-    degree = 1
-    keep = degree + 1
-    tmp_dir = myalloc3(size(dir)..., degree)
-    for i in 1:size(dir, 1)
-        for j in 1:size(dir, 2)
-            tmp_dir[i, j, 1] = dir[i, j]
+function hess_mat!(res::CxxPtr{CxxPtr{CxxPtr{Float64}}}, f, m::Int64, n::Int64, x::Union{Float64,Vector{Float64}}, dir::Matrix{Float64}, tape_id::Int64, reuse_tape::Bool)
+    if !(reuse_tape)
+        create_tape(f, m, n, x, tape_id)
+    end
+    num_dir= size(dir, 2)
+    weights = create_cxx_identity(m, m)
+    res_tmp = myalloc2(m, num_dir)
+    for i in 1:num_dir
+        mat_hess_vec!(res_tmp, f, 2, 3, x, dir[:, i], weights, m, tape_id, reuse_tape)
+        for j in 1:m
+            for k in 1:n
+                res[j, k, i] = res_tmp[j, k]
+                res_tmp[j, k] = 0.0
+            end
         end
     end
-    tmp = myalloc3(1, n, degree)
-
-    nz = ADOLC.array_types.alloc_mat_short(1, n)
-    res_tmp = ADOLC.array_types.myalloc3(1, n, degree + 1)
-    ADOLC.TbadoubleModule.fov_wk_forward(tape_id, 1, n, degree, keep, size(dir, 2), x, tmp_dir, [0.0 for _ in 1:m], tmp)
-    ADOLC.TbadoubleModule.hos_reverse(tape_id, 1, n, degree, 1, [1.0], res_tmp, nz)
-
-    for i in 1:size(dir, 2)
-        res[i] = res_tmp[1, i, degree + 1]
-    end
-
-
-    myfree3(tmp_dir)
-    free_mat_short(nz, 1)
-    myfree3(tmp)
     myfree2(weights)
-    myfree3(res_tmp)
-
+    myfree2(res_tmp)
 end
 
 function vec_hess_vec!(res, f, m::Int64, n::Int64, x::Union{Float64,Vector{Float64}}, dir::Vector{Float64}, weights::Vector{Float64}, tape_id::Int64, reuse_tape::Bool)
@@ -372,10 +347,6 @@ end
 
 
 function mat_hess_vec!(res, f, m::Int64, n::Int64, x::Union{Float64,Vector{Float64}}, dir::Vector{Float64}, weights::Matrix{Float64}, tape_id::Int64, reuse_tape::Bool)
-    if !(reuse_tape)
-        create_tape(f, m, n, x, tape_id)
-    end
-
     num_weights = size(weights, 1)
     weights_cxx = myalloc2(size(weights)...)
     for i = 1:size(weights, 1)
@@ -383,13 +354,20 @@ function mat_hess_vec!(res, f, m::Int64, n::Int64, x::Union{Float64,Vector{Float
             weights_cxx[i, j] = weights[i, j]
         end
     end
+    mat_hess_vec!(res, f, m, n, x, dir, weights_cxx, num_weights, tape_id, reuse_tape)
+end
+
+function mat_hess_vec!(res, f, m::Int64, n::Int64, x::Union{Float64, Vector{Float64}}, dir::Vector{Float64}, weights::CxxPtr{CxxPtr{Float64}}, num_weights::Int64, tape_id::Int64, reuse_tape::Bool)
+    if !(reuse_tape)
+        create_tape(f, m, n, x, tape_id)
+    end
     tmp = alloc_vec_double(m)
     degree = 1
     keep = degree + 1
     nz = ADOLC.array_types.alloc_mat_short(num_weights, n)
     res_tmp = ADOLC.array_types.myalloc3(num_weights, n, degree + 1)
     ADOLC.TbadoubleModule.fos_forward(tape_id, m, n, keep, x, dir, [0.0 for _ in 1:m], tmp)
-    ADOLC.TbadoubleModule.hov_reverse(tape_id, m, n, degree, num_weights, weights_cxx, res_tmp, nz)
+    ADOLC.TbadoubleModule.hov_reverse(tape_id, m, n, degree, num_weights, weights, res_tmp, nz)
 
     for i in 1:num_weights
         for j in 1:n
@@ -400,9 +378,7 @@ function mat_hess_vec!(res, f, m::Int64, n::Int64, x::Union{Float64,Vector{Float
     free_mat_short(nz, num_weights)
     myfree3(res_tmp)
     free_vec_double(tmp)
-
 end
-
 
 
 function create_tape(
