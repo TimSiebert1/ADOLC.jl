@@ -164,6 +164,17 @@ Base.getindex(X::CxxVector{T}, row::Int64) where {T<:Real} = getindex(X.data, ro
 Base.setindex!(X::CxxVector{T}, val::T, row::Int64) where {T<:Real} =
     setindex!(X.data, val, row)
 
+function julia_mat_to_cxx_mat(mat::Matrix{Float64})
+    mat_cxx = myalloc2(size(mat)...)
+    for i = 1:size(mat, 1)
+        for j = 1:size(mat, 2)
+            mat_cxx[i, j] = mat[i, j]
+        end
+    end
+    return mat_cxx
+end
+
+
 export CxxMatrix,
     CxxVector,
     myalloc3,
@@ -171,6 +182,8 @@ export CxxMatrix,
     alloc_vec_double,
     alloc_vec_short,
     alloc_vec,
-    alloc_mat_short
+    alloc_mat_short,
+    julia_mat_to_cxx_mat
+
 export myfree3, myfree2, free_vec_double, free_vec_short, free_mat_short
 end # module arry_types
