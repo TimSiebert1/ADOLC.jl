@@ -1,4 +1,6 @@
 using CxxWrap
+using LinearAlgebra
+
 function derivative!(
     res,
     f::Function,
@@ -31,12 +33,19 @@ function derivative!(
         hess_vec!(res, f, m, n, x, dir, tape_id, reuse_tape)
     elseif mode === :hess_mat
         hess_mat!(res, f, m, n, x, dir, tape_id, reuse_tape)
+
+    elseif mode === :vec_hess
+        vec_hess!(res, f, m, n, x, weights, tape_id, reuse_tape)
+    elseif mode === :mat_hess
+        mat_hess!(res, f, m, n, x, weights, tape_id, reuse_tape)
+
     elseif mode === :vec_hess_vec
         vec_hess_vec!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
     elseif mode === :mat_hess_vec
         mat_hess_vec!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
-    elseif mode === :vec_hess
-        vec_hess!(res, f, m, n, x, weights, tape_id, reuse_tape)
+    elseif mode === :mat_hess_mat 
+        mat_hess_mat!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
+
     else
         throw("mode $mode not implemented!")
     end
@@ -116,12 +125,7 @@ function fov_reverse!(
     reuse_tape,
 )
     num_dir = size(weights, 2)
-    weights_cxx = myalloc2(size(weights)...)
-    for i = 1:size(weights, 1)
-        for j = 1:size(weights, 2)
-            weights_cxx[i, j] = weights[i, j]
-        end
-    end
+    weights_cxx = julia_mat_to_cxx_mat(weights)
     fov_reverse!(res, f, m, n, num_dir, x, weights_cxx, tape_id, reuse_tape)
     myfree2(weights_cxx)
 end
@@ -175,12 +179,7 @@ function fov_forward!(
     reuse_tape,
 )
     num_dir = size(dir, 2)
-    dir_cxx = myalloc2(size(dir)...)
-    for i = 1:size(dir, 1)
-        for j = 1:size(dir, 2)
-            dir_cxx[i, j] = dir[i, j]
-        end
-    end
+    dir_cxx = julia_mat_to_cxx_mat(dir)
     fov_forward!(res, f, m, n, x, dir_cxx, num_dir, tape_id, reuse_tape)
     myfree2(dir_cxx)
 end
@@ -370,12 +369,7 @@ function hess_mat!(
 )
 
     num_dir = size(dir, 2)
-    dir_cxx = myalloc2(size(dir)...)
-    for i = 1:size(dir, 1)
-        for j = 1:size(dir, 2)
-            dir_cxx[i, j] = dir[i, j]
-        end
-    end
+    dir_cxx = julia_mat_to_cxx_mat(dir)
     hess_mat!(res, f, m, n, x, dir_cxx, num_dir, tape_id, reuse_tape)
     myfree2(dir_cxx)
 end
@@ -454,14 +448,9 @@ function mat_hess_vec!(
     weights::Matrix{Float64},
     tape_id::Int64,
     reuse_tape::Bool,
-)
+)   
     num_weights = size(weights, 1)
-    weights_cxx = myalloc2(size(weights)...)
-    for i = 1:size(weights, 1)
-        for j = 1:size(weights, 2)
-            weights_cxx[i, j] = weights[i, j]
-        end
-    end
+    weights_cxx = julia_mat_to_cxx_mat(weights)
     mat_hess_vec!(res, f, m, n, x, dir, weights_cxx, num_weights, tape_id, reuse_tape)
 end
 
@@ -520,10 +509,43 @@ function vec_hess!(res::CxxPtr{CxxPtr{Float64}}, f, m::Int64, n::Int64, x::Union
         vec_hess_vec!(res_tmp, f, m, n, x, dir, weights, tape_id, true)
         for j in 1:n
             res[j, i] = res_tmp[j]
+            res_tmp[j] = 0.0
         end
         dir[i] = 0.0
     end
     free_vec_double(res_tmp)
+end
+
+function mat_hess_mat!(res::CxxPtr{CxxPtr{CxxPtr{Float64}}}, f, m::Int64, n::Int64, x::Union{Float64, Vector{Float64}}, dir::Matrix{Float64}, weights::Matrix{Float64}, tape_id::Int64, reuse_tape::Bool)
+    num_weights = size(weights, 1)
+    weights_cxx = julia_mat_to_cxx_mat(weights)
+    mat_hess_mat!(res, f, m, n, x, dir, weights_cxx, num_weights, tape_id, reuse_tape)
+end
+
+function mat_hess_mat!(res::CxxPtr{CxxPtr{CxxPtr{Float64}}}, f, m::Int64, n::Int64, x::Union{Float64, Vector{Float64}}, dir::Matrix{Float64}, weights::CxxPtr{CxxPtr{Float64}}, num_weights::Int64, tape_id::Int64, reuse_tape::Bool)
+    if !(reuse_tape)
+        create_tape(f, m, n, x, tape_id)
+    end
+    res_tmp = myalloc2(num_weights, n)
+    for i in axes(dir, 2)
+        mat_hess_vec!(res_tmp, f, m, n, x, dir[:, i], weights, num_weights, tape_id, true)
+        for j in 1:num_weights
+            for k in 1:n
+                res[j, k, i] = res_tmp[j, k]
+                res_tmp[j, k] = 0.0
+            end
+        end
+    end
+    myfree2(res_tmp)
+end
+
+
+function mat_hess!(res::CxxPtr{CxxPtr{CxxPtr{Float64}}}, f, m::Int64, n::Int64, x::Union{Float64, Vector{Float64}}, weights::Matrix{Float64}, tape_id::Int64, reuse_tape::Bool)
+    if !(reuse_tape)
+        create_tape(f, m, n, x, tape_id)
+    end
+    dir = Matrix{Float64}(I, n, n)
+    mat_hess_mat!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
 end
 
 function create_tape(

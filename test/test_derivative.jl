@@ -729,10 +729,101 @@ end
     @test res[3, 3] == 12.0
 end
 
-"""
-function test_second_order_mat_hess()
-    derivative(f, 2, 3, [1.0, 1.0, 2.0], :mat_hess, [-1.0, 1.0], res)
+@testset "mat_hess_mat" begin()
+    function f(x)
+        return [x[1]^2*x[2], x[1]*x[3]^3]
+    end
+
+    x = [1.0, 2.0, 2.0]
+    dir = [[1.0, 2.0, 3.0] [-1.0, -2.0, -3.0]]
+    weights = [[1.0, 0.0, 0.0] [0.0, 1.0, -1.0]]
+
+    res = myalloc3(3, 3, 2)
+
+    derivative!(res, f, 2, 3, x, :mat_hess_mat, dir=dir, weights=weights)
+
+    @test res[1, 1, 1] == 8.0
+    @test res[1, 1, 2] == -8.0
+
+    @test res[1, 2, 1] == 2.0
+    @test res[1, 2, 2] == -2.0
+
+    @test res[1, 3, 1] == 0.0
+    @test res[1, 3, 2] == 0.0
+
+
+    @test res[2, 1, 1] == 36.0
+    @test res[2, 1, 2] == -36.0
+
+    @test res[2, 2, 1] == 0.0
+    @test res[2, 2, 2] == 0.0
+
+    @test res[2, 3, 1] == 48.0
+    @test res[2, 3, 2] == -48.0
+
+
+    @test res[3, 1, 1] == -36.0
+    @test res[3, 1, 2] == 36.0
+
+    @test res[3, 2, 1] == 0.0
+    @test res[3, 2, 2] == 0.0
+
+    @test res[3, 3, 1] == -48.0
+    @test res[3, 3, 2] == 48.0
+
 end
+
+@testset "mat_hess" begin()
+    function f(x)
+        return [x[1]^2*x[2], x[1]*x[3]^3]
+    end
+
+    x = [1.0, 2.0, 2.0]
+    weights = [[1.0, 0.0, 0.0] [0.0, 1.0, -1.0]]
+
+    res = myalloc3(3, 3, 3)
+
+    derivative!(res, f, 2, 3, x, :mat_hess, weights=weights)
+
+    @test res[1, 1, 1] == 4.0
+    @test res[1, 1, 2] == 2.0
+    @test res[1, 1, 3] == 0.0  
+
+    @test res[1, 2, 1] == 2.0
+    @test res[1, 2, 2] == 0.0
+    @test res[1, 2, 3] == 0.0  
+
+    @test res[1, 3, 1] == 0.0
+    @test res[1, 3, 2] == 0.0
+    @test res[1, 3, 3] == 0.0  
+
+
+    @test res[2, 1, 1] == 0.0
+    @test res[2, 1, 2] == 0.0
+    @test res[2, 1, 3] == 12.0  
+
+    @test res[2, 2, 1] == 0.0
+    @test res[2, 2, 2] == 0.0
+    @test res[2, 2, 3] == 0.0  
+
+    @test res[2, 3, 1] == 12.0
+    @test res[2, 3, 2] == 0.0
+    @test res[2, 3, 3] == 12.0  
+
+
+    @test res[3, 1, 1] == 0.0
+    @test res[3, 1, 2] == 0.0
+    @test res[3, 1, 3] == -12.0  
+
+    @test res[3, 2, 1] == 0.0
+    @test res[3, 2, 2] == 0.0
+    @test res[3, 2, 3] == 0.0  
+
+    @test res[3, 3, 1] == -12.0
+    @test res[3, 3, 2] == 0.0
+    @test res[3, 3, 3] == -12.0  
+end
+"""
 
 function test_second_order_vec_hess_mat()
     derivative(f, 2, 3, [1.0, 1.0, 2.0], :vec_hess_mat, [-1.0, 1.0], res)
