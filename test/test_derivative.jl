@@ -950,7 +950,8 @@ end
 
 
 
-@testset "higher_order_1D" begin()
+@testset "higher_order_1D" begin
+    ()
     function f(x)
         x[1] * x[2] * x[3] * x[4]
     end
@@ -979,7 +980,8 @@ end
 
 
 
-@testset "higher_order_2D" begin()
+@testset "higher_order_2D" begin
+    ()
     function f(x)
         [x[1]^2 * x[2]^2, x[3]^2 * x[4]^2]
     end
@@ -1016,4 +1018,43 @@ end
 
     @test res[1, 7] ≈ 8.0
     @test res[2, 7] ≈ 0.0
+end
+
+
+
+
+@testset "higher_order_seed" begin
+    ()
+    function f(x)
+        x[1]^2 * x[2]^2
+    end
+
+    x = [1.0, 2.0]
+
+    partials = [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+        [1, 1, 0],
+        [0, 0, 2],
+        [1, 2, 0],
+        [0, 1, 2],
+        [4, 0, 0],
+        [0, 1, 3],
+    ]
+
+    seed = [[1.0, 0.0] [0.0, 2.0] [1.0, 1.0]]
+
+    res = Matrix{Float64}(undef, 1, length(partials))
+    derivative!(res, f, 1, length(x), x, partials, seed)
+
+    @test res[1] ≈ 8.0
+    @test res[2] ≈ 8.0
+    @test res[3] ≈ 12.0
+    @test res[4] ≈ 16.0
+    @test res[5] ≈ 26.0
+    @test res[6] ≈ 16.0
+    @test res[7] ≈ 32.0
+    @test res[8] ≈ 0.0
+    @test res[9] ≈ 24.0
 end
