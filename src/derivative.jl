@@ -10,7 +10,6 @@ function derivative!(
     mode::Symbol;
     dir::Union{Vector{Float64},Matrix{Float64}} = Vector{Float64}(),
     weights::Union{Vector{Float64},Matrix{Float64}} = Vector{Float64}(),
-    partials::Vector{Int64} = Vector{Int64}(),
     tape_id::Int64 = 0,
     reuse_tape::Bool = false,
 )
@@ -53,6 +52,49 @@ function derivative!(
     end
 end
 
+
+function derivative!(res, f, m::Int64, n::Int64, x::Union{Float64, Vector{Float64}}, partials::Vector{Vector{Int64}}; tape_id::Int64=0, reuse_tape::Bool=false)
+    if !reuse_tape
+        create_tape(f, m, n, x, tape_id)
+    end
+    degree = maximum(map(sum, partials))
+    res_tmp = myalloc2(
+        m,
+        binomial(n + degree, degree),
+    )
+    higher_order!(res_tmp, m, n, x, degree, tape_id)
+    partials_to_tensor_idx!(partials, degree)
+    for (i, partial) in enumerate(partials)
+        for j in 1:m
+            res[j, i] = res_tmp[j, tensor_address(degree, partial)]
+        end
+    end
+    myfree2(res_tmp)
+end
+
+
+function higher_order!(
+    res::CxxPtr{CxxPtr{Float64}},
+    m::Int64,
+    n::Int64,
+    x::Vector{Float64},
+    degree::Int64,
+    tape_id::Int64,
+)
+
+    seed = create_cxx_identity(n, n)
+    tensor_eval(
+        tape_id,
+        m,
+        n,
+        degree,
+        n,
+        x,
+        res,
+        seed,
+    )
+    myfree2(seed)
+end
 
 function jac!(
     res,
