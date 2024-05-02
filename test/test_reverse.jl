@@ -1,8 +1,5 @@
 function func(x)
-    return [
-        x[1] * x[2]^3,
-        x[1] + x[3] / x[2]
-    ]
+    return [x[1] * x[2]^3, x[1] + x[3] / x[2]]
 end
 
 x0 = [-1.0, 2.0, -1.0]
@@ -20,7 +17,7 @@ trace_off(0)
 
 u = [1.0, 0.0]
 z = Vector{Float64}(undef, 3)
-fos_reverse(tape_num, m, n, u, z) 
+fos_reverse(tape_num, m, n, u, z)
 
 
 @test z[1] == 8.0
@@ -39,8 +36,8 @@ fos_reverse(tape_num, m, n, u, z)
 
 q = 2
 U = myalloc2(q, m)
-for i in 1:q
-    for j in 1:m
+for i = 1:q
+    for j = 1:m
         U[i, j] = 0.0
         if i == j
             U[i, i] = 1.0
@@ -50,7 +47,7 @@ end
 
 Z = myalloc2(q, n)
 
-fov_reverse(tape_num, m, n, q, U, Z) 
+fov_reverse(tape_num, m, n, q, U, Z)
 
 @test Z[1, 1] == 8.0
 @test Z[2, 1] == 1.0
@@ -66,19 +63,19 @@ d = 1
 # preprun
 
 X = myalloc2(n, d)
-for i in 1:n
-    for j in 1:d
+for i = 1:n
+    for j = 1:d
         X[i, j] = 0.0
     end
 end
 X[1, 1] = 1.0
 Y = myalloc2(m, d)
-hos_forward(tape_num, m, n, 1, d+1, x0, X, y0, Y) 
+hos_forward(tape_num, m, n, 1, d + 1, x0, X, y0, Y)
 
 
 u = [1.0, 0.0]
 Z = myalloc2(n, d + 1)
-hos_reverse(tape_num, m, n, d, u, Z) 
+hos_reverse(tape_num, m, n, d, u, Z)
 
 @test Z[1, 1] == 8.0
 @test Z[2, 1] == -12.0
@@ -90,7 +87,7 @@ hos_reverse(tape_num, m, n, d, u, Z)
 
 u = [0.0, 1.0]
 Z = myalloc2(n, d + 1)
-hos_reverse(tape_num, m, n, d, u, Z) 
+hos_reverse(tape_num, m, n, d, u, Z)
 
 @test Z[1, 1] == 1.0
 @test Z[2, 1] == 0.25
@@ -104,18 +101,18 @@ hos_reverse(tape_num, m, n, d, u, Z)
 d = 1
 q = 2
 U = myalloc2(q, m)
-for i in 1:q
-    for j in 1:m
+for i = 1:q
+    for j = 1:m
         U[i, j] = 0.0
-        if i == j 
+        if i == j
             U[i, i] = 1.0
         end
     end
 end
 
-Z = myalloc3(q, n, d+1)
+Z = myalloc3(q, n, d + 1)
 nz = alloc_mat_short(q, n)
-hov_reverse(tape_num, m, n, d, q, U, Z, nz) 
+hov_reverse(tape_num, m, n, d, q, U, Z, nz)
 
 
 @test Z[1, 1, 1] == 8.0
@@ -134,31 +131,31 @@ hov_reverse(tape_num, m, n, d, q, U, Z, nz)
 
 
 X = myalloc2(n, d)
-for i in 1:n
-    for j in 1:d
+for i = 1:n
+    for j = 1:d
         X[i, j] = 0.0
     end
 end
 X[2, 1] = 1.0
 Y = myalloc2(m, d)
-hos_forward(tape_num, m, n, d, d+1, x0, X, y0, Y) 
+hos_forward(tape_num, m, n, d, d + 1, x0, X, y0, Y)
 
 
 d = 1
 q = 2
 U = myalloc2(q, m)
-for i in 1:q
-    for j in 1:m
+for i = 1:q
+    for j = 1:m
         U[i, j] = 0.0
-        if i == j 
+        if i == j
             U[i, i] = 1.0
         end
     end
 end
 
-Z = myalloc3(q, n, d+1)
+Z = myalloc3(q, n, d + 1)
 nz = alloc_mat_short(q, n)
-hov_reverse(tape_num, m, n, d, q, U, Z, nz) 
+hov_reverse(tape_num, m, n, d, q, U, Z, nz)
 
 
 @test Z[1, 1, 1] == 8.0
