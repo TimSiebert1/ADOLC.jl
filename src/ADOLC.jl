@@ -185,7 +185,7 @@ function partials_to_tensor_idx!(partials::Vector{Vector{Int64}}, degree)
         tmp = zeros(Int64, degree)
         idx = 1
         for j in eachindex(partial)
-            for _ in 1:partial[j]
+            for _ = 1:partial[j]
                 tmp[idx] = j
                 idx += 1
             end
@@ -241,6 +241,30 @@ function build_tensor(
     end
     return tensor
 end
+
+function get_seed_idxs(partials::Vector{Vector{Int64}})
+    seed_idxs = []
+    for partial in partials
+        for i in eachindex(partial)
+            if partial[i] != 0
+                if !(i in seed_idxs)
+                    push!(seed_idxs, i)
+                end
+            end
+        end
+    end
+    return sort!(seed_idxs)
+end
+
+function create_seed(n::Int64, partials::Vector{Vector{Int64}})
+    seed_idxs = get_seed_idxs(partials)
+    seed = myalloc2(n, length(seed_idxs))
+    for i in eachindex(seed_idxs)
+        seed[i, seed_idxs[i]] = 1.0
+    end
+    return seed
+end
+
 
 function reverse(
     tape_num::Int64,
