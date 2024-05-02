@@ -171,12 +171,27 @@ function abs_normal!(
     abs_normal!(tape_id, cz, cy, Y_cxx, J_cxx, Z_cxx, L_cxx, m, n, num_switches, x, y, z)
 end
 
-function tensor_address2(derivative_order::Int64, multi_index::Tuple{Vararg{Int64}})
-    # need non-increasing order -> ask ADOLC
+function tensor_address(derivative_order::Int64, multi_index::Vector{Int64})
+    # (0, 1, 0) means first derivative w.r.t to first variable
+    # (2, 0, 0) means first derivative w.r.t to second variable
     multi_index_sorted = sort(collect(Int32, multi_index), rev = true)
 
     # "+1" because c++ index is -1
-    return Int64(tensor_address(derivative_order, multi_index_sorted)) + 1
+    return Int64(TbadoubleModule.tensor_address(derivative_order, multi_index_sorted)) + 1
+end
+
+function partials_to_tensor_idx!(partials::Vector{Vector{Int64}}, degree)
+    for (i, partial) in enumerate(partials)
+        tmp = zeros(Int64, degree)
+        idx = 1
+        for j in eachindex(partial)
+            for _ in 1:partial[j]
+                tmp[idx] = j
+                idx += 1
+            end
+        end
+        partials[i] = tmp
+    end
 end
 
 function create_cxx_identity(n::Int64, m::Int64)
