@@ -62,8 +62,13 @@ function derivative!(
     partials::Vector{Vector{Int64}};
     tape_id::Int64 = 0,
     reuse_tape::Bool = false,
+    id_seed::Bool = false
 )
-    seed = create_seed(n, partials)
+    if id_seed 
+        seed = create_cxx_identity(n, n)
+    else
+        seed = create_seed(n, partials)
+    end
     higher_order!(res, f, m, n, x, partials, seed, n, tape_id, reuse_tape)
     myfree2(seed)
 end
@@ -84,36 +89,6 @@ function derivative!(
     myfree2(seed_cxx)
 end
 
-
-function higher_order!(
-    res,
-    f,
-    m::Int64,
-    n::Int64,
-    x::Vector{Float64},
-    partials::Vector{Vector{Int64}},
-    seed::CxxPtr{CxxPtr{Float64}},
-    num_seeds::Int64,
-    tape_id::Int64,
-    reuse_tape::Bool,
-)
-    if !reuse_tape
-        create_tape(f, m, n, x, tape_id)
-    end
-    degree = maximum(map(sum, partials))
-    res_tmp = myalloc2(m, binomial(num_seeds + degree, degree))
-
-    tensor_eval(tape_id, m, n, degree, num_seeds, x, res_tmp, seed)
-
-    partials_to_tensor_idx!(partials, degree)
-
-    for (i, partial) in enumerate(partials)
-        for j = 1:m
-            res[j, i] = res_tmp[j, tensor_address(degree, partial)]
-        end
-    end
-    myfree2(res_tmp)
-end
 
 function jac!(
     res,
@@ -647,6 +622,35 @@ function hess_mat!(
     mat_hess_mat!(res, f, m, n, x, dir, weights, m, tape_id, reuse_tape)
 end
 
+function higher_order!(
+    res,
+    f,
+    m::Int64,
+    n::Int64,
+    x::Vector{Float64},
+    partials::Vector{Vector{Int64}},
+    seed::CxxPtr{CxxPtr{Float64}},
+    num_seeds::Int64,
+    tape_id::Int64,
+    reuse_tape::Bool,
+)
+    if !reuse_tape
+        create_tape(f, m, n, x, tape_id)
+    end
+    degree = maximum(map(sum, partials))
+    res_tmp = myalloc2(m, binomial(num_seeds + degree, degree))
+
+    tensor_eval(tape_id, m, n, degree, num_seeds, x, res_tmp, seed)
+
+    partials_to_tensor_idx!(partials, degree)
+
+    for (i, partial) in enumerate(partials)
+        for j = 1:m
+            res[j, i] = res_tmp[j, tensor_address(degree, partial)]
+        end
+    end
+    myfree2(res_tmp)
+end
 
 function create_tape(
     f,
