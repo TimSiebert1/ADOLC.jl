@@ -207,6 +207,29 @@ function create_cxx_identity(n::Int64, m::Int64)
     return I
 end
 
+function get_seed_idxs(partials::Vector{Vector{Int64}})
+    seed_idxs = []
+    for partial in partials
+        for i in eachindex(partial)
+            if partial[i] != 0
+                if !(i in seed_idxs)
+                    push!(seed_idxs, i)
+                end
+            end
+        end
+    end
+    return sort!(seed_idxs)
+end
+
+
+function create_seed(n::Int64, partials::Vector{Vector{Int64}})
+    seed_idxs = get_seed_idxs(partials)
+    seed = myalloc2(n, length(seed_idxs))
+    for i in eachindex(seed_idxs)
+        seed[i, seed_idxs[i]] = 1.0
+    end
+    return seed
+end
 
 function build_tensor(
     derivative_order::Int64,
@@ -242,28 +265,7 @@ function build_tensor(
     return tensor
 end
 
-function get_seed_idxs(partials::Vector{Vector{Int64}})
-    seed_idxs = []
-    for partial in partials
-        for i in eachindex(partial)
-            if partial[i] != 0
-                if !(i in seed_idxs)
-                    push!(seed_idxs, i)
-                end
-            end
-        end
-    end
-    return sort!(seed_idxs)
-end
 
-function create_seed(n::Int64, partials::Vector{Vector{Int64}})
-    seed_idxs = get_seed_idxs(partials)
-    seed = myalloc2(n, length(seed_idxs))
-    for i in eachindex(seed_idxs)
-        seed[i, seed_idxs[i]] = 1.0
-    end
-    return seed
-end
 
 
 function check_input_taylor_coeff(

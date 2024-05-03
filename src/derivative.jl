@@ -442,7 +442,6 @@ function mat_hess_vec!(
         res_hov_tmp,
         nz_tmp,
     )
-
     for i = 1:num_weights
         for j = 1:n
             res[i, j] = res_hov_tmp[i, j, degree+1]
@@ -458,61 +457,6 @@ function mat_hess_vec!(
     if free_res_hov_tmp
         myfree3(res_hov_tmp)
     end
-end
-
-
-function hessian!(
-    res::CxxPtr{CxxPtr{CxxPtr{Float64}}},
-    f::Function,
-    m::Int64,
-    n::Int64,
-    x::Union{Float64,Vector{Float64}},
-    tape_id::Int64,
-    reuse_tape::Bool,
-)
-    if !reuse_tape
-        create_tape(f, m, n, x, tape_id)
-    end
-    weights = create_cxx_identity(m, m)
-    res_tmp = myalloc2(m, n)
-
-    res_fos_tmp = alloc_vec_double(m)
-    nz_tmp = ADOLC.array_types.alloc_mat_short(m, n)
-    res_hov_tmp = ADOLC.array_types.myalloc3(m, n, 2)
-    for i = 1:n
-        dir = zeros(Float64, n)
-        dir[i] = 1.0
-        mat_hess_vec!(
-            res_tmp,
-            f,
-            m,
-            n,
-            x,
-            dir,
-            weights,
-            m,
-            tape_id,
-            true,
-            res_fos_tmp = res_fos_tmp,
-            nz_tmp = nz_tmp,
-            res_hov_tmp = res_hov_tmp,
-        )
-        for j = 1:m
-            for k = 1:n
-                if i <= k
-                    res[j, k, i] = res_tmp[j, k]
-                    res_tmp[j, k] = 0.0
-                end
-            end
-        end
-    end
-    myfree2(weights)
-    myfree2(res_tmp)
-
-
-    free_vec_double(res_fos_tmp)
-    free_mat_short(nz_tmp, m)
-    myfree3(res_hov_tmp)
 end
 
 
@@ -542,7 +486,8 @@ function mat_hess_mat!(
     weights::CxxPtr{CxxPtr{Float64}},
     num_weights::Int64,
     tape_id::Int64,
-    reuse_tape::Bool,
+    reuse_tape::Bool;
+    lower_triag::Bool = false
 )
     if !(reuse_tape)
         create_tape(f, m, n, x, tape_id)
@@ -567,10 +512,21 @@ function mat_hess_mat!(
             nz_tmp = nz_tmp,
             res_hov_tmp = res_hov_tmp,
         )
-        for j = 1:num_weights
-            for k = 1:n
-                res[j, k, i] = res_tmp[j, k]
-                res_tmp[j, k] = 0.0
+        if lower_triag
+            for j = 1:m
+                for k = 1:n
+                    if i <= k
+                        res[j, k, i] = res_tmp[j, k]
+                        res_tmp[j, k] = 0.0
+                    end
+                end
+            end
+        else
+            for j = 1:num_weights
+                for k = 1:n
+                    res[j, k, i] = res_tmp[j, k]
+                    res_tmp[j, k] = 0.0
+                end
             end
         end
     end
@@ -578,6 +534,21 @@ function mat_hess_mat!(
     free_vec_double(res_fos_tmp)
     free_mat_short(nz_tmp, num_weights)
     myfree3(res_hov_tmp)
+end
+
+function hessian!(
+    res::CxxPtr{CxxPtr{CxxPtr{Float64}}},
+    f::Function,
+    m::Int64,
+    n::Int64,
+    x::Union{Float64,Vector{Float64}},
+    tape_id::Int64,
+    reuse_tape::Bool,
+)
+    dir = Matrix{Float64}(I, n, n)
+    weights = create_cxx_identity(m, m)
+    mat_hess_mat!(res, f, m, n, x, dir, weights, m, tape_id, reuse_tape, lower_triag=true)
+    
 end
 
 function hess_vec!(
