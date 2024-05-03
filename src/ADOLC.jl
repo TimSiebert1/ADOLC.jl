@@ -205,6 +205,19 @@ function create_cxx_identity(n::Int64, m::Int64)
     return I
 end
 
+function create_partial_cxx_identity(n::Int64, m::Int64, idxs::Vector{Int64})
+    I = myalloc2(n, m)
+    for i = 1:n
+        for j = 1:m
+            I[i, j] = 0.0
+        end
+    end
+    for i in idxs
+        I[i, i] = 1.0
+    end
+    return I
+end
+
 function get_seed_idxs(partials::Vector{Vector{Int64}})
     seed_idxs = Vector{Int64}()
     for partial in partials
@@ -216,17 +229,9 @@ function get_seed_idxs(partials::Vector{Vector{Int64}})
             end
         end
     end
-    return sort!(seed_idxs)
+    return seed_idxs
 end
 
-
-function create_seed(n::Int64, seed_idxs::Vector{Int64})
-    seed = myalloc2(n, length(seed_idxs))
-    for i in eachindex(seed_idxs)
-        seed[i, seed_idxs[i]] = 1.0
-    end
-    return seed
-end
 
 function build_tensor(
     derivative_order::Int64,
