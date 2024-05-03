@@ -10,8 +10,6 @@ using .TbadoubleModule
 using .TladoubleModule
 
 
-
-
 TbAlloc = TbadoubleModule.TbadoubleCxxAllocated
 TlAlloc = TladoubleModule.TladoubleCxxAllocated
 
@@ -208,7 +206,7 @@ function create_cxx_identity(n::Int64, m::Int64)
 end
 
 function get_seed_idxs(partials::Vector{Vector{Int64}})
-    seed_idxs = []
+    seed_idxs = Vector{Int64}()
     for partial in partials
         for i in eachindex(partial)
             if partial[i] != 0
@@ -222,8 +220,7 @@ function get_seed_idxs(partials::Vector{Vector{Int64}})
 end
 
 
-function create_seed(n::Int64, partials::Vector{Vector{Int64}})
-    seed_idxs = get_seed_idxs(partials)
+function create_seed(n::Int64, seed_idxs::Vector{Int64})
     seed = myalloc2(n, length(seed_idxs))
     for i in eachindex(seed_idxs)
         seed[i, seed_idxs[i]] = 1.0
