@@ -66,14 +66,11 @@ function derivative!(
 )
     if id_seed 
         seed = create_cxx_identity(n, n)
-        num_seeds = n
     else
         seed_idxs = get_seed_idxs(partials)
-        seed = create_seed(n, seed_idxs)
-        num_seeds = length(seed_idxs)
-        
+        seed = create_partial_cxx_identity(n, n, seed_idxs)
     end
-    higher_order!(res, f, m, n, x, partials, seed, num_seeds, tape_id, reuse_tape)
+    higher_order!(res, f, m, n, x, partials, seed, n, tape_id, reuse_tape)
     myfree2(seed)
 end
 
