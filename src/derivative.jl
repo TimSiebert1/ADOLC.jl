@@ -66,10 +66,14 @@ function derivative!(
 )
     if id_seed 
         seed = create_cxx_identity(n, n)
+        num_seeds = n
     else
-        seed = create_seed(n, partials)
+        seed_idxs = get_seed_idxs(partials)
+        seed = create_seed(n, seed_idxs)
+        num_seeds = length(seed_idxs)
+        
     end
-    higher_order!(res, f, m, n, x, partials, seed, n, tape_id, reuse_tape)
+    higher_order!(res, f, m, n, x, partials, seed, num_seeds, tape_id, reuse_tape)
     myfree2(seed)
 end
 
@@ -487,7 +491,7 @@ function mat_hess_mat!(
     num_weights::Int64,
     tape_id::Int64,
     reuse_tape::Bool;
-    lower_triag::Bool = false
+    lower_triag::Bool=false,
 )
     if !(reuse_tape)
         create_tape(f, m, n, x, tape_id)
@@ -548,7 +552,6 @@ function hessian!(
     dir = Matrix{Float64}(I, n, n)
     weights = create_cxx_identity(m, m)
     mat_hess_mat!(res, f, m, n, x, dir, weights, m, tape_id, reuse_tape, lower_triag=true)
-    
 end
 
 function hess_vec!(
