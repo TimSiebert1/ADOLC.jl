@@ -169,27 +169,23 @@ function abs_normal!(
     abs_normal!(tape_id, cz, cy, Y_cxx, J_cxx, Z_cxx, L_cxx, m, n, num_switches, x, y, z)
 end
 
-function tensor_address(derivative_order::Int64, multi_index::Vector{Int64})
-    # (0, 1, 0) means first derivative w.r.t to first variable
-    # (2, 0, 0) means first derivative w.r.t to second variable
-    multi_index_sorted = sort(collect(Int32, multi_index), rev = true)
-
-    # "+1" because c++ index is -1
-    return Int64(TbadoubleModule.tensor_address(derivative_order, multi_index_sorted)) + 1
+function tensor_address(degree::Int64, adolc_partial::Vector{Int32})
+    # "+1" because c++ indexing is -1
+    return Int64(TbadoubleModule.tensor_address(degree, adolc_partial)) + 1
 end
 
-function partials_to_tensor_idx!(partials::Vector{Vector{Int64}}, degree)
-    for (i, partial) in enumerate(partials)
-        tmp = zeros(Int64, degree)
-        idx = 1
-        for j in eachindex(partial)
-            for _ = 1:partial[j]
-                tmp[idx] = j
-                idx += 1
-            end
+function partial_to_tensor_idx!(res::Vector{Int32}, partial::Vector{Int64}, degree::Int64)
+    idx = 1
+    for i in eachindex(partial)
+        for _ = 1:partial[i]
+            res[idx] = i
+            idx += 1
         end
-        partials[i] = tmp
     end
+    for i in idx:degree
+        res[i] = 0
+    end
+    sort!(res, rev = true)
 end
 
 function create_cxx_identity(n::Int64, m::Int64)

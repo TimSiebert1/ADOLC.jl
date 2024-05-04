@@ -1021,6 +1021,34 @@ end
 end
 
 
+@testset "higher_order_not_full_seed" begin()
+    function f(x)
+        [x[1]^2 * x[2]^2, x[3]^2 * x[4]^2]
+    end
+    x = [1.0, 2.0, 3.0, 4.0]
+    partials = [
+        [1, 0, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 2, 0],
+        [2, 0, 0, 0],
+    ]
+    res = Matrix{Float64}(undef, 2, length(partials))
+    derivative!(res, f, 2, length(x), x, partials)
+
+    @test res[1, 1] ≈ 8.0
+    @test res[2, 1] ≈ 0.0
+
+    @test res[1, 2] ≈ 0.0
+    @test res[2, 2] ≈ 96.0
+
+    @test res[1, 3] ≈ 0.0
+    @test res[2, 3] ≈ 32.0
+
+    @test res[1, 4] ≈ 8.0
+    @test res[2, 4] ≈ 0.0
+
+end
+
 
 
 @testset "higher_order_seed" begin

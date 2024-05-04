@@ -612,12 +612,12 @@ function higher_order!(
     res_tmp = myalloc2(m, binomial(num_seeds + degree, degree))
 
     tensor_eval(tape_id, m, n, degree, num_seeds, x, res_tmp, seed)
-
-    partials_to_tensor_idx!(partials, degree)
-
+    
+    adolc_partial = zeros(Int32, degree)
     for (i, partial) in enumerate(partials)
+        partial_to_tensor_idx!(adolc_partial, partial, degree)
         for j = 1:m
-            res[j, i] = res_tmp[j, tensor_address(degree, partial)]
+            res[j, i] = res_tmp[j, tensor_address(degree, adolc_partial)]
         end
     end
     myfree2(res_tmp)
