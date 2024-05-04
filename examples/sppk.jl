@@ -29,8 +29,9 @@ end
 dftrid_forwarddiff(x)=ForwardDiff.gradient(ftrid,[x])[1]
 
 function dftrid_adolc(x)
-    grad,_=ADOLC.gradient(ftrid,[x],1; mode=:tape_less)
-    grad[1]
+    res = zeros(Float64, length(x))
+    derivative!(res, ftrid, 1, length(x), x, :jac)
+    res[1]
 end
 
 # Sparse version
@@ -45,8 +46,9 @@ end
 dfsppk_forwarddiff(x)=ForwardDiff.gradient(fsppk,[x])[1]
 
 function dfsppk_adolc(x)
-    grad,_=ADOLC.gradient(fsppk,[x],1; mode=:tape_less)
-    grad[1]
+    res = zeros(Float64, length(x))
+    derivative!(res, fsppk, 1, length(x), x, :jac)
+    res[1]
 end
 
 function runtests()
@@ -55,6 +57,5 @@ function runtests()
     @test all( x->(dftrid_forwarddiff(x)≈dfsppk_forwarddiff(x)), 1:0.1:10)
     @test all( x->(dfsppk_forwarddiff(x)≈dfsppk_adolc(x)), 1:0.1:10)
 end
-
 
 end
