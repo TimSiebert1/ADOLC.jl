@@ -611,7 +611,11 @@ function higher_order!(
     if !reuse_tape
         create_tape(f, m, n, x, tape_id)
     end
-    degree = maximum(map(sum, partials))
+    if adolc_scheme
+        degree = length(partials[1])
+    else
+        degree = maximum(map(sum, partials))
+    end
     res_tmp = myalloc2(m, binomial(num_seeds + degree, degree))
 
     tensor_eval(tape_id, m, n, degree, num_seeds, x, res_tmp, seed)
@@ -619,7 +623,7 @@ function higher_order!(
     adolc_partial = zeros(Int32, degree)
     for (i, partial) in enumerate(partials)
         if !adolc_scheme
-            partial_to_tensor_idx!(adolc_partial, partial, degree)
+            partial_to_adolc_scheme!(adolc_partial, partial, degree)
         end
         for j = 1:m
             res[j, i] = res_tmp[j, tensor_address(degree, adolc_partial)]

@@ -174,7 +174,7 @@ function tensor_address(degree::Int64, adolc_partial::Vector{Int32})
     return Int64(TbadoubleModule.tensor_address(degree, adolc_partial)) + 1
 end
 
-function partial_to_tensor_idx!(res::Vector{Int32}, partial::Vector{Int64}, degree::Int64)
+function partial_to_adolc_scheme!(res::Vector{Int32}, partial::Vector{Int64}, degree::Int64)
     idx = 1
     for i in eachindex(partial)
         for _ = 1:partial[i]
