@@ -68,8 +68,11 @@ function derivative!(
     if id_seed 
         seed = create_cxx_identity(n, n)
     else
-        seed_idxs = adolc_scheme ? get_seed_idxs_adolc_scheme(partials) : get_seed_idxs(partials)     
-        seed = create_partial_cxx_identity(n, n, seed_idxs)
+        seed_idxs = adolc_scheme ? get_seed_idxs_adolc_scheme(partials) : get_seed_idxs(partials)   
+        partials = adolc_scheme ? adolc_scheme_to_seed_space(partials, seed_idxs) : partials_to_seed_space(partials, seed_idxs)
+        seed = new_create_partial_cxx_identity(n, seed_idxs)
+        println(seed_idxs)
+        println(partials)
     end
     higher_order!(res, f, m, n, x, partials, seed, n, tape_id, reuse_tape, adolc_scheme)
     myfree2(seed)

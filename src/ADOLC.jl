@@ -213,6 +213,46 @@ function create_partial_cxx_identity(n::Int64, m::Int64, idxs::Vector{Int64})
     end
     return I
 end
+function new_create_partial_cxx_identity(n::Int64, idxs::Vector{Int64})
+    sort!(idxs)
+    m = length(idxs)
+    I = myalloc2(n, m)
+    for j = 1:m
+        for i = 1:n
+            I[i, j] = 0.0
+        end
+        I[idxs[j], j] = 1.0
+    end
+    return I
+end
+
+function partials_to_seed_space(partials::Vector{Vector{Int64}}, seed_idxs::Vector{Int64})
+    new_partials = Vector{Vector{Int64}}(undef, length(partials))
+    for (i, partial) in enumerate(partials)
+        new_partials[i] = zeros(length(seed_idxs))
+        for j in eachindex(partial)
+            if partial[j] != 0
+                new_partials[i][indexin(j, seed_idxs)[1]] = partial[j]
+            end
+        end
+    end
+    return new_partials
+end
+
+function adolc_scheme_to_seed_space(partials::Vector{Vector{Int64}}, seed_idxs::Vector{Int64})
+    new_partials = Vector{Vector{Int64}}(undef, length(partials))
+    for (i, partial) in enumerate(partials)
+        new_partials[i] = zeros(length(partial))
+        for j in eachindex(partial)
+            if partial[j] != 0
+                new_partials[i][j] = indexin(partial[j], seed_idxs)[1]
+            else # since adolc_scheme is sorted, first zero means everything afterward is zero
+                break
+            end
+        end
+    end
+    return new_partials
+end
 
 function get_seed_idxs(partials::Vector{Vector{Int64}})
     seed_idxs = Vector{Int64}()
@@ -225,6 +265,7 @@ function get_seed_idxs(partials::Vector{Vector{Int64}})
             end
         end
     end
+    sort!(seed_idxs)
     return seed_idxs
 end
 
@@ -239,6 +280,7 @@ function get_seed_idxs_adolc_scheme(partials::Vector{Vector{Int64}})
             end
         end
     end
+    sort!(seed_idxs)
     return seed_idxs
 end
 
