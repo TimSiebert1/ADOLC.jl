@@ -978,8 +978,6 @@ end
 end
 
 
-
-
 @testset "higher_order_2D" begin
     ()
     function f(x)
@@ -997,6 +995,46 @@ end
     ]
     res = Matrix{Float64}(undef, 2, length(partials))
     derivative!(res, f, 2, length(x), x, partials)
+
+    @test res[1, 1] ≈ 8.0
+    @test res[2, 1] ≈ 0.0
+
+    @test res[1, 2] ≈ 0.0
+    @test res[2, 2] ≈ 96.0
+
+    @test res[1, 3] ≈ 8.0
+    @test res[2, 3] ≈ 0.0
+
+    @test res[1, 4] ≈ 0.0
+    @test res[2, 4] ≈ 48.0
+
+    @test res[1, 5] ≈ 0.0
+    @test res[2, 5] ≈ 0.0
+
+    @test res[1, 6] ≈ 0.0
+    @test res[2, 6] ≈ 16.0
+
+    @test res[1, 7] ≈ 8.0
+    @test res[2, 7] ≈ 0.0
+end
+
+@testset "higher_order_adolc_scheme" begin
+    ()
+    function f(x)
+        [x[1]^2 * x[2]^2, x[3]^2 * x[4]^2]
+    end
+    x = [1.0, 2.0, 3.0, 4.0]
+    partials = [
+        [1, 0, 0],
+        [3, 0, 0],
+        [2, 1, 0],
+        [4, 3, 0],
+        [3, 2, 1],
+        [4, 3, 3],
+        [1, 1, 0],
+    ]
+    res = Matrix{Float64}(undef, 2, length(partials))
+    derivative!(res, f, 2, length(x), x, partials, adolc_scheme=true)
 
     @test res[1, 1] ≈ 8.0
     @test res[2, 1] ≈ 0.0

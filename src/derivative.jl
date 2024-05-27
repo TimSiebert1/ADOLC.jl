@@ -68,10 +68,10 @@ function derivative!(
     if id_seed 
         seed = create_cxx_identity(n, n)
     else
-        seed_idxs = get_seed_idxs(partials)
+        seed_idxs = adolc_scheme ? get_seed_idxs_adolc_scheme(partials) : get_seed_idxs(partials)     
         seed = create_partial_cxx_identity(n, n, seed_idxs)
     end
-    higher_order!(res, f, m, n, x, partials, seed, n, tape_id, reuse_tape)
+    higher_order!(res, f, m, n, x, partials, seed, n, tape_id, reuse_tape, adolc_scheme)
     myfree2(seed)
 end
 
@@ -88,7 +88,7 @@ function derivative!(
     adolc_scheme::Bool = false,
 )
     seed_cxx = julia_mat_to_cxx_mat(seed)
-    higher_order!(res, f, m, n, x, partials, seed_cxx, size(seed, 2), tape_id, reuse_tape)
+    higher_order!(res, f, m, n, x, partials, seed_cxx, size(seed, 2), tape_id, reuse_tape, adolc_scheme)
     myfree2(seed_cxx)
 end
 
@@ -605,7 +605,7 @@ function higher_order!(
     seed::CxxPtr{CxxPtr{Float64}},
     num_seeds::Int64,
     tape_id::Int64,
-    reuse_tape::Bool;
+    reuse_tape::Bool,
     adolc_scheme::Bool
 )
     if !reuse_tape
@@ -617,20 +617,26 @@ function higher_order!(
         degree = maximum(map(sum, partials))
     end
     res_tmp = myalloc2(m, binomial(num_seeds + degree, degree))
-
     tensor_eval(tape_id, m, n, degree, num_seeds, x, res_tmp, seed)
-    
-    adolc_partial = zeros(Int32, degree)
+    if !adolc_scheme
+        adolc_partial = zeros(Int32, degree)
+    end
     for (i, partial) in enumerate(partials)
         if !adolc_scheme
             partial_to_adolc_scheme!(adolc_partial, partial, degree)
         end
         for j = 1:m
-            res[j, i] = res_tmp[j, tensor_address(degree, adolc_partial)]
+            if !adolc_scheme
+                res[j, i] = res_tmp[j, tensor_address(degree, adolc_partial)]
+            else
+                res[j, i] = res_tmp[j, tensor_address(degree, collect(Int32, partial))]
+            end
         end
     end
     myfree2(res_tmp)
 end
+
+
 
 function create_tape(
     f,

@@ -228,6 +228,19 @@ function get_seed_idxs(partials::Vector{Vector{Int64}})
     return seed_idxs
 end
 
+function get_seed_idxs_adolc_scheme(partials::Vector{Vector{Int64}})
+    seed_idxs = Vector{Int64}()
+    for partial in partials
+        for i in partial
+            if i != 0
+                if !(i in seed_idxs)
+                    push!(seed_idxs, i)
+                end
+            end
+        end
+    end
+    return seed_idxs
+end
 
 function build_tensor(
     derivative_order::Int64,
