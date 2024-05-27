@@ -62,7 +62,8 @@ function derivative!(
     partials::Vector{Vector{Int64}};
     tape_id::Int64 = 0,
     reuse_tape::Bool = false,
-    id_seed::Bool = false
+    id_seed::Bool = false,
+    adolc_scheme::Bool = false,
 )
     if id_seed 
         seed = create_cxx_identity(n, n)
@@ -84,6 +85,7 @@ function derivative!(
     seed::Matrix{Float64};
     tape_id::Int64 = 0,
     reuse_tape::Bool = false,
+    adolc_scheme::Bool = false,
 )
     seed_cxx = julia_mat_to_cxx_mat(seed)
     higher_order!(res, f, m, n, x, partials, seed_cxx, size(seed, 2), tape_id, reuse_tape)
@@ -603,7 +605,8 @@ function higher_order!(
     seed::CxxPtr{CxxPtr{Float64}},
     num_seeds::Int64,
     tape_id::Int64,
-    reuse_tape::Bool,
+    reuse_tape::Bool;
+    adolc_scheme::Bool
 )
     if !reuse_tape
         create_tape(f, m, n, x, tape_id)
@@ -615,7 +618,9 @@ function higher_order!(
     
     adolc_partial = zeros(Int32, degree)
     for (i, partial) in enumerate(partials)
-        partial_to_tensor_idx!(adolc_partial, partial, degree)
+        if !adolc_scheme
+            partial_to_tensor_idx!(adolc_partial, partial, degree)
+        end
         for j = 1:m
             res[j, i] = res_tmp[j, tensor_address(degree, adolc_partial)]
         end
