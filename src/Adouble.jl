@@ -113,6 +113,11 @@ end
 
 function init_gradient(a::Vector{Adouble{TlAlloc}})
     for i in eachindex(a)
-        TladoubleModule.setADValue(a[i].val, 1.0, i)
+        for j in eachindex(a)
+            TladoubleModule.setADValue(a[i].val, 0.0, j)
+            if i==j
+                TladoubleModule.setADValue(a[i].val, 1.0, i)
+            end
+        end
     end
 end
