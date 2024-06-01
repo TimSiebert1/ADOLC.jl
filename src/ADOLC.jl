@@ -201,20 +201,7 @@ function create_cxx_identity(n::Int64, m::Int64)
     return I
 end
 
-function create_partial_cxx_identity(n::Int64, m::Int64, idxs::Vector{Int64})
-    I = myalloc2(n, m)
-    for i = 1:n
-        for j = 1:m
-            I[i, j] = 0.0
-        end
-    end
-    for i in idxs
-        I[i, i] = 1.0
-    end
-    return I
-end
-function new_create_partial_cxx_identity(n::Int64, idxs::Vector{Int64})
-    sort!(idxs)
+function create_partial_cxx_identity(n::Int64, idxs::Vector{Int64})
     m = length(idxs)
     I = myalloc2(n, m)
     for j = 1:m
