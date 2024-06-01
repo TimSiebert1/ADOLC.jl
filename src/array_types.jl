@@ -24,7 +24,6 @@ Base.setindex!(
     col::Int64,
 ) = setindex_tens(X, val, dim, row, col)
 
-
 Base.getindex(X::CxxPtr{CxxPtr{Cdouble}}, row::Int64, col::Int64) =
     getindex_mat(X, row, col)
 Base.setindex!(X::CxxPtr{CxxPtr{Cdouble}}, val::Cdouble, row::Int64, col::Int64) =
