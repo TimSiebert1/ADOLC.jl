@@ -9,10 +9,7 @@ function __init__()
     @initcxx
 end
 
-
-##### raw CxxPtr utilities ###################
-
-
+###### Array getter and setter ###### 
 Base.getindex(X::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64) = getindex_tens(X, dim)
 Base.getindex(X::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64, row::Int64, col::Int64) =
     getindex_tens(X, dim, row, col)
@@ -40,15 +37,14 @@ Base.setindex!(X::CxxPtr{Cshort}, val::Cshort, row::Int64) = setindex_vec(X, val
 
 function cxx_mat_finalizer(t)
     myfree2(t.data)
-    # @async println("mat_finalized")
 end
 
 
-###### double** wrappe #########################
+###### ptr-ptr wrapper #########################
 
 mutable struct CxxMatrix{T} <: AbstractMatrix{T}
     """
-    Wrapper for c++ double** data
+    Wrapper for c++ double** or short** data
     """
     data::CxxPtr{CxxPtr{T}}
     n::Int64
@@ -105,7 +101,6 @@ alloc_vec(::Type{Cshort}, n::Integer) = alloc_vec_short(n)
 
 function cxx_vec_finalizer(x)
     free_vec_double(x.data)
-    # @async println("free_vec")
 end
 
 mutable struct CxxVector{T} <: AbstractVector{T}

@@ -18,3 +18,5 @@ src/TODO
 my_examples
 
 *.pdf
+
+local_only.jl

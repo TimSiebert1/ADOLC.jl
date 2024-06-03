@@ -14,7 +14,6 @@ function abs_normal_finalizer(problem)
 
 end
 mutable struct AbsNormalForm
-
     tape_id::Int64
 
     m::Int64
