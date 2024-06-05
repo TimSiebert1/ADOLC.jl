@@ -1,7 +1,12 @@
+"""
+    Adouble
+
+My double type.
+"""
 struct Adouble{T<:Union{TbAlloc,TlAlloc}} <: AbstractFloat
     """
     Wrapper for adouble from c++ but with more flexibility.
-
+    
     @param val: Its a Float64 or a c++ adouble. This gives the possibility
                 to have containers of type adouble but without allocating 
                 an element which has to be differentiated. 

@@ -1,4 +1,10 @@
 module ADOLC
+
+using ADOLC_jll
+using CxxWrap
+using LinearAlgebra
+using SpecialFunctions
+
 include("array_types.jl")
 include("TbadoubleModule.jl")
 include("TladoubleModule.jl")
