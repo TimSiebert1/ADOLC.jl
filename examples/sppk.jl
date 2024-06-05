@@ -10,10 +10,10 @@ using ADOLC
 # This should have the M property
 function tridiagonal(p, n)
     T = typeof(p)
-    b = T[(p^2 * i + p) for i = 1:n]
-    a = T[(-0.1 * p) for i = 1:n-1]
-    c = T[(-0.1 * p) for i = 1:n-1]
-    Tridiagonal(a, b, c)
+    b = T[(p^2 * i + p) for i in 1:n]
+    a = T[(-0.1 * p) for i in 1:(n - 1)]
+    c = T[(-0.1 * p) for i in 1:(n - 1)]
+    return Tridiagonal(a, b, c)
 end
 
 # Use the tridiagonal solve from Julia
@@ -22,16 +22,15 @@ function ftrid(x)
     n = 100
     M = tridiagonal(p, n)
     f = ones(n)
-    sum(M \ f)
+    return sum(M \ f)
 end
-
 
 dftrid_forwarddiff(x) = ForwardDiff.gradient(ftrid, [x])[1]
 
 function dftrid_adolc(x)
     res = zeros(Float64, length(x))
     derivative!(res, ftrid, 1, length(x), x, :jac)
-    res[1]
+    return res[1]
 end
 
 # Sparse version
@@ -40,7 +39,7 @@ function fsppk(x)
     n = 100
     M = sparse(tridiagonal(p, n))
     f = ones(typeof(p), n)
-    sum(sparspaklu(M) \ f)
+    return sum(sparspaklu(M) \ f)
 end
 
 dfsppk_forwarddiff(x) = ForwardDiff.gradient(fsppk, [x])[1]
@@ -48,7 +47,7 @@ dfsppk_forwarddiff(x) = ForwardDiff.gradient(fsppk, [x])[1]
 function dfsppk_adolc(x)
     res = zeros(Float64, length(x))
     derivative!(res, fsppk, 1, length(x), x, :jac)
-    res[1]
+    return res[1]
 end
 
 function runtests()

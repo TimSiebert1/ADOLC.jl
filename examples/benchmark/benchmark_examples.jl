@@ -8,7 +8,6 @@ function speelpenning(x)
     return x[1]
 end
 
-
 function build_banded_matrix(dim)
     h = 1 / dim
     A = BandedMatrix{Float64}(undef, (dim, dim), (1, 1))

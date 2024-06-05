@@ -7,8 +7,6 @@ function __init__()
     @initcxx
 end
 
-
-
 # C++ version of adouble
 export TbadoubleCxx #, getValue
 
@@ -24,7 +22,6 @@ export tensor_eval, tensor_address
 
 # more drivers
 export jacobian, hessian, vec_jac, jac_vec, hess_vec, hess_mat, lagra_hess_vec, jac_solv
-
 
 # abs-smooth utils 
 export enableMinMaxUsingAbs,

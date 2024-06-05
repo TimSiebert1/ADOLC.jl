@@ -7,11 +7,7 @@ using ForwardDiff
 using ReverseDiff
 using Printf
 
-
 include("benchmark_examples.jl")
-
-
-
 
 function plot(suite::Dict)
     experiments = keys(suite)
@@ -23,24 +19,23 @@ function plot(suite::Dict)
                 dims_sorted = sort(collect(keys(suite[experiment][mode])))
                 mode_vals = [suite[experiment][mode][key] for key in dims_sorted]
                 base_times = [suite[experiment]["base_time"][key] for key in dims_sorted]
-                Plots.plot!(p, dims_sorted, mode_vals ./ base_times, label = "$mode")
+                Plots.plot!(p, dims_sorted, mode_vals ./ base_times; label="$mode")
             end
         end
-        Plots.plot!(p, legend = :topleft)
+        Plots.plot!(p; legend=:topleft)
         xlabel!(p, "dimension")
         ylabel!(p, "runtime-ratio")
         Plots.savefig(p, "fwd_vs_rvs_$experiment.pdf")
     end
 end
 
-
 function run_base_time(experiment, dim)
     if experiment === BenchmarkExamples.speelpenning
-        x = [(i + 1.0) / (2.0 + i) for i = 1:dim]
+        x = [(i + 1.0) / (2.0 + i) for i in 1:dim]
         time = @benchmark BenchmarkExamples.speelpenning($x)
 
     elseif experiment === BenchmarkExamples.lin_solve
-        x = [(i + 1.0) / (2.0 + i) for i = 1:dim]
+        x = [(i + 1.0) / (2.0 + i) for i in 1:dim]
         A = BenchmarkExamples.build_banded_matrix(dim)
         time = @benchmark BenchmarkExamples.lin_solve($A, $x)
 
@@ -52,11 +47,11 @@ function run_base_time(experiment, dim)
 end
 
 function run_mode(experiment, mode, dim)
-    x = [(i + 1.0) / (2.0 + i) for i = 1:dim]
+    x = [(i + 1.0) / (2.0 + i) for i in 1:dim]
     if mode != "ReverseDiff" &&
-       mode != "Forward" &&
-       mode != "ForwardDiff" &&
-       experiment === BenchmarkExamples.speelpenning
+        mode != "Forward" &&
+        mode != "ForwardDiff" &&
+        experiment === BenchmarkExamples.speelpenning
         a = [Adouble{TbAlloc}() for _ in eachindex(x)]
         b = [Adouble{TbAlloc}()]
         y = 0.0
@@ -65,15 +60,14 @@ function run_mode(experiment, mode, dim)
         b = BenchmarkExamples.speelpenning(a)
         y = b >> y
         trace_off()
-
     end
     if mode != "ReverseDiff" &&
-       mode != "Forward" &&
-       mode != "ForwardDiff" &&
-       experiment === BenchmarkExamples.lin_solve
+        mode != "Forward" &&
+        mode != "ForwardDiff" &&
+        experiment === BenchmarkExamples.lin_solve
         A = BenchmarkExamples.build_banded_matrix(dim)
-        a = [Adouble{TbAlloc}() for _ = 1:dim]
-        b = [Adouble{TbAlloc}() for _ = 1:dim]
+        a = [Adouble{TbAlloc}() for _ in 1:dim]
+        b = [Adouble{TbAlloc}() for _ in 1:dim]
         y = Vector{Float64}(undef, dim)
 
         trace_on(0)
@@ -100,7 +94,9 @@ function run_mode(experiment, mode, dim)
             time = @benchmark ForwardDiff.gradient(BenchmarkExamples.speelpenning, $x)
         else
             A = BenchmarkExamples.build_banded_matrix(dim)
-            time = @benchmark ForwardDiff.jacobian(Base.Fix1(BenchmarkExamples.lin_solve, $A), $x)
+            time = @benchmark ForwardDiff.jacobian(
+                Base.Fix1(BenchmarkExamples.lin_solve, $A), $x
+            )
         end
 
     elseif mode == "ReverseDiff"
@@ -108,13 +104,15 @@ function run_mode(experiment, mode, dim)
             time = @benchmark ReverseDiff.gradient(BenchmarkExamples.speelpenning, $x)
         else
             A = BenchmarkExamples.build_banded_matrix(dim)
-            time = @benchmark ReverseDiff.jacobian(Base.Fix1(BenchmarkExamples.lin_solve, $A), $x)
+            time = @benchmark ReverseDiff.jacobian(
+                Base.Fix1(BenchmarkExamples.lin_solve, $A), $x
+            )
         end
     elseif mode == "Forward_TB"
         m = length(y)
         x_tangent = myalloc2(dim, dim)
-        for i = 1:dim
-            for j = 1:dim
+        for i in 1:dim
+            for j in 1:dim
                 x_tangent[i, j] = 0.0
                 if i == j
                     x_tangent[i, i] = 1.0
@@ -131,8 +129,8 @@ function run_mode(experiment, mode, dim)
     elseif mode == "Reverse"
         m = length(y)
         weights = myalloc2(m, m)
-        for i = 1:m
-            for j = 1:m
+        for i in 1:m
+            for j in 1:m
                 weights[i, j] = 0.0
                 if i == j
                     weights[i, i] = 1.0
@@ -165,8 +163,9 @@ function run_benchmark(max_dim, steps)
     for experiment in experiments
         println("Running $experiment ...")
         suite[experiment] = Dict()
-        suite[experiment]["base_time"] =
-            Dict(dim => run_base_time(experiment, dim) for dim in dims[experiment])
+        suite[experiment]["base_time"] = Dict(
+            dim => run_base_time(experiment, dim) for dim in dims[experiment]
+        )
         for mode in modes
             suite[experiment][mode] = Dict()
             for dim in dims[experiment]
@@ -180,8 +179,6 @@ function run_benchmark(max_dim, steps)
     return suite
 end
 
-
-
 function compute_slope(suite)
     slope = Dict()
     for experiment in keys(suite)
@@ -190,10 +187,11 @@ function compute_slope(suite)
         for mode in keys(suite[experiment])
             if mode != "base_time"
                 dims_sorted = sort(collect(keys(suite[experiment][mode])))
-                mode_vals =
-                    [suite[experiment][mode][key] ./ base_times[key] for key in dims_sorted]
-                dim_diff = dims_sorted[2:end] - dims_sorted[1:end-1]
-                mode_val_diff = mode_vals[2:end] - mode_vals[1:end-1]
+                mode_vals = [
+                    suite[experiment][mode][key] ./ base_times[key] for key in dims_sorted
+                ]
+                dim_diff = dims_sorted[2:end] - dims_sorted[1:(end - 1)]
+                mode_val_diff = mode_vals[2:end] - mode_vals[1:(end - 1)]
                 diff_quotient = mode_val_diff ./ dim_diff
                 slope[experiment][mode] = mean(diff_quotient)
             end
@@ -240,9 +238,8 @@ function run()
     suite = run_benchmark(1000, 100)
     plot(suite)
     slope = compute_slope(suite)
-    print_slope(slope)
+    return print_slope(slope)
     #print_table(suite)
 end
-
 
 run()

@@ -4,7 +4,7 @@ function demo_reuse_tape()
     function f(x)
         if x[1] == 1.0
             return x[1]^2 * x[2]
-        else 
+        else
             return 1
         end
     end
@@ -17,21 +17,11 @@ function demo_reuse_tape()
     n = 2
     tape_id = 1
 
-    derivative!(res, f, m, n, x0, :jac_vec, dir = dir, tape_id = tape_id)
+    derivative!(res, f, m, n, x0, :jac_vec; dir=dir, tape_id=tape_id)
     println(res[1])
     x0 = [-2.0, 4.0]
-    derivative!(
-                res,
-                f,
-                m,
-                n,
-                x0,
-                :jac_vec,
-                dir = dir,
-                tape_id = tape_id,
-                reuse_tape = true,
-            )
-    println(res[1])
+    derivative!(res, f, m, n, x0, :jac_vec; dir=dir, tape_id=tape_id, reuse_tape=true)
+    return println(res[1])
 end
 
 demo_reuse_tape()

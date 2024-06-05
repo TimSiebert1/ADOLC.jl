@@ -13,20 +13,12 @@ function demo_reuse_tape()
     n = 2
     tape_id = 1
     max_iters = 100
-    for i = 1:max_iters
+    for i in 1:max_iters
         if i == 1
-            derivative!(res, f, m, n, x0, :jac_vec, dir = dir, tape_id = tape_id)
+            derivative!(res, f, m, n, x0, :jac_vec; dir=dir, tape_id=tape_id)
         else
             derivative!(
-                res,
-                f,
-                m,
-                n,
-                x0,
-                :jac_vec,
-                dir = dir,
-                tape_id = tape_id,
-                reuse_tape = true,
+                res, f, m, n, x0, :jac_vec; dir=dir, tape_id=tape_id, reuse_tape=true
             )
         end
         # do computations ....

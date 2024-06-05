@@ -11,12 +11,12 @@ function demo_second_order()
 
     res = ADOLC.myalloc3(3, 3, 2)
 
-    derivative!(res, f, 2, 3, x, :mat_hess_mat, dir = dir, weights = weights)
+    derivative!(res, f, 2, 3, x, :mat_hess_mat; dir=dir, weights=weights)
 
-    for i = 1:3
+    for i in 1:3
         println("dim $i: ")
-        for j = 1:3
-            for k = 1:2
+        for j in 1:3
+            for k in 1:2
                 if res[i, j, k] >= 0
                     print(" ", res[i, j, k], " ")
                 else
@@ -27,7 +27,6 @@ function demo_second_order()
         end
         println("")
     end
-
 end
 
 demo_second_order()

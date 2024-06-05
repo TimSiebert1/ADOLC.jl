@@ -1,7 +1,7 @@
 using ADOLC
 function demo_higher_order()
     function f(x)
-        [x[1]^2 * x[2]^2, x[2]^2]
+        return [x[1]^2 * x[2]^2, x[2]^2]
     end
 
     x = [1.0, 2.0]

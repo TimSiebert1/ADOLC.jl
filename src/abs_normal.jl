@@ -10,8 +10,7 @@ function abs_normal_finalizer(problem)
     finalize(problem.Y)
     finalize(problem.J)
     finalize(problem.Z)
-    finalize(problem.L)
-
+    return finalize(problem.L)
 end
 mutable struct AbsNormalForm
     tape_id::Int64
@@ -32,15 +31,9 @@ mutable struct AbsNormalForm
     Z::CxxMatrix{Float64}
     L::CxxMatrix{Float64}
 
-
     function AbsNormalForm(
-        tape_id::Int64,
-        m::Int64,
-        n::Int64,
-        x::Vector{Float64},
-        y::Vector{Float64},
+        tape_id::Int64, m::Int64, n::Int64, x::Vector{Float64}, y::Vector{Float64}
     )
-
         num_switches = TbadoubleModule.get_num_switches(tape_id)
         z = CxxVector{Float64}(num_switches)
 
@@ -67,13 +60,13 @@ mutable struct AbsNormalForm
             Z,
             L,
         )
-        finalizer(abs_normal_finalizer, problem)
+        return finalizer(abs_normal_finalizer, problem)
     end
     AbsNormalForm() = new()
 end
 
 function abs_normal!(abs_normal_form::AbsNormalForm)
-    _abs_normal!(
+    return _abs_normal!(
         abs_normal_form.tape_id,
         abs_normal_form.z,
         abs_normal_form.cz,
@@ -119,9 +112,10 @@ function _abs_normal!(
     Z = Z_cxx.data
     L = L_cxx.data
 
-    TbadoubleModule.abs_normal(tape_id, m, n, num_switches, x, y, z, cz, cy, Y, J, Z, L)
+    return TbadoubleModule.abs_normal(
+        tape_id, m, n, num_switches, x, y, z, cz, cy, Y, J, Z, L
+    )
 end
-
 
 function abs_normal!(
     tape_id::Int64,
@@ -145,5 +139,7 @@ function abs_normal!(
     Z_cxx = CxxMatrix(Z)
     L_cxx = CxxMatrix(L)
 
-    abs_normal!(tape_id, cz, cy, Y_cxx, J_cxx, Z_cxx, L_cxx, m, n, num_switches, x, y, z)
+    return abs_normal!(
+        tape_id, cz, cy, Y_cxx, J_cxx, Z_cxx, L_cxx, m, n, num_switches, x, y, z
+    )
 end

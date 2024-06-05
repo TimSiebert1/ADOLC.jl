@@ -1,6 +1,4 @@
 
-
-
 # ----- only Adouble{TbAlloc} 
 
 function check_input(a, x)
@@ -22,7 +20,6 @@ function Base.:<<(a::Vector{Adouble{TbAlloc}}, x::Vector{Float64})
         a[i].val << x[i]
     end
 end
-
 
 function Base.:>>(a::Vector{Adouble{TbAlloc}}, x::Vector{Float64})
     check_input(a, x)
@@ -51,66 +48,70 @@ function Base.:>>(a::Adouble{TbAlloc}, x::Float64)
 end
 
 function Base.:<<(a::Adouble{TbAlloc}, x::Float64)
-    a.val << x
+    return a.val << x
 end
-
-
 
 #--------------- Operation: * -------------------
 
 function Base.:*(
-    a::Adouble{T},
-    x::AbstractVector{Float64},
+    a::Adouble{T}, x::AbstractVector{Float64}
 ) where {T<:Union{TbAlloc,TlAlloc}}
     return map((x_i) -> a * x_i, x)
 end
 
+function Base.:*(a::Adouble{T}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
+    return Adouble{T}(a.val * Float64(x))
+end
+function Base.:*(x::V, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
+    return Adouble{T}(Float64(x) * a.val)
+end
+function Base.:*(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}}
+    return Adouble{T}(a.val * b.val)
+end
 
-Base.:*(a::Adouble{T}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real} =
-    Adouble{T}(a.val * Float64(x))
-Base.:*(x::V, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real} =
-    Adouble{T}(Float64(x) * a.val)
-Base.:*(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} =
-    Adouble{T}(a.val * b.val)
-
-Base.:*(a::Adouble{T}, x::Bool) where {T<:Union{TbAlloc,TlAlloc}} =
-    Adouble{T}(a.val * Float64(x))
-Base.:*(x::Bool, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} =
-    Adouble{T}(Float64(x) * a.val)
-
-
+function Base.:*(a::Adouble{T}, x::Bool) where {T<:Union{TbAlloc,TlAlloc}}
+    return Adouble{T}(a.val * Float64(x))
+end
+function Base.:*(x::Bool, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}}
+    return Adouble{T}(Float64(x) * a.val)
+end
 
 #--------------- Operation: * -------------------
 
-Base.:+(x::V, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real} =
-    Adouble{T}(Float64(x) + a.val)
-Base.:+(a::Adouble{T}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real} =
-    Adouble{T}(a.val + Float64(x))
-Base.:+(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} =
-    Adouble{T}(a.val + b.val)
-
+function Base.:+(x::V, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
+    return Adouble{T}(Float64(x) + a.val)
+end
+function Base.:+(a::Adouble{T}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
+    return Adouble{T}(a.val + Float64(x))
+end
+function Base.:+(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}}
+    return Adouble{T}(a.val + b.val)
+end
 
 #--------------- Operation: - -------------------
-Base.:-(x::V, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real} =
-    Adouble{T}(Float64(x) - a.val)
-Base.:-(a::Adouble{T}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real} =
-    Adouble{T}(a.val - Float64(x))
-Base.:-(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} =
-    Adouble{T}(a.val - b.val)
+function Base.:-(x::V, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
+    return Adouble{T}(Float64(x) - a.val)
+end
+function Base.:-(a::Adouble{T}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
+    return Adouble{T}(a.val - Float64(x))
+end
+function Base.:-(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}}
+    return Adouble{T}(a.val - b.val)
+end
 
 Base.:-(a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = (-1) * a
 
-
 #--------------- Operation: / -------------------
 
-Base.:/(x::V, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real} =
-    Adouble{T}(Float64(x) / a.val)
-Base.:/(a::Adouble{T}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real} =
-    Adouble{T}(a.val / Float64(x))
-Base.:/(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} =
-    Adouble{T}(a.val / b.val)
-
-
+function Base.:/(x::V, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
+    return Adouble{T}(Float64(x) / a.val)
+end
+function Base.:/(a::Adouble{T}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
+    return Adouble{T}(a.val / Float64(x))
+end
+function Base.:/(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}}
+    return Adouble{T}(a.val / b.val)
+end
 
 #--------------- Operation: >= -------------------
 Base.:>=(x::V, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real} = x >= a.val
@@ -127,39 +128,39 @@ Base.:<=(x::V, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real} = x <= a
 Base.:<=(a::Adouble{T}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real} = a.val <= x
 Base.:<=(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = a.val <= b.val
 
-
 #--------------- Operation: < -------------------
 Base.:<(x::V, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real} = x < a.val
 Base.:<(a::Adouble{T}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real} = a.val < x
 Base.:<(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = a.val < b.val
-
 
 #--------------- Operation: == -------------------
 Base.:(==)(x::V, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real} = x == a.val
 Base.:(==)(a::Adouble{T}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real} = a.val == x
 Base.:(==)(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = a.val == b.val
 
-
 #-------------- Functions: max -----------------
 
-Base.max(x::V, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real} =
-    Adouble{T}(max(a.val, x))
-Base.max(a::Adouble{T}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real} =
-    Adouble{T}(max(x, a.val))
-Base.max(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} =
-    Adouble{T}(max(a.val, b.val))
+function Base.max(x::V, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
+    return Adouble{T}(max(a.val, x))
+end
+function Base.max(a::Adouble{T}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
+    return Adouble{T}(max(x, a.val))
+end
+function Base.max(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}}
+    return Adouble{T}(max(a.val, b.val))
+end
 
 # ------------ Functions: min -----------
 
-Base.min(x::V, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real} =
-    Adouble{T}(min(a.val, x))
-Base.min(a::Adouble{T}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real} =
-    Adouble{T}(min(x, a.val))
-Base.min(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} =
-    Adouble{T}(min(a.val, b.val))
-
-
-
+function Base.min(x::V, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
+    return Adouble{T}(min(a.val, x))
+end
+function Base.min(a::Adouble{T}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
+    return Adouble{T}(min(x, a.val))
+end
+function Base.min(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}}
+    return Adouble{T}(min(a.val, b.val))
+end
 
 #-------------- unary Functions
 
@@ -189,57 +190,55 @@ Base.atanh(a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = Adouble{T}(atanh(a
 Base.ceil(a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = Adouble{T}(ceil(a.val))
 Base.floor(a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = Adouble{T}(floor(a.val))
 
-
-
 Base.ldexp(a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = Adouble{T}(ldexp(a.val))
 Base.frexp(a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = Adouble{T}(frexp(a.val))
 
 erf(a::Adouble{TbAlloc}) = Adouble{TbAlloc}(TbadoubleModule.erf(a.val))
 erf(a::Adouble{TlAlloc}) = Adouble{TlAlloc}(TladoubleModule.erf(a.val))
 
-
 Base.eps(::Type{Adouble{T}}) where {T<:Union{TbAlloc,TlAlloc}} = eps(Float64)
 #### SpecialFunctions
-import SpecialFunctions
+using SpecialFunctions: SpecialFunctions
 
 SpecialFunctions.erf(a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = erf(a)
 SpecialFunctions.erfc(a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = 1.0 - erf(a)
 
 ##############################################################
 
-
 #-------- utilities for type handling ----------
-Base.promote(x::V, y::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real} =
-    Adouble{T}(Float64(x), false)
+function Base.promote(x::V, y::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
+    return Adouble{T}(Float64(x), false)
+end
 
 # not sure if needed 
 Base.promote(x::Adouble{T}, y::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = x
 
-Base.promote_rule(::Type{Adouble{T}}, ::Type{V}) where {T<:Union{TbAlloc,TlAlloc},V<:Real} =
-    Adouble{T}
+function Base.promote_rule(
+    ::Type{Adouble{T}}, ::Type{V}
+) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
+    return Adouble{T}
+end
 
 # since every operation where an argument is a adouble have to return a adouble
-Base.promote_op(
-    f,
-    ::Type{Adouble{T}},
-    ::Type{Adouble{T}},
-) where {T<:Union{TbAlloc,TlAlloc}} = Adouble{T}
-Base.promote_op(
-    f,
-    ::Type{V},
-    ::Type{Adouble{T}},
-) where {T<:Union{TbAlloc,TlAlloc},V<:Real} = Adouble{T}
-Base.promote_op(
-    f,
-    ::Type{Adouble{T}},
-    ::Type{V},
-) where {T<:Union{TbAlloc,TlAlloc},V<:Real} = Adouble{T}
+function Base.promote_op(
+    f, ::Type{Adouble{T}}, ::Type{Adouble{T}}
+) where {T<:Union{TbAlloc,TlAlloc}}
+    return Adouble{T}
+end
+function Base.promote_op(
+    f, ::Type{V}, ::Type{Adouble{T}}
+) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
+    return Adouble{T}
+end
+function Base.promote_op(
+    f, ::Type{Adouble{T}}, ::Type{V}
+) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
+    return Adouble{T}
+end
 
-
-
-Base.convert(::Type{Adouble{T}}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real} =
-    Adouble{T}(Float64(x), false)
-
+function Base.convert(::Type{Adouble{T}}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
+    return Adouble{T}(Float64(x), false)
+end
 
 # this is called e.g. when creating a vector of Adouble{T}s ... not sure why
 Base.convert(::Type{Adouble{T}}, x::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = x

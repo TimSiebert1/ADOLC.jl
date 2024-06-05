@@ -8,7 +8,6 @@ struct Adouble{T<:Union{TbAlloc,TlAlloc}} <: AbstractFloat
     """
     val::Union{Float64,T}
 
-
     Adouble{TbAlloc}() = new{TbAlloc}(TbadoubleModule.TbadoubleCxx())
     Adouble{TlAlloc}() = new{TlAlloc}(TladoubleModule.TladoubleCxx())
 
@@ -16,8 +15,6 @@ struct Adouble{T<:Union{TbAlloc,TlAlloc}} <: AbstractFloat
     Adouble{TlAlloc}(a::TlAlloc) = new{TlAlloc}(a)
 
     Adouble{T}(val::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real} = new(Float64(val))
-
-
 end
 Adouble{TbAlloc}(a::Adouble{TbAlloc}) = Adouble{TbAlloc}(a.val)
 Adouble{TlAlloc}(a::Adouble{TlAlloc}) = Adouble{TlAlloc}(a.val)
@@ -36,7 +33,6 @@ end
 
 Adouble{TbAlloc}(val::Bool, isadouble::Bool) = Adouble{TbAlloc}(float(val), isadouble)
 
-
 function Adouble{TlAlloc}(val::V, isadouble::Bool) where {V<:Real}
     """
     The idea behind this is that when a floating point number is promoted to 
@@ -50,8 +46,6 @@ function Adouble{TlAlloc}(val::V, isadouble::Bool) where {V<:Real}
 end
 
 Adouble{TlAlloc}(val::Bool, isadouble::Bool) = Adouble{TlAlloc}(float(val), isadouble)
-
-
 
 function Adouble{TbAlloc}(vals::Vector{V}, isadouble::Bool) where {V<:Real}
     """
@@ -77,11 +71,12 @@ function Adouble{TlAlloc}(vals::Vector{V}, isadouble::Bool) where {V<:Real}
     return [Adouble{TlAlloc}(val) for val in vals]
 end
 
-
-getValue(a::Adouble{TbAlloc}) =
-    typeof(a.val) == Float64 ? a.val : TbadoubleModule.getValue(a.val)
-getValue(a::Adouble{TlAlloc}) =
-    typeof(a.val) == Float64 ? a.val : TladoubleModule.getValue(a.val)
+function getValue(a::Adouble{TbAlloc})
+    return typeof(a.val) == Float64 ? a.val : TbadoubleModule.getValue(a.val)
+end
+function getValue(a::Adouble{TlAlloc})
+    return typeof(a.val) == Float64 ? a.val : TladoubleModule.getValue(a.val)
+end
 
 function getValue(a::Vector{Adouble{T}}) where {T<:Union{TbAlloc,TlAlloc}}
     res = Vector{Float64}(undef, length(a))
@@ -91,21 +86,19 @@ function getValue(a::Vector{Adouble{T}}) where {T<:Union{TbAlloc,TlAlloc}}
     return res
 end
 
-
 function getADValue(a::Adouble{TlAlloc}, i::Int64)
     return TladoubleModule.getADValue(a.val, i)
 end
 
-
 function gradient(n::Int64, a::Adouble{TlAlloc}, res)
-    for i = 1:n
+    for i in 1:n
         res[i] = getADValue(a, i)
     end
 end
 
 function gradient(n::Int64, a::Vector{Adouble{TlAlloc}}, res)
-    for i = 1:length(a)
-        for j = 1:n
+    for i in 1:length(a)
+        for j in 1:n
             res[i, j] = getADValue(a[i], j)
         end
     end
@@ -115,7 +108,7 @@ function init_gradient(a::Vector{Adouble{TlAlloc}})
     for i in eachindex(a)
         for j in eachindex(a)
             TladoubleModule.setADValue(a[i].val, 0.0, j)
-            if i==j
+            if i == j
                 TladoubleModule.setADValue(a[i].val, 1.0, i)
             end
         end

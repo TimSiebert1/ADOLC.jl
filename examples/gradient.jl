@@ -9,7 +9,7 @@ function chained_lq(x)
 end
 
 x = [0.0, 2.0, -1.0]
-a = [AdoubleCxx() for _ = 1:3]
+a = [AdoubleCxx() for _ in 1:3]
 y = 0.0
 trace_on(1)
 
@@ -17,7 +17,6 @@ a << x
 b = chained_lq(a)
 b >> y
 trace_off(0)
-
 
 g = gradient(1, x)
 

@@ -3,7 +3,6 @@ using ADOLC.TbadoubleModule
 using ADOLC.array_types
 using Test
 
-
 include("test_adouble.jl")
 #include("test_gradient.jl")
 #include("test_hess_vec.jl")

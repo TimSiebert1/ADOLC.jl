@@ -10,7 +10,7 @@ function demo_abs_normal()
     x = [-1.0, -1.0]
 
     # Initialize the AbsNormalForm object
-    abs_normal_form = ADOLC.init_abs_normal_form(f, 1, 2, x, tape_id = 1)
+    abs_normal_form = ADOLC.init_abs_normal_form(f, 1, 2, x; tape_id=1)
 
     # Calculate the absolute normal form derivative
     derivative!(
@@ -19,9 +19,9 @@ function demo_abs_normal()
         1,
         2,
         x,
-        :abs_normal,
-        tape_id = abs_normal_form.tape_id,
-        reuse_tape = true,
+        :abs_normal;
+        tape_id=abs_normal_form.tape_id,
+        reuse_tape=true,
     )
 
     println("AbsNormalForm at $x: ", abs_normal_form)
@@ -37,11 +37,11 @@ function demo_abs_normal()
         1,
         2,
         x,
-        :abs_normal,
-        tape_id = abs_normal_form.tape_id,
-        reuse_tape = true,
+        :abs_normal;
+        tape_id=abs_normal_form.tape_id,
+        reuse_tape=true,
     )
 
-    println("AbsNormalForm at $x: ", abs_normal_form)
+    return println("AbsNormalForm at $x: ", abs_normal_form)
 end
 demo_abs_normal()

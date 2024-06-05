@@ -6,15 +6,13 @@ function speelpenning(x::Vector{Adouble{T}}) where {T<:Union{TbAlloc,TlAlloc}}
     return y
 end
 
-
 function compute_grad(tape_id, m, n, x, y, weights, grad)
     zos_forward(tape_id, m, n, 1, x, y)
-    fov_reverse(tape_id, m, n, m, weights, grad)
+    return fov_reverse(tape_id, m, n, m, weights, grad)
 end
 
-
 function test_reuse_tape_local(n)
-    x = [(i + 1.0) / (2.0 + i) for i = 1:n]
+    x = [(i + 1.0) / (2.0 + i) for i in 1:n]
     a = [Adouble{TbAlloc}() for _ in eachindex(x)]
     b = [Adouble{TbAlloc}()]
     y = 0.0
@@ -28,8 +26,8 @@ function test_reuse_tape_local(n)
 
     m = length(y)
     weights = myalloc2(m, m)
-    for i = 1:m
-        for j = 1:m
+    for i in 1:m
+        for j in 1:m
             weights[i, j] = 0.0
             if i == j
                 weights[i, i] = 1.0
@@ -38,7 +36,7 @@ function test_reuse_tape_local(n)
     end
 
     res = myalloc2(m, n)
-    for i = 1:10
+    for i in 1:10
         compute_grad(tape_id, m, n, x .+ i, y, weights, res)
     end
     return res
@@ -59,14 +57,14 @@ end
 
 function test_reuse_tape_outside(n)
     tape_id = 0
-    x = [(i + 1.0) / (2.0 + i) for i = 1:n]
+    x = [(i + 1.0) / (2.0 + i) for i in 1:n]
     y = create_tape(tape_id, speelpenning, x)
 
     m = length(y)
 
     weights = myalloc2(m, m)
-    for i = 1:m
-        for j = 1:m
+    for i in 1:m
+        for j in 1:m
             weights[i, j] = 0.0
             if i == j
                 weights[i, i] = 1.0
@@ -75,14 +73,11 @@ function test_reuse_tape_outside(n)
     end
 
     res = myalloc2(m, n)
-    for i = 1:10
+    for i in 1:10
         compute_grad(tape_id, m, n, x .+ i, y, weights, res)
     end
     return res
 end
-
-
-
 
 enableMinMaxUsingAbs()
 
@@ -95,8 +90,8 @@ end
 
 function create_tape_abs_norm(tape_id, f, x)
     y = Vector{Float64}(undef, 1)
-    a = [Adouble{TbAlloc}() for _ = 1:length(x)]
-    b = [Adouble{TbAlloc}() for _ = 1:length(y)]
+    a = [Adouble{TbAlloc}() for _ in 1:length(x)]
+    b = [Adouble{TbAlloc}() for _ in 1:length(y)]
 
     trace_on(tape_id, 1)
     a << x
@@ -114,7 +109,7 @@ function create_abs_normal()
     m = length(y)
     abs_normal_form = ADOLC.AbsNormalForm(tape_id, m, n, x, y)
 
-    for _ = 1:10
+    for _ in 1:10
         abs_normal!(abs_normal_form)
     end
     return abs_normal_form
