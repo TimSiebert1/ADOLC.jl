@@ -1,5 +1,4 @@
-using CxxWrap
-using LinearAlgebra
+
 
 function derivative!(
     res,

@@ -1,25 +1,32 @@
 module ADOLC
+
+using CxxWrap
+using ADOLC_jll
+using LinearAlgebra
+using SpecialFunctions: SpecialFunctions
+
 include("array_types.jl")
+include("abs_normal.jl")
 include("TbadoubleModule.jl")
 include("TladoubleModule.jl")
+include("Adouble.jl")
+include("arithmetics.jl")
+include("utils.jl")
+include("derivative.jl")
+
 
 using .array_types
 using .TbadoubleModule
 using .TladoubleModule
 
-TbAlloc = TbadoubleModule.TbadoubleCxxAllocated
-TlAlloc = TladoubleModule.TladoubleCxxAllocated
 
-include("Adouble.jl")
+
+
 export TbAlloc, TlAlloc, Adouble, getValue, get_gradient
 
-include("arithmetics.jl")
-
-include("abs_normal.jl")
 export abs_normal!, AbsNormalForm
 
-include("utils.jl")
-include("derivative.jl")
+
 export derivative!
 
 export tensor_address, create_cxx_identity

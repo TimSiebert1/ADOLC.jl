@@ -2,6 +2,7 @@ module TbadoubleModule
 using ADOLC_jll
 using CxxWrap
 
+
 @wrapmodule(() -> libadolc_wrap, :Tbadouble_module)
 function __init__()
     @initcxx

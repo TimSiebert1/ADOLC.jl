@@ -198,7 +198,7 @@ erf(a::Adouble{TlAlloc}) = Adouble{TlAlloc}(TladoubleModule.erf(a.val))
 
 Base.eps(::Type{Adouble{T}}) where {T<:Union{TbAlloc,TlAlloc}} = eps(Float64)
 #### SpecialFunctions
-using SpecialFunctions: SpecialFunctions
+
 
 SpecialFunctions.erf(a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = erf(a)
 SpecialFunctions.erfc(a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = 1.0 - erf(a)

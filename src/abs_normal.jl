@@ -1,4 +1,4 @@
-
+using .array_types
 function abs_normal_finalizer(problem)
     finalize(problem.x)
     finalize(problem.y)

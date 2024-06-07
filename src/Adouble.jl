@@ -1,3 +1,8 @@
+
+
+TbAlloc = TbadoubleModule.TbadoubleCxxAllocated
+TlAlloc = TladoubleModule.TladoubleCxxAllocated
+
 struct Adouble{T<:Union{TbAlloc,TlAlloc}} <: AbstractFloat
     """
     Wrapper for adouble from c++ but with more flexibility.
