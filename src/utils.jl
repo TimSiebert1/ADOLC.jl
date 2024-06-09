@@ -1,10 +1,62 @@
+"""
+Generates the index (address) of the mixed-partial specified by `adolc_partial`
+in an higher-order derivative tensor of derivative order `degree`.
 
-function tensor_address(degree::Int64, adolc_partial::Vector{Int32})
-    # "+1" because c++ indexing is -1
-    return Int64(TbadoubleModule.tensor_address(degree, adolc_partial)) + 1
+Note: The partial has to be in the ADOLC-format.
+"""
+function tensor_address(degree::I, adolc_partial::Vector{I}) where I <: Integer
+    return tensor_address(Cint(degree), convert(Vector{Cint}, adolc_partial))
 end
 
-function partial_to_adolc_scheme!(res::Vector{Int32}, partial::Vector{Int64}, degree::Int64)
+function tensor_address(degree::Cint, adolc_partial::Vector{I}) where I <: Integer
+    return tensor_address(degree, convert(Vector{Cint}, adolc_partial))
+end
+
+function tensor_address(degree::I, adolc_partial::Vector{Cint}) where I <: Integer
+    return tensor_address(Cint(degree), adolc_partial)
+end
+
+function tensor_address(degree::Cint, adolc_partial::Vector{Cint})
+    # "+1" because c++ indexing is -1
+    return TbadoubleModule.tensor_address(degree, adolc_partial) + 1
+end
+
+
+"""
+Transforms a given partial to the ADOLC-format. 
+
+Example
+```juliadoctest
+julia>partial = [1, 0, 4]
+3-element Vector{Int64}:
+ 1
+ 0
+ 4
+
+julia>degree = sum(partial)
+5
+
+julia>partial_to_adolc_scheme(partial, degree)
+5-element Vector{Int32}:
+ 3
+ 3
+ 3
+ 3
+ 1
+```
+"""
+function partial_to_adolc_scheme(partial::Vector{I_1}, degree::I_2) where {I_1<:Integer, I_2<:Integer}
+    res = Vector{Cint}(undef, degree)
+    partial_to_adolc_scheme!(res, partial, degree)
+    return res
+end
+
+function partial_to_adolc_scheme!(res::Vector{Cint}, partial::Vector{I_1}, degree::I_2) where {I_1<:Integer, I_2<:Integer}
+    partial_to_adolc_scheme!(res, convert(Vector{Cint}, partial), degree)
+end
+
+
+function partial_to_adolc_scheme!(res::Vector{Cint}, partial::Vector{Cint}, degree::I) where I <: Integer
     idx = 1
     for i in eachindex(partial)
         for _ in 1:partial[i]
