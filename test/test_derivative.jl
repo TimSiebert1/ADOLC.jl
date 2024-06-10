@@ -905,7 +905,7 @@ end
     @test res[2, 7] ≈ 0.0
 end
 
-@testset "higher_order_adolc_scheme" begin
+@testset "higher_order_adolc_format" begin
     ()
     function f(x)
         return [x[1]^2 * x[2]^2, x[3]^2 * x[4]^2]
@@ -913,7 +913,7 @@ end
     x = [1.0, 2.0, 3.0, 4.0]
     partials = [[1, 0, 0], [3, 0, 0], [2, 1, 0], [4, 3, 0], [3, 2, 1], [4, 3, 3], [1, 1, 0]]
     res = Matrix{Float64}(undef, 2, length(partials))
-    derivative!(res, f, 2, length(x), x, partials; adolc_scheme=true)
+    derivative!(res, f, 2, length(x), x, partials; adolc_format=true)
 
     @test res[1, 1] ≈ 8.0
     @test res[2, 1] ≈ 0.0
@@ -960,7 +960,7 @@ end
     @test res[2, 4] ≈ 0.0
 end
 
-@testset "higher_order_not_full_seed_adolc_scheme" begin
+@testset "higher_order_not_full_seed_adolc_format" begin
     ()
     function f(x)
         return [x[1]^2 * x[2]^2, x[3]^2 * x[4]^2]
@@ -968,7 +968,7 @@ end
     x = [1.0, 2.0, 3.0, 4.0]
     partials = [[1, 0], [3, 0], [3, 3], [1, 1]]
     res = Matrix{Float64}(undef, 2, length(partials))
-    derivative!(res, f, 2, length(x), x, partials; adolc_scheme=true)
+    derivative!(res, f, 2, length(x), x, partials; adolc_format=true)
 
     @test res[1, 1] ≈ 8.0
     @test res[2, 1] ≈ 0.0
