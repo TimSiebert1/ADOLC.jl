@@ -39,7 +39,7 @@ Transforms a given partial to the [ADOLC-Format](@ref).
 
 # Example:
 ```jldoctest
-using ADOLC
+
 partial = [1, 0, 4]
 degree = sum(partial)
 partial_to_adolc_format(partial, degree)
@@ -70,7 +70,6 @@ Variant of [`partial_to_adolc_format`](@ref) that writes the result to `res`.
 
 # Example:
 ```jldoctest
-using ADOLC
 partial = [1, 3, 2, 0]
 degree = sum(partial)
 res = zeros(Int32, degree)
@@ -113,7 +112,6 @@ Creates a identity matrix of shape (`n`, `m`) of type CxxPtr{CxxPtr{Float64}} (w
 
 # Example
 ```jldoctest
-using ADOLC
 id = create_cxx_identity(2, 4)
 for i in 1:2
     for j in 1:4
@@ -157,7 +155,6 @@ is defined by the order of the indices in `idxs`.
 
 # Examples
 ```jldoctest
-using ADOLC
 n = 4
 idxs = [1, 3]
 id = create_partial_cxx_identity(n, idxs)
@@ -177,7 +174,6 @@ end
 ```
 The order in `idxs` defines the order of the basis vectors.
 ```jldoctest
-using ADOLC
 n = 3
 idxs = [3, 0, 1]
 id = create_partial_cxx_identity(n, idxs)
@@ -223,7 +219,6 @@ ascendet sorted.
 
 # Example
 ```jldoctest
-using ADOLC
 
 partials = [[1, 0, 0, 0, 3], [1, 0, 1, 0, 0], [0, 0, 3, 0, 0]]
 seed_idxs_partial_format(partials)
@@ -264,7 +259,6 @@ ascendet sorted.
 
 # Example
 ```jldoctest
-using ADOLC
 
 partials = [[5, 5, 5, 1], [3, 1, 0, 0], [3, 3, 3, 0]]
 seed_idxs_adolc_format(partials)
@@ -301,7 +295,6 @@ Without `seed_idxs` the function first calls [`seed_idxs_partial_format(seed_idx
 
 # Examples
 ```jldoctest
-using ADOLC
 
 partials = [[0, 1, 1], [0, 2, 0]]
 seed_idxs = seed_idxs_partial_format(partials)
@@ -315,7 +308,6 @@ partial_format_to_seed_space(partials, seed_idxs)
 ```
 Without `seed_idxs`
 ```jldoctest
-using ADOLC
 
 partials = [[0, 1, 1], [0, 2, 0]]
 partial_format_to_seed_space(partials)
@@ -354,7 +346,6 @@ Same as [`partial_format_to_seed_space`](@ref) but with [ADOLC-Format](@ref).
 
 # Examples
 ```jldoctest
-using ADOLC
 
 partials = [[3, 2], [2, 2]]
 seed_idxs = seed_idxs_adolc_format(partials)
@@ -368,7 +359,6 @@ adolc_format_to_seed_space(partials, seed_idxs)
 ```
 Without `seed_idxs`
 ```jldoctest
-using ADOLC
 
 partials = [[3, 2], [2, 2]]
 seed_idxs = seed_idxs_adolc_format(partials)

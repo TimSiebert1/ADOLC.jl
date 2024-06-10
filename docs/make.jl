@@ -1,6 +1,12 @@
 using Documenter
 using ADOLC
 
+DocMeta.setdocmeta!(
+    ADOLC,
+    :DocTestSetup,
+    :(using ADOLC);
+    recursive=true,
+)
 
 makedocs(;
     sitename = "ADOLC.jl",
