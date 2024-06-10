@@ -21,6 +21,16 @@ using .TladoubleModule
 
 
 
+export tensor_address, 
+       partial_to_adolc_format, 
+       partial_to_adolc_format!, 
+       create_cxx_identity,
+       create_partial_cxx_identity,
+       seed_idxs_partial_format,
+       seed_idxs_adolc_format,
+       partial_format_to_seed_space,
+       adolc_format_to_seed_space,
+       myalloc2
 
 export TbAlloc, TlAlloc, Adouble, getValue, get_gradient
 
@@ -29,7 +39,6 @@ export abs_normal!, AbsNormalForm
 
 export derivative!
 
-export tensor_address, create_cxx_identity
 export erf, eps
 
 end # module ADOLC

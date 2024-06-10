@@ -1,8 +1,14 @@
 """
+    tensor_address(degree::I, adolc_partial::Vector{I}) where I <: Integer
+    tensor_address(degree::Cint, adolc_partial::Vector{I}) where I <: Integer
+    tensor_address(degree::I, adolc_partial::Vector{Cint}) where I <: Integer
+    tensor_address(degree::Cint, adolc_partial::Vector{Cint})
+
 Generates the index (address) of the mixed-partial specified by `adolc_partial`
 in an higher-order derivative tensor of derivative order `degree`.
 
-Note: The partial has to be in the ADOLC-format.
+!!! note 
+    The partial has to be in [ADOLC-Format](@ref).
 """
 function tensor_address(degree::I, adolc_partial::Vector{I}) where I <: Integer
     return tensor_address(Cint(degree), convert(Vector{Cint}, adolc_partial))
@@ -23,20 +29,23 @@ end
 
 
 """
-Transforms a given partial to the ADOLC-format. 
+    partial_to_adolc_format(partial::Vector{I_1}, degree::I_2) where {I_1<:Integer, I_2<:Integer}
 
-Example
-```juliadoctest
-julia>partial = [1, 0, 4]
-3-element Vector{Int64}:
- 1
- 0
- 4
+Transforms a given partial to the [ADOLC-Format](@ref). 
 
-julia>degree = sum(partial)
-5
+!!! note
 
-julia>partial_to_adolc_scheme(partial, degree)
+    `partial` is required to be in the `Partial-format`
+
+# Example:
+```jldoctest
+using ADOLC
+partial = [1, 0, 4]
+degree = sum(partial)
+partial_to_adolc_format(partial, degree)
+
+# output
+
 5-element Vector{Int32}:
  3
  3
@@ -45,18 +54,44 @@ julia>partial_to_adolc_scheme(partial, degree)
  1
 ```
 """
-function partial_to_adolc_scheme(partial::Vector{I_1}, degree::I_2) where {I_1<:Integer, I_2<:Integer}
+function partial_to_adolc_format(partial::Vector{I_1}, degree::I_2) where {I_1<:Integer, I_2<:Integer}
     res = Vector{Cint}(undef, degree)
-    partial_to_adolc_scheme!(res, partial, degree)
+    partial_to_adolc_format!(res, partial, degree)
     return res
 end
 
-function partial_to_adolc_scheme!(res::Vector{Cint}, partial::Vector{I_1}, degree::I_2) where {I_1<:Integer, I_2<:Integer}
-    partial_to_adolc_scheme!(res, convert(Vector{Cint}, partial), degree)
+"""
+    partial_to_adolc_format!(res::Vector{Cint}, partial::Vector{I_1}, degree::I_2) where {I_1<:Integer, I_2<:Integer}
+    partial_to_adolc_format!(res::Vector{Cint}, partial::Vector{Cint}, degree::I) where I <: Integer
+
+    
+Variant of [`partial_to_adolc_format`](@ref) that writes the result to `res`.
+    
+
+# Example:
+```jldoctest
+using ADOLC
+partial = [1, 3, 2, 0]
+degree = sum(partial)
+res = zeros(Int32, degree)
+partial_to_adolc_format!(res, partial, degree)
+
+# output
+
+6-element Vector{Int32}:
+ 3
+ 3
+ 2
+ 2
+ 2
+ 1
+```
+"""
+function partial_to_adolc_format!(res::Vector{Cint}, partial::Vector{I_1}, degree::I_2) where {I_1<:Integer, I_2<:Integer}
+    partial_to_adolc_format!(res, convert(Vector{Cint}, partial), degree)
 end
 
-
-function partial_to_adolc_scheme!(res::Vector{Cint}, partial::Vector{Cint}, degree::I) where I <: Integer
+function partial_to_adolc_format!(res::Vector{Cint}, partial::Vector{Cint}, degree::I) where I <: Integer
     idx = 1
     for i in eachindex(partial)
         for _ in 1:partial[i]
@@ -70,7 +105,30 @@ function partial_to_adolc_scheme!(res::Vector{Cint}, partial::Vector{Cint}, degr
     return sort!(res; rev=true)
 end
 
-function create_cxx_identity(n::Int64, m::Int64)
+"""
+    create_cxx_identity(n::I_1, m::I_2) where {I_1 <: Integer, I_2 <: Integer}
+
+Creates a identity matrix of shape (`n`, `m`) of type CxxPtr{CxxPtr{Float64}} (wrapper of C++'s double**).
+
+
+# Example
+```jldoctest
+using ADOLC
+id = create_cxx_identity(2, 4)
+for i in 1:2
+    for j in 1:4
+        print(id[i, j], " ")
+    end
+    println("")
+end
+
+# output
+
+1.0 0.0 0.0 0.0 
+0.0 1.0 0.0 0.0
+```
+"""
+function create_cxx_identity(n::I_1, m::I_2) where {I_1 <: Integer, I_2 <: Integer}
     I = myalloc2(n, m)
     for i in 1:n
         for j in 1:m
@@ -83,50 +141,103 @@ function create_cxx_identity(n::Int64, m::Int64)
     return I
 end
 
-function create_partial_cxx_identity(n::Int64, idxs::Vector{Int64})
+
+"""
+    create_partial_cxx_identity(n::I_1, idxs::Vector{I_2}) where {I_1 <: Integer, I_2 <: Integer}
+
+Creates a matrix of shape (`n`, `length(idxs)`) of type CxxPtr{CxxPtr{Float64}} (wrapper of C++'s double**).
+The columns are canonical basis vectors corresponding to the entries of `idxs`. The order of the basis vectors
+is defined by the order of the indices in `idxs`.
+
+!!! warning
+    The number of rows `n` must be smaller than the maximal index of `idxs`!
+
+!!! warning
+    The values of `idxs` must be non-negative!
+
+# Examples
+```jldoctest
+using ADOLC
+n = 4
+idxs = [1, 3]
+id = create_partial_cxx_identity(n, idxs)
+for i in 1:4
+    for j in 1:length(idxs)
+        print(id[i, j], " ")
+    end
+    println("")
+end
+
+# output
+
+1.0 0.0 
+0.0 0.0
+0.0 1.0
+0.0 0.0
+```
+The order in `idxs` defines the order of the basis vectors.
+```jldoctest
+using ADOLC
+n = 3
+idxs = [3, 0, 1]
+id = create_partial_cxx_identity(n, idxs)
+for i in 1:3
+    for j in 1:length(idxs)
+        print(id[i, j], " ")
+    end
+    println("")
+end
+
+# output
+
+0.0 0.0 1.0
+0.0 0.0 0.0
+1.0 0.0 0.0
+```
+"""
+function create_partial_cxx_identity(n::I_1, idxs::Vector{I_2}) where {I_1 <: Integer, I_2 <: Integer}
+    if n < maximum(idxs)
+        throw("ArgumentError: The number of rows must be greater than the largest index: $n < $(maximum(idxs)).")
+    end       
     m = length(idxs)
     I = myalloc2(n, m)
     for j in 1:m
         for i in 1:n
             I[i, j] = 0.0
         end
-        I[idxs[j], j] = 1.0
+        if idxs[j] > 0
+            I[idxs[j], j] = 1.0
+        end
     end
     return I
 end
 
-function partials_to_seed_space(partials::Vector{Vector{Int64}}, seed_idxs::Vector{Int64})
-    new_partials = Vector{Vector{Int64}}(undef, length(partials))
-    for (i, partial) in enumerate(partials)
-        new_partials[i] = zeros(length(seed_idxs))
-        for j in eachindex(partial)
-            if partial[j] != 0
-                new_partials[i][indexin(j, seed_idxs)[1]] = partial[j]
-            end
-        end
-    end
-    return new_partials
-end
+"""
+    seed_idxs_partial_format(partials::Vector{Vector{I}}) where I <: Integer
 
-function adolc_scheme_to_seed_space(
-    partials::Vector{Vector{Int64}}, seed_idxs::Vector{Int64}
-)
-    new_partials = Vector{Vector{Int64}}(undef, length(partials))
-    for (i, partial) in enumerate(partials)
-        new_partials[i] = zeros(length(partial))
-        for j in eachindex(partial)
-            if partial[j] != 0
-                new_partials[i][j] = indexin(partial[j], seed_idxs)[1]
-            else # since adolc_scheme is sorted, first zero means everything afterward is zero
-                break
-            end
-        end
-    end
-    return new_partials
-end
+Extracts the actually required derivative directions of `partials` and returns them 
+ascendet sorted. 
 
-function get_seed_idxs(partials::Vector{Vector{Int64}})
-    seed_idxs = Vector{Int64}()
+!!! note
+    `partials` has to be in [Partial-Format](@ref).
+
+# Example
+```jldoctest
+using ADOLC
+
+partials = [[1, 0, 0, 0, 3], [1, 0, 1, 0, 0], [0, 0, 3, 0, 0]]
+seed_idxs_partial_format(partials)
+
+# output
+
+3-element Vector{Int64}:
+ 1
+ 3
+ 5
+```
+"""
+function seed_idxs_partial_format(partials::Vector{Vector{I}}) where I <: Integer
+    seed_idxs = Vector{I}()
     for partial in partials
         for i in eachindex(partial)
             if partial[i] != 0
@@ -140,8 +251,34 @@ function get_seed_idxs(partials::Vector{Vector{Int64}})
     return seed_idxs
 end
 
-function get_seed_idxs_adolc_scheme(partials::Vector{Vector{Int64}})
-    seed_idxs = Vector{Int64}()
+"""
+    seed_idxs_adolc_format(partials::Vector{Vector{I}}) where I <: Integer
+
+
+Extracts the actually required derivative directions of `partials` and returns them 
+ascendet sorted. 
+
+!!! note
+
+    `partials` has to be in [ADOLC-Format](@ref).
+
+# Example
+```jldoctest
+using ADOLC
+
+partials = [[5, 5, 5, 1], [3, 1, 0, 0], [3, 3, 3, 0]]
+seed_idxs_adolc_format(partials)
+
+# output
+
+3-element Vector{Int64}:
+ 1
+ 3
+ 5
+```
+"""
+function seed_idxs_adolc_format(partials::Vector{Vector{I}}) where I <: Integer
+    seed_idxs = Vector{I}()
     for partial in partials
         for i in partial
             if i != 0
@@ -153,6 +290,117 @@ function get_seed_idxs_adolc_scheme(partials::Vector{Vector{Int64}})
     end
     sort!(seed_idxs)
     return seed_idxs
+end
+"""
+    partial_format_to_seed_space(partials::Vector{Vector{I_1}}, seed_idxs::Vector{I_2}) where {I_1 <: Integer, I_2 <: Integer}
+    partial_format_to_seed_space(partials::Vector{Vector{I}}) where I <: Integer
+
+Converts `partials` in [Partial-Format](@ref) to `partials` of the same format but with (possible) reduced number 
+of derivatives directions. The `seed_idxs` is expected to store the result of [`seed_idxs_partial_format(seed_idxs)`](@ref).
+Without `seed_idxs` the function first calls [`seed_idxs_partial_format(seed_idxs)`](@ref) to get the indices.
+
+# Examples
+```jldoctest
+using ADOLC
+
+partials = [[0, 1, 1], [0, 2, 0]]
+seed_idxs = seed_idxs_partial_format(partials)
+partial_format_to_seed_space(partials, seed_idxs)
+
+# output
+
+2-element Vector{Vector{Int64}}:
+ [1, 1]
+ [2, 0]
+```
+Without `seed_idxs`
+```jldoctest
+using ADOLC
+
+partials = [[0, 1, 1], [0, 2, 0]]
+partial_format_to_seed_space(partials)
+
+# output
+
+2-element Vector{Vector{Int64}}:
+ [1, 1]
+ [2, 0]
+```
+"""
+function partial_format_to_seed_space(partials::Vector{Vector{I_1}}, seed_idxs::Vector{I_2}) where {I_1 <: Integer, I_2 <: Integer}
+    seed_space_partials = Vector{Vector{Int64}}(undef, length(partials))
+    for (i, partial) in enumerate(partials)
+        seed_space_partials[i] = zeros(length(seed_idxs))
+        for j in eachindex(partial)
+            if partial[j] != 0
+                seed_space_partials[i][indexin(j, seed_idxs)[1]] = partial[j]
+            end
+        end
+    end
+    return seed_space_partials
+end
+
+function partial_format_to_seed_space(partials::Vector{Vector{I}}) where I <: Integer
+    seed_idxs = seed_idxs_partial_format(partials)
+    return partial_format_to_seed_space(partials, seed_idxs)
+end
+
+
+"""
+    adolc_format_to_seed_space(partials::Vector{Vector{I_1}}, seed_idxs::Vector{I_2}) where {I_1 <: Integer, I_2 <: Integer}
+    adolc_format_to_seed_space(partials::Vector{Vector{I}}) where I <: Integer
+
+Same as [`partial_format_to_seed_space`](@ref) but with [ADOLC-Format](@ref).
+
+# Examples
+```jldoctest
+using ADOLC
+
+partials = [[3, 2], [2, 2]]
+seed_idxs = seed_idxs_adolc_format(partials)
+adolc_format_to_seed_space(partials, seed_idxs)
+
+# output
+
+2-element Vector{Vector{Int64}}:
+ [2, 1]
+ [1, 1]
+```
+Without `seed_idxs`
+```jldoctest
+using ADOLC
+
+partials = [[3, 2], [2, 2]]
+seed_idxs = seed_idxs_adolc_format(partials)
+adolc_format_to_seed_space(partials, seed_idxs)
+
+# output
+
+2-element Vector{Vector{Int64}}:
+ [2, 1]
+ [1, 1]
+```
+"""
+function adolc_format_to_seed_space(
+    partials::Vector{Vector{I_1}}, seed_idxs::Vector{I_2}) where {I_1 <: Integer, I_2 <: Integer}
+    new_partials = Vector{Vector{Int64}}(undef, length(partials))
+    for (i, partial) in enumerate(partials)
+        new_partials[i] = zeros(length(partial))
+        for j in eachindex(partial)
+            if partial[j] != 0
+                new_partials[i][j] = indexin(partial[j], seed_idxs)[1]
+            else # since adolc_format is sorted, first zero means everything afterward is zero
+                break
+            end
+        end
+    end
+    return new_partials
+end
+
+function adolc_format_to_seed_space(
+    partials::Vector{Vector{I}}) where I <: Integer
+    seed_idxs = seed_idxs_adolc_format(partials)
+    return adolc_format_to_seed_space(partials, seed_idxs)
 end
 
 function build_tensor(

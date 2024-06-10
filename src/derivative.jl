@@ -61,21 +61,21 @@ function derivative!(
     tape_id::Int64=0,
     reuse_tape::Bool=false,
     id_seed::Bool=false,
-    adolc_scheme::Bool=false,
+    adolc_format::Bool=false,
 )
     if id_seed
         seed = create_cxx_identity(n, n)
     else
         seed_idxs =
-            adolc_scheme ? get_seed_idxs_adolc_scheme(partials) : get_seed_idxs(partials)
-        partials = if adolc_scheme
-            adolc_scheme_to_seed_space(partials, seed_idxs)
+            adolc_format ? seed_idxs_adolc_format(partials) : seed_idxs_partial_format(partials)
+        partials = if adolc_format
+            adolc_format_to_seed_space(partials, seed_idxs)
         else
-            partials_to_seed_space(partials, seed_idxs)
+            partial_format_to_seed_space(partials, seed_idxs)
         end
         seed = create_partial_cxx_identity(n, seed_idxs)
     end
-    higher_order!(res, f, m, n, x, partials, seed, n, tape_id, reuse_tape, adolc_scheme)
+    higher_order!(res, f, m, n, x, partials, seed, n, tape_id, reuse_tape, adolc_format)
     return myfree2(seed)
 end
 
@@ -89,7 +89,7 @@ function derivative!(
     seed::Matrix{Float64};
     tape_id::Int64=0,
     reuse_tape::Bool=false,
-    adolc_scheme::Bool=false,
+    adolc_format::Bool=false,
 )
     seed_cxx = julia_mat_to_cxx_mat(seed)
     higher_order!(
@@ -103,7 +103,7 @@ function derivative!(
         size(seed, 2),
         tape_id,
         reuse_tape,
-        adolc_scheme,
+        adolc_format,
     )
     return myfree2(seed_cxx)
 end
@@ -583,27 +583,27 @@ function higher_order!(
     num_seeds::Int64,
     tape_id::Int64,
     reuse_tape::Bool,
-    adolc_scheme::Bool,
+    adolc_format::Bool,
 )
     if !reuse_tape
         create_tape(f, m, n, x, tape_id)
     end
-    if adolc_scheme
+    if adolc_format
         degree = length(partials[1])
     else
         degree = maximum(map(sum, partials))
     end
     res_tmp = myalloc2(m, binomial(num_seeds + degree, degree))
     tensor_eval(tape_id, m, n, degree, num_seeds, x, res_tmp, seed)
-    if !adolc_scheme
+    if !adolc_format
         adolc_partial = zeros(Int32, degree)
     end
     for (i, partial) in enumerate(partials)
-        if !adolc_scheme
-            partial_to_adolc_scheme!(adolc_partial, partial, degree)
+        if !adolc_format
+            partial_to_adolc_format!(adolc_partial, partial, degree)
         end
         for j in 1:m
-            if !adolc_scheme
+            if !adolc_format
                 res[j, i] = res_tmp[j, tensor_address(degree, adolc_partial)]
             else
                 res[j, i] = res_tmp[j, tensor_address(degree, collect(Int32, partial))]
