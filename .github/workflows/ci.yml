@@ -75,7 +75,7 @@ jobs:
         shell: julia --project=docs --color=yes {0}
         run: |
           using Pkg
-          Pkg.add("git@github.com:TimSiebert1/ADOLC_jll.jl.git")
+          Pkg.add(url="git@github.com:TimSiebert1/ADOLC_jll.jl.git")
           Pkg.Registry.update()
           Pkg.develop(PackageSpec(path=pwd()))
           Pkg.instantiate()
