@@ -371,15 +371,14 @@ adolc_format_to_seed_space(partials, seed_idxs)
  [1, 1]
 ```
 """
-function adolc_format_to_seed_space(
-    partials::Vector{Vector{I_1}}, seed_idxs::Vector{I_2}) where {I_1 <: Integer, I_2 <: Integer}
+function adolc_format_to_seed_space(partials::Vector{Vector{I_1}}, seed_idxs::Vector{I_2}) where {I_1 <: Integer, I_2 <: Integer}
     new_partials = Vector{Vector{Int64}}(undef, length(partials))
     for (i, partial) in enumerate(partials)
         new_partials[i] = zeros(length(partial))
         for j in eachindex(partial)
             if partial[j] != 0
                 new_partials[i][j] = indexin(partial[j], seed_idxs)[1]
-            else # since adolc_format is sorted, first zero means everything afterward is zero
+            else # since adolc_format is sorted, first zero means everything afterwards is zero
                 break
             end
         end
@@ -387,37 +386,7 @@ function adolc_format_to_seed_space(
     return new_partials
 end
 
-function adolc_format_to_seed_space(
-    partials::Vector{Vector{I}}) where I <: Integer
+function adolc_format_to_seed_space(partials::Vector{Vector{I}}) where I <: Integer
     seed_idxs = seed_idxs_adolc_format(partials)
     return adolc_format_to_seed_space(partials, seed_idxs)
-end
-
-function build_tensor(
-    derivative_order::Int64, num_dependents::Int64, num_independents::Int64, CxxTensor
-)
-
-    # allocate the output (julia) tensor 
-    tensor = Array{Float64}(
-        undef, [num_independents for _ in 1:derivative_order]..., num_dependents
-    )
-
-    # creates all index-pairs; the i-th entry specifies the i-th directional derivative w.r.t x_i
-    # e.g. (1, 1, 3, 4) gives the derivative w.r.t x_1, x_1, x_3, x_4
-    # this is used as index for the tensor and to get the address from the compressed vector
-    idxs = vec(
-        collect(
-            Iterators.product(Iterators.repeated(1:num_independents, derivative_order)...)
-        ),
-    )
-
-    # build the tensor
-    for idx in idxs
-        for component in 1:num_dependents
-            tensor[idx..., component] = CxxTensor[
-                component, tensor_address2(derivative_order, idx)
-            ]
-        end
-    end
-    return tensor
 end

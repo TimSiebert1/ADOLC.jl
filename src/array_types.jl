@@ -8,6 +8,9 @@ function __init__()
     @initcxx
 end
 
+#CxxMatrix{T} = CxxPtr{CxxPtr{T}} where T <: Real
+#CxxTensor{T} = CxxPtr{CxxPtr{CxxPtr{T}}} where T <: Real
+
 ###### Array getter and setter ###### 
 Base.getindex(X::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64) = getindex_tens(X, dim)
 function Base.getindex(
@@ -41,6 +44,7 @@ function cxx_mat_finalizer(t)
 end
 
 ###### ptr-ptr wrapper #########################
+
 
 mutable struct CxxMatrix{T} <: AbstractMatrix{T}
     """
@@ -168,6 +172,17 @@ function julia_mat_to_cxx_mat(mat::Matrix{Float64})
         end
     end
     return mat_cxx
+end
+
+
+function cxx_mat_to_julia_mat(mat_cxx::CxxMat{Float64}, m, n)
+    mat = Matrix{Float64}(undef, m, n)
+    for i in 1:size(mat, 1)
+        for j in 1:size(mat, 2)
+            mat[i, j] = mat_cxx[i, j]
+        end
+    end
+    return mat
 end
 
 export CxxMatrix,
