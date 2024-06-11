@@ -1,5 +1,61 @@
 
 
+function derivative(
+    f::Function,
+    m::Int64,
+    n::Int64,
+    x::Union{Float64,Vector{Float64}},
+    mode::Symbol;
+    dir::Union{Vector{Float64},Matrix{Float64}}=Vector{Float64}(),
+    weights::Union{Vector{Float64},Matrix{Float64}}=Vector{Float64}(),
+    tape_id::Int64=0,
+    reuse_tape::Bool=false,
+)
+    res = allocator(mode, m, n, axes(dir, 1)[1], axes(weights, 2)[1])
+    derivative!(res, f, m, n, x, mode, dir=dir, weights=weights, tape_id=tape_id, reuse_tape=reuse_tape)
+    return cxx_mat_to_julia_mat(res)
+end
+
+
+function allocator(mode, m, n, num_dir, num_weights)
+    if mode === :jac
+        return myalloc2(m, n)
+    elseif mode === :hess
+        return myalloc3(m, n, n)
+    elseif mode === :jac_vec
+        return alloc_vec_double(m)
+    elseif mode === :jac_mat
+        return myalloc2(m, num_dir)
+    elseif mode === :hess_vec
+        return myalloc2(m, n)
+    elseif mode === :hess_mat
+        return myalloc3(m, n, num_dir)
+    elseif mode === :vec_jac
+        return alloc_vec_double(n)
+    elseif mode === :mat_jac
+        return myalloc2(num_weights, n)
+    elseif mode === :vec_hess
+        return myalloc2(n, n)
+    elseif mode === :mat_hess
+        return myalloc3(num_weights, n, n)
+
+    elseif mode === :vec_hess_vec
+        return alloc_vec_double(m)
+    elseif mode === :mat_hess_vec
+        return myalloc2(num_weights, n)
+    elseif mode === :vec_hess_mat
+        return myalloc2(n, num_dir)
+    elseif mode === :mat_hess_mat
+        return myalloc3(num_weights, n, num_dir)
+
+    elseif mode === :abs_normal
+        return init_abs_normal_form(f, m, n, x, tape_id=tape_id)
+
+    else
+        throw("mode $mode not implemented!")
+    end
+end
+
 function derivative!(
     res,
     f::Function,
@@ -12,26 +68,25 @@ function derivative!(
     tape_id::Int64=0,
     reuse_tape::Bool=false,
 )
+
     if mode === :jac
         jac!(res, f, m, n, x, tape_id, reuse_tape)
+    elseif mode === :hess
+        hessian!(res, f, m, n, x, tape_id, reuse_tape)
+
     elseif mode === :jac_vec
         fos_forward!(res, f, m, n, x, dir, tape_id, reuse_tape)
     elseif mode === :jac_mat
         fov_forward!(res, f, m, n, x, dir, tape_id, reuse_tape)
-    elseif mode === :vec_jac
-        fos_reverse!(res, f, m, n, x, weights, tape_id, reuse_tape)
-    elseif mode === :mat_jac
-        fov_reverse!(res, f, m, n, x, weights, tape_id, reuse_tape)
-    elseif mode === :abs_normal
-        abs_normal!(res, f, m, n, x, tape_id, reuse_tape)
-
-    elseif mode === :hess
-        hessian!(res, f, m, n, x, tape_id, reuse_tape)
     elseif mode === :hess_vec
         hess_vec!(res, f, m, n, x, dir, tape_id, reuse_tape)
     elseif mode === :hess_mat
         hess_mat!(res, f, m, n, x, dir, tape_id, reuse_tape)
 
+    elseif mode === :vec_jac
+        fos_reverse!(res, f, m, n, x, weights, tape_id, reuse_tape)
+    elseif mode === :mat_jac
+        fov_reverse!(res, f, m, n, x, weights, tape_id, reuse_tape)
     elseif mode === :vec_hess
         vec_hess!(res, f, m, n, x, weights, tape_id, reuse_tape)
     elseif mode === :mat_hess
@@ -45,6 +100,9 @@ function derivative!(
         vec_hess_mat!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
     elseif mode === :mat_hess_mat
         mat_hess_mat!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
+
+    elseif mode === :abs_normal
+        abs_normal!(res, f, m, n, x, tape_id, reuse_tape)
 
     else
         throw("mode $mode not implemented!")
