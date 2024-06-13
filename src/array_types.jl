@@ -175,7 +175,7 @@ function julia_mat_to_cxx_mat(mat::Matrix{Float64})
 end
 
 
-function cxx_mat_to_julia_mat(mat_cxx::CxxMat{Float64}, m, n)
+function cxx_mat_to_julia_mat(mat_cxx::CxxPtr{CxxPtr{Float64}}, m, n)
     mat = Matrix{Float64}(undef, m, n)
     for i in 1:size(mat, 1)
         for j in 1:size(mat, 2)

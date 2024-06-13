@@ -13,7 +13,9 @@ function derivative(
 )
     res = allocator(mode, m, n, axes(dir, 1)[1], axes(weights, 2)[1])
     derivative!(res, f, m, n, x, mode, dir=dir, weights=weights, tape_id=tape_id, reuse_tape=reuse_tape)
-    return cxx_mat_to_julia_mat(res)
+    julia_res = cxx_mat_to_julia_mat(res)
+    deallocator(res)
+    return julia_res
 end
 
 
