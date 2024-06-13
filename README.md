@@ -5,9 +5,9 @@
 :warning: :warning: :warning:  
 Under development
   
-Supported Versions: Julia 1.9 & 1.10  
+Supported Versions: Julia 1.9 & 1.10 & 1.11
 
-ADOL-C does not compile with musl libc. 
+ADOL-C does not compile with musl libc.  
 :warning::warning::warning:
   
 This package wraps the C/C++ automatic differentation library [ADOL-C](https://github.com/coin-or/ADOL-C) for the usage in [Julia](https://julialang.org/). 
