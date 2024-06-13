@@ -16,11 +16,7 @@ Supported Architectures:
   
 This package wraps the C/C++ automatic differentation library [ADOL-C](https://github.com/coin-or/ADOL-C) for the usage in [Julia](https://julialang.org/). 
 ## How to use this package?
-First, you have to get the ADOL-C binaries from
-```julia
-] add git@github.com:TimSiebert1/ADOLC_jll.jl.git
-```
-Then you can add the ADOLC.jl package 
+Add the ADOLC.jl package 
 ```julia 
 ] add git@github.com:TimSiebert1/ADOLC.jl.git
 ```
