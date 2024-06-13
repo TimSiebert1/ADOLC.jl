@@ -17,4 +17,4 @@ makedocs(;
     pages=["Home" => "index.md", "Reference" => "lib/reference.md"],
 )
 
-deploydocs(; repo="github.com/TimSiebert1/ADOLC.jl", devbranch="main")
+deploydocs(; repo="github.com/TimSiebert1/ADOLC.jl", devbranch="master")
