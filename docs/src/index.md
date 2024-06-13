@@ -15,6 +15,9 @@
 
 ## Seed-Space
 
+
+## Memory handling
+
 ## API Reference
 ```@contents
 Pages = ["lib/reference.md"]
