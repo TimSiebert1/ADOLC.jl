@@ -204,6 +204,50 @@ function cxx_tensor_to_julia_tensor(cxx_tensor::CxxPtr{CxxPtr{CxxPtr{Float64}}},
     end
     return jl_tensor
 end
+
+
+
+
+function cxx_res_to_julia_res(cxx_res, m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights::Int64)
+    if mode === :jac
+        if m > 1 
+            return cxx_mat_to_julia_mat(cxx_res, m, n)
+        else
+            return cxx_vec_to_julia_vec(cxx_res, n)
+        end
+    elseif mode === :hess
+        return cxx_tensor_to_julia_tensor(cxx_res, m, n, n)
+    elseif mode === :jac_vec
+        return cxx_vec_to_julia_vec(cxx_res, m)
+    elseif mode === :jac_mat
+        return cxx_mat_to_julia_mat(cxx_res, m, num_dir)
+    elseif mode === :vec_jac
+        return cxx_vec_to_julia_vec(cxx_res, n)
+    elseif mode === :mat_jac
+        return cxx_mat_to_julia_mat(cxx_res, num_weights, n)
+
+    elseif mode === :hess_vec
+        return cxx_mat_to_julia_mat(cxx_res, m, n)
+    elseif mode === :hess_mat
+        return cxx_tensor_to_julia_tensor(cxx_res, m, n, num_dir)
+    elseif mode === :vec_hess
+        return cxx_mat_to_julia_mat(cxx_res, n, n)
+    elseif mode === :mat_hess
+        return cxx_tensor_to_julia_tensor(cxx_res, num_weights, n, n)
+
+    elseif mode === :vec_hess_vec
+        return cxx_vec_to_julia_vec(cxx_res, n)
+    elseif mode === :mat_hess_vec
+        return cxx_mat_to_julia_mat(cxx_res, num_weights, n)
+    elseif mode === :vec_hess_mat
+        return cxx_mat_to_julia_mat(cxx_res, n, num_dir)
+    elseif mode === :mat_hess_mat
+        return cxx_tensor_to_julia_tensor(cxx_res, num_weights, n, num_dir)
+    elseif mode === :abs_normal
+        return 
+    end
+end
+
 export CxxMatrix,
     CxxVector,
     myalloc3,
@@ -215,7 +259,8 @@ export CxxMatrix,
     julia_mat_to_cxx_mat,
     cxx_mat_to_julia_mat,
     cxx_vec_to_julia_vec,
-    cxx_tensor_to_julia_tensor
+    cxx_tensor_to_julia_tensor,
+    cxx_res_to_julia_res
 
 export myfree3, myfree2, free_vec_double, free_vec_short, free_mat_short
 end # module arry_types

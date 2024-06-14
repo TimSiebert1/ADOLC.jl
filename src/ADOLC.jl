@@ -36,7 +36,7 @@ export TbAlloc, TlAlloc, Adouble, getValue, get_gradient
 
 export abs_normal!, AbsNormalForm
 
-export derivative, derivative!
+export derivative, derivative!, allocator, deallocator
 
 export erf, eps
 

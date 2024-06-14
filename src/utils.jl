@@ -390,3 +390,84 @@ function adolc_format_to_seed_space(partials::Vector{Vector{I}}) where I <: Inte
     seed_idxs = seed_idxs_adolc_format(partials)
     return adolc_format_to_seed_space(partials, seed_idxs)
 end
+
+
+
+
+function allocator(m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights::Int64)
+    if mode === :jac
+        if m > 1 
+            return myalloc2(m, n)
+        else
+            return alloc_vec_double(n)
+        end
+    elseif mode === :hess
+        return myalloc3(m, n, n)
+    elseif mode === :jac_vec
+        return alloc_vec_double(m)
+    elseif mode === :jac_mat
+        return myalloc2(m, num_dir)
+    elseif mode === :vec_jac
+        return alloc_vec_double(n)
+    elseif mode === :mat_jac
+        return myalloc2(num_weights, n)
+
+
+    elseif mode === :hess_vec
+        return myalloc2(m, n)
+    elseif mode === :hess_mat
+        return myalloc3(m, n, num_dir)
+    elseif mode === :vec_hess
+        return myalloc2(n, n)
+    elseif mode === :mat_hess
+        return myalloc3(num_weights, n, n)
+    elseif mode === :vec_hess_vec
+        return alloc_vec_double(n)
+    elseif mode === :mat_hess_vec
+        return myalloc2(num_weights, n)
+    elseif mode === :vec_hess_mat
+        return myalloc2(n, num_dir)
+    elseif mode === :mat_hess_mat
+        return myalloc3(num_weights, n, num_dir)
+    end
+end
+
+
+function deallocator(res, m::Int64, mode::Symbol)
+    if mode === :jac
+        if m > 1 
+            return myfree2(res)
+        else
+            return free_vec_double(res)
+        end
+    elseif mode === :hess
+        return myfree3(res)
+    elseif mode === :jac_vec
+        return free_vec_double(res)
+    elseif mode === :jac_mat
+        return myfree2(res)
+    elseif mode === :hess_vec
+        return myfree2(res)
+    elseif mode === :hess_mat
+        return myfree3(res)
+    elseif mode === :vec_jac
+        return free_vec_double(res)
+    elseif mode === :mat_jac
+        return myfree2(res)
+    elseif mode === :vec_hess
+        return myfree2(res)
+    elseif mode === :mat_hess
+        return myfree3(res)
+
+    elseif mode === :vec_hess_vec
+        return free_vec_double(res)
+    elseif mode === :mat_hess_vec
+        return myfree2(res)
+    elseif mode === :vec_hess_mat
+        return myfree2(res)
+    elseif mode === :mat_hess_mat
+        return myfree3(res)
+    elseif mode === :abs_normal
+        return 
+    end
+end
