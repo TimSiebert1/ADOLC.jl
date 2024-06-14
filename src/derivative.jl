@@ -11,12 +11,53 @@ function derivative(
     tape_id::Int64=0,
     reuse_tape::Bool=false,
 )
-    cxx_res = allocator(m, n, mode, size(dir, 1)[1], size(weights, 2)[1])
+    cxx_res = mode === :abs_normal ? init_abs_normal_form(f, m, n, x, tape_id=tape_id) : allocator(m, n, mode, size(dir, 2)[1], size(weights, 1)[1])
+
+    # allocator creates tape in case of :abs_normal
+    tape_id = mode === :abs_normal ? cxx_res.tape_id : tape_id
+    reuse_tape = mode === :abs_normal ? true : reuse_tape
+
     derivative!(cxx_res, f, m, n, x, mode, dir=dir, weights=weights, tape_id=tape_id, reuse_tape=reuse_tape)
-    jl_res = cxx_res_to_julia_res(cxx_res, m, n, mode, size(dir, 1)[1], size(weights, 2)[1])
+    jl_res = mode === :abs_normal ? cxx_res : cxx_res_to_julia_res(cxx_res, m, n, mode, size(dir, 2)[1], size(weights, 1)[1])
     deallocator(cxx_res, m, mode)
     return jl_res
 end
+
+
+
+function derivative(
+    f,
+    m::Int64,
+    n::Int64,
+    x::Union{Float64,Vector{Float64}},
+    partials::Vector{Vector{Int64}};
+    tape_id::Int64=0,
+    reuse_tape::Bool=false,
+    id_seed::Bool=false,
+    adolc_format::Bool=false,
+)
+    res = Matrix{Float64}(undef, m, length(partials))
+    derivative!(res, f, m, n, x, partials, tape_id=tape_id, reuse_tape=reuse_tape, id_seed=id_seed, adolc_format=adolc_format)
+    return res
+end
+
+
+function derivative(
+    f,
+    m::Int64,
+    n::Int64,
+    x::Union{Float64,Vector{Float64}},
+    partials::Vector{Vector{Int64}}, 
+    seed::Matrix{Float64};
+    tape_id::Int64=0,
+    reuse_tape::Bool=false,
+    adolc_format::Bool=false,
+)
+    res = Matrix{Float64}(undef, m, length(partials))
+    derivative!(res, f, m, n, x, partials, seed, tape_id=tape_id, reuse_tape=reuse_tape, adolc_format=adolc_format)
+    return res
+end
+
 
 function cxx_res_to_julia_res(cxx_res, m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights::Int64)
     if mode === :jac
@@ -31,27 +72,30 @@ function cxx_res_to_julia_res(cxx_res, m::Int64, n::Int64, mode::Symbol, num_dir
         return cxx_vec_to_julia_vec(cxx_res, m)
     elseif mode === :jac_mat
         return cxx_mat_to_julia_mat(cxx_res, m, num_dir)
-    elseif mode === :hess_vec
-        return cxx_mat_to_julia_mat(cxx_res, m, n)
-    elseif mode === :hess_mat
-        return cxx_tensor_to_julia_tensor(cxx_res, m, n, num_dir)
     elseif mode === :vec_jac
         return cxx_vec_to_julia_vec(cxx_res, n)
     elseif mode === :mat_jac
         return cxx_mat_to_julia_mat(cxx_res, num_weights, n)
+
+    elseif mode === :hess_vec
+        return cxx_mat_to_julia_mat(cxx_res, m, n)
+    elseif mode === :hess_mat
+        return cxx_tensor_to_julia_tensor(cxx_res, m, n, num_dir)
     elseif mode === :vec_hess
         return cxx_mat_to_julia_mat(cxx_res, n, n)
     elseif mode === :mat_hess
         return cxx_tensor_to_julia_tensor(cxx_res, num_weights, n, n)
 
     elseif mode === :vec_hess_vec
-        return cxx_vec_to_julia_vec(cxx_res, m)
+        return cxx_vec_to_julia_vec(cxx_res, n)
     elseif mode === :mat_hess_vec
         return cxx_mat_to_julia_mat(cxx_res, num_weights, n)
     elseif mode === :vec_hess_mat
         return cxx_mat_to_julia_mat(cxx_res, n, num_dir)
     elseif mode === :mat_hess_mat
         return cxx_tensor_to_julia_tensor(cxx_res, num_weights, n, num_dir)
+    elseif mode === :abs_normal
+        return 
     end
 end
 
@@ -68,33 +112,28 @@ function allocator(m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights
         return alloc_vec_double(m)
     elseif mode === :jac_mat
         return myalloc2(m, num_dir)
-    elseif mode === :hess_vec
-        return myalloc2(m, n)
-    elseif mode === :hess_mat
-        return myalloc3(m, n, num_dir)
     elseif mode === :vec_jac
         return alloc_vec_double(n)
     elseif mode === :mat_jac
         return myalloc2(num_weights, n)
+
+
+    elseif mode === :hess_vec
+        return myalloc2(m, n)
+    elseif mode === :hess_mat
+        return myalloc3(m, n, num_dir)
     elseif mode === :vec_hess
         return myalloc2(n, n)
     elseif mode === :mat_hess
         return myalloc3(num_weights, n, n)
-
     elseif mode === :vec_hess_vec
-        return alloc_vec_double(m)
+        return alloc_vec_double(n)
     elseif mode === :mat_hess_vec
         return myalloc2(num_weights, n)
     elseif mode === :vec_hess_mat
         return myalloc2(n, num_dir)
     elseif mode === :mat_hess_mat
         return myalloc3(num_weights, n, num_dir)
-
-    elseif mode === :abs_normal
-        return init_abs_normal_form(f, m, n, x, tape_id=tape_id)
-
-    else
-        throw("mode $mode not implemented!")
     end
 end
 
@@ -133,8 +172,8 @@ function deallocator(res, m::Int64, mode::Symbol)
         return myfree2(res)
     elseif mode === :mat_hess_mat
         return myfree3(res)
-    else
-        throw("mode $mode not implemented!")
+    elseif mode === :abs_normal
+        return 
     end
 end
 
