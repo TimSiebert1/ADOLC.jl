@@ -21,8 +21,7 @@ using .TladoubleModule
 
 
 
-export tensor_address, 
-       partial_to_adolc_format, 
+export  partial_to_adolc_format, 
        partial_to_adolc_format!, 
        create_cxx_identity,
        create_partial_cxx_identity,

@@ -1,34 +1,80 @@
+"""
 
+    derivative(
+        f::Function,
+        m::Integer,
+        n::Integer,
+        x::Union{Float64,Vector{Float64}},
+        mode::Symbol;
+        dir::Union{Vector{Float64},Matrix{Float64}}=Vector{Float64}(),
+        weights::Union{Vector{Float64},Matrix{Float64}}=Vector{Float64}(),
+        tape_id::Integer=0,
+        reuse_tape::Bool=false,
+    )
 
+    A variant of the core [`derivative`](@ref) driver, which can be used to compute
+    [`first-order`](@ref First-Order Modes) and [second-order](@ref Second-Order Modes) 
+    derivatives, as well as the [abs-normal-form](@ref) of a given function `f`. 
+
+"""
 function derivative(
     f::Function,
-    m::Int64,
-    n::Int64,
+    m::Integer,
+    n::Integer,
     x::Union{Float64,Vector{Float64}},
     mode::Symbol;
     dir::Union{Vector{Float64},Matrix{Float64}}=Vector{Float64}(),
     weights::Union{Vector{Float64},Matrix{Float64}}=Vector{Float64}(),
-    tape_id::Int64=0,
+    tape_id::Integer=0,
     reuse_tape::Bool=false,
 )
-    cxx_res = mode === :abs_normal ? init_abs_normal_form(f, m, n, x, tape_id=tape_id) : allocator(m, n, mode, size(dir, 2)[1], size(weights, 1)[1])
-
+    cxx_res = if mode === :abs_normal
+        init_abs_normal_form(f, m, n, x; tape_id=tape_id)
+    else
+        allocator(m, n, mode, size(dir, 2)[1], size(weights, 1)[1])
+    end
     # allocator creates tape in case of :abs_normal
-    tape_id = mode === :abs_normal ? cxx_res.tape_id : tape_id
-    reuse_tape = mode === :abs_normal ? true : reuse_tape
-
-    derivative!(cxx_res, f, m, n, x, mode, dir=dir, weights=weights, tape_id=tape_id, reuse_tape=reuse_tape)
-    jl_res = mode === :abs_normal ? cxx_res : cxx_res_to_julia_res(cxx_res, m, n, mode, size(dir, 2)[1], size(weights, 1)[1])
+    derivative!(
+        cxx_res,
+        f,
+        m,
+        n,
+        x,
+        mode;
+        dir=dir,
+        weights=weights,
+        tape_id=mode === :abs_normal ? cxx_res.tape_id : tape_id,
+        reuse_tape=mode === :abs_normal ? true : reuse_tape,
+    )
+    jl_res = if mode === :abs_normal
+        cxx_res
+    else
+        cxx_res_to_julia_res(cxx_res, m, n, mode, size(dir, 2)[1], size(weights, 1)[1])
+    end
     deallocator(cxx_res, m, mode)
     return jl_res
 end
 
 
+"""
+    derivative(
+        f::Function,
+        m::Integer,
+        n::Integer,
+        x::Union{Float64,Vector{Float64}},
+        partials::Vector{Vector{Int64}};
+        tape_id::Int64=0,
+        reuse_tape::Bool=false,
+        id_seed::Bool=false,
+        adolc_format::Bool=false,
+    )
 
+
+"""
 function derivative(
     f,
-    m::Int64,
-    n::Int64,
+    m::Integer,
+    n::Integer,
     x::Union{Float64,Vector{Float64}},
     partials::Vector{Vector{Int64}};
     tape_id::Int64=0,
@@ -37,27 +83,62 @@ function derivative(
     adolc_format::Bool=false,
 )
     res = Matrix{Float64}(undef, m, length(partials))
-    derivative!(res, f, m, n, x, partials, tape_id=tape_id, reuse_tape=reuse_tape, id_seed=id_seed, adolc_format=adolc_format)
+    derivative!(
+        res,
+        f,
+        m,
+        n,
+        x,
+        partials;
+        tape_id=tape_id,
+        reuse_tape=reuse_tape,
+        id_seed=id_seed,
+        adolc_format=adolc_format,
+    )
     return res
 end
 
 
+"""
+    derivative(
+        f::Function,
+        m::Int64,
+        n::Int64,
+        x::Union{Float64,Vector{Float64}},
+        partials::Vector{Vector{Int64}},
+        seed::Matrix{Float64};
+        tape_id::Int64=0,
+        reuse_tape::Bool=false,
+        adolc_format::Bool=false,
+    )
+
+"""
 function derivative(
     f,
     m::Int64,
     n::Int64,
     x::Union{Float64,Vector{Float64}},
-    partials::Vector{Vector{Int64}}, 
+    partials::Vector{Vector{Int64}},
     seed::Matrix{Float64};
     tape_id::Int64=0,
     reuse_tape::Bool=false,
     adolc_format::Bool=false,
 )
     res = Matrix{Float64}(undef, m, length(partials))
-    derivative!(res, f, m, n, x, partials, seed, tape_id=tape_id, reuse_tape=reuse_tape, adolc_format=adolc_format)
+    derivative!(
+        res,
+        f,
+        m,
+        n,
+        x,
+        partials,
+        seed;
+        tape_id=tape_id,
+        reuse_tape=reuse_tape,
+        adolc_format=adolc_format,
+    )
     return res
 end
-
 
 function derivative!(
     res,
@@ -71,7 +152,6 @@ function derivative!(
     tape_id::Int64=0,
     reuse_tape::Bool=false,
 )
-
     if mode === :jac
         jac!(res, f, m, n, x, tape_id, reuse_tape)
     elseif mode === :hess
@@ -127,8 +207,11 @@ function derivative!(
     if id_seed
         seed = create_cxx_identity(n, n)
     else
-        seed_idxs =
-            adolc_format ? seed_idxs_adolc_format(partials) : seed_idxs_partial_format(partials)
+        seed_idxs = if adolc_format
+            seed_idxs_adolc_format(partials)
+        else
+            seed_idxs_partial_format(partials)
+        end
         partials = if adolc_format
             adolc_format_to_seed_space(partials, seed_idxs)
         else
@@ -196,15 +279,15 @@ function gradient!(
     if !reuse_tape
         create_tape(f, 1, n, x, tape_id)
     end
-    return ADOLC.TbadoubleModule.gradient(tape_id, n, x, res)
+    return TbadoubleModule.gradient(tape_id, n, x, res)
 end
 
 function tape_less_forward!(res, f, n::Int64, x::Union{Float64,Vector{Float64}})
-    ADOLC.TladoubleModule.set_num_dir(n)
+    TladoubleModule.set_num_dir(n)
     a = Adouble{TlAlloc}(x, true)
     ADOLC.init_gradient(a)
     b = f(a)
-    return ADOLC.gradient(n, b, res)
+    return TladoubleModule.gradient(n, b, res)
 end
 
 function fos_reverse!(
@@ -220,7 +303,7 @@ function fos_reverse!(
     if !reuse_tape
         create_tape(f, m, n, x, tape_id; keep=1)
     else
-        ADOLC.TbadoubleModule.zos_forward(tape_id, m, n, 1, x, [0.0 for _ in 1:m])
+        ADOLC.zos_forward(tape_id, m, n, 1, x, [0.0 for _ in 1:m])
     end
     return ADOLC.TbadoubleModule.fos_reverse(tape_id, m, n, weights, res)
 end

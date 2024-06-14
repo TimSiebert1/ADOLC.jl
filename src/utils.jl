@@ -393,7 +393,6 @@ end
 
 
 
-
 function allocator(m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights::Int64)
     if mode === :jac
         if m > 1 
@@ -431,6 +430,7 @@ function allocator(m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights
         return myalloc3(num_weights, n, num_dir)
     end
 end
+
 
 
 function deallocator(res, m::Int64, mode::Symbol)

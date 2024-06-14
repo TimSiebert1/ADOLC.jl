@@ -8,5 +8,5 @@ function __init__()
     @initcxx
 end
 
-export TladoubleCxx, getADValue, setADValue, erf, cbrt, set_num_dir
+export TladoubleCxx, setADValue, cbrt, set_num_dir
 end # module adouble
