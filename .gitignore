@@ -20,3 +20,4 @@ my_examples
 *.pdf
 
 local_only.jl
+Manifest.toml
