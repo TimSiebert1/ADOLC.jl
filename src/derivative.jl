@@ -11,17 +11,57 @@ function derivative(
     tape_id::Int64=0,
     reuse_tape::Bool=false,
 )
-    res = allocator(mode, m, n, axes(dir, 1)[1], axes(weights, 2)[1])
-    derivative!(res, f, m, n, x, mode, dir=dir, weights=weights, tape_id=tape_id, reuse_tape=reuse_tape)
-    julia_res = cxx_mat_to_julia_mat(res)
-    deallocator(res, mode)
-    return julia_res
+    cxx_res = allocator(m, n, mode, size(dir, 1)[1], size(weights, 2)[1])
+    derivative!(cxx_res, f, m, n, x, mode, dir=dir, weights=weights, tape_id=tape_id, reuse_tape=reuse_tape)
+    jl_res = cxx_res_to_julia_res(cxx_res, m, n, mode, size(dir, 1)[1], size(weights, 2)[1])
+    deallocator(cxx_res, m, mode)
+    return jl_res
 end
 
-
-function allocator(mode, m, n, num_dir, num_weights)
+function cxx_res_to_julia_res(cxx_res, m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights::Int64)
     if mode === :jac
-        return myalloc2(m, n)
+        if m > 1 
+            return cxx_mat_to_julia_mat(cxx_res, m, n)
+        else
+            return cxx_vec_to_julia_vec(cxx_res, n)
+        end
+    elseif mode === :hess
+        return cxx_tensor_to_julia_tensor(cxx_res, m, n, n)
+    elseif mode === :jac_vec
+        return cxx_vec_to_julia_vec(cxx_res, m)
+    elseif mode === :jac_mat
+        return cxx_mat_to_julia_mat(cxx_res, m, num_dir)
+    elseif mode === :hess_vec
+        return cxx_mat_to_julia_mat(cxx_res, m, n)
+    elseif mode === :hess_mat
+        return cxx_tensor_to_julia_tensor(cxx_res, m, n, num_dir)
+    elseif mode === :vec_jac
+        return cxx_vec_to_julia_vec(cxx_res, n)
+    elseif mode === :mat_jac
+        return cxx_mat_to_julia_mat(cxx_res, num_weights, n)
+    elseif mode === :vec_hess
+        return cxx_mat_to_julia_mat(cxx_res, n, n)
+    elseif mode === :mat_hess
+        return cxx_tensor_to_julia_tensor(cxx_res, num_weights, n, n)
+
+    elseif mode === :vec_hess_vec
+        return cxx_vec_to_julia_vec(cxx_res, m)
+    elseif mode === :mat_hess_vec
+        return cxx_mat_to_julia_mat(cxx_res, num_weights, n)
+    elseif mode === :vec_hess_mat
+        return cxx_mat_to_julia_mat(cxx_res, n, num_dir)
+    elseif mode === :mat_hess_mat
+        return cxx_tensor_to_julia_tensor(cxx_res, num_weights, n, num_dir)
+    end
+end
+
+function allocator(m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights::Int64)
+    if mode === :jac
+        if m > 1 
+            return myalloc2(m, n)
+        else
+            return alloc_vec_double(n)
+        end
     elseif mode === :hess
         return myalloc3(m, n, n)
     elseif mode === :jac_vec
@@ -59,9 +99,13 @@ function allocator(mode, m, n, num_dir, num_weights)
 end
 
 
-function deallocator(res, mode)
+function deallocator(res, m::Int64, mode::Symbol)
     if mode === :jac
-        return myfree2(res)
+        if m > 1 
+            return myfree2(res)
+        else
+            return free_vec_double(res)
+        end
     elseif mode === :hess
         return myfree3(res)
     elseif mode === :jac_vec
