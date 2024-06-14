@@ -175,16 +175,35 @@ function julia_mat_to_cxx_mat(mat::Matrix{Float64})
 end
 
 
-function cxx_mat_to_julia_mat(mat_cxx::CxxPtr{CxxPtr{Float64}}, m, n)
-    mat = Matrix{Float64}(undef, m, n)
-    for i in 1:size(mat, 1)
-        for j in 1:size(mat, 2)
-            mat[i, j] = mat_cxx[i, j]
+function cxx_mat_to_julia_mat(mat_cxx::CxxPtr{CxxPtr{Float64}}, dim1, dim2)
+    jl_mat = Matrix{Float64}(undef, dim1, dim2)
+    for i in 1:dim2
+        for j in 1:dim1
+            jl_mat[j, i] = mat_cxx[j, i]
         end
     end
-    return mat
+    return jl_mat
 end
 
+function cxx_vec_to_julia_vec(cxx_vec::CxxPtr{Float64}, dim)
+    jl_vec = Vector{Float64}(undef, dim)
+    for i in 1:dim
+        jl_vec[i] = cxx_vec[i]
+    end
+    return jl_vec
+end
+
+function cxx_tensor_to_julia_tensor(cxx_tensor::CxxPtr{CxxPtr{CxxPtr{Float64}}}, dim1, dim2, dim3)
+    jl_tensor = Array{Float64}(undef, dim1, dim2, dim3)
+    for i in 1:dim3
+        for j in 1:dim2
+            for k in 1:dim1
+                jl_tensor[k, j, i] = cxx_tensor[k, j, i]
+            end
+        end
+    end
+    return jl_tensor
+end
 export CxxMatrix,
     CxxVector,
     myalloc3,
@@ -193,7 +212,10 @@ export CxxMatrix,
     alloc_vec_short,
     alloc_vec,
     alloc_mat_short,
-    julia_mat_to_cxx_mat
+    julia_mat_to_cxx_mat,
+    cxx_mat_to_julia_mat,
+    cxx_vec_to_julia_vec,
+    cxx_tensor_to_julia_tensor
 
 export myfree3, myfree2, free_vec_double, free_vec_short, free_mat_short
 end # module arry_types
