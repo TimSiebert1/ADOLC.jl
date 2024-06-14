@@ -14,7 +14,7 @@ function derivative(
     res = allocator(mode, m, n, axes(dir, 1)[1], axes(weights, 2)[1])
     derivative!(res, f, m, n, x, mode, dir=dir, weights=weights, tape_id=tape_id, reuse_tape=reuse_tape)
     julia_res = cxx_mat_to_julia_mat(res)
-    deallocator(res)
+    deallocator(res, mode)
     return julia_res
 end
 
@@ -53,6 +53,42 @@ function allocator(mode, m, n, num_dir, num_weights)
     elseif mode === :abs_normal
         return init_abs_normal_form(f, m, n, x, tape_id=tape_id)
 
+    else
+        throw("mode $mode not implemented!")
+    end
+end
+
+
+function deallocator(res, mode)
+    if mode === :jac
+        return myfree2(res)
+    elseif mode === :hess
+        return myfree3(res)
+    elseif mode === :jac_vec
+        return free_vec_double(res)
+    elseif mode === :jac_mat
+        return myfree2(res)
+    elseif mode === :hess_vec
+        return myfree2(res)
+    elseif mode === :hess_mat
+        return myfree3(res)
+    elseif mode === :vec_jac
+        return free_vec_double(res)
+    elseif mode === :mat_jac
+        return myfree2(res)
+    elseif mode === :vec_hess
+        return myfree2(res)
+    elseif mode === :mat_hess
+        return myfree3(res)
+
+    elseif mode === :vec_hess_vec
+        return free_vec_double(res)
+    elseif mode === :mat_hess_vec
+        return myfree2(res)
+    elseif mode === :vec_hess_mat
+        return myfree2(res)
+    elseif mode === :mat_hess_mat
+        return myfree3(res)
     else
         throw("mode $mode not implemented!")
     end
