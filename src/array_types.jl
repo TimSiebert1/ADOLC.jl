@@ -260,7 +260,8 @@ export CxxMatrix,
     cxx_mat_to_julia_mat,
     cxx_vec_to_julia_vec,
     cxx_tensor_to_julia_tensor,
-    cxx_res_to_julia_res
+    cxx_res_to_julia_res,
+    vec_to_cxx
 
 export myfree3, myfree2, free_vec_double, free_vec_short, free_mat_short
 end # module arry_types
