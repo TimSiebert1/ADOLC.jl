@@ -1,6 +1,3 @@
-
-####### first_order ########
-
 @testset "jac" begin
     # m = 1
     function f(x)
@@ -13,14 +10,14 @@
     @test res[3] == 1.0
 end
 
-"""
+
 @testset "jac_tl" begin
     # m > 1, n / 2 < m
     function f(x)
         return [x[1]^2 + x[2], x[3]^3]
     end
-    res = myalloc2(2, 3)
-    derivative!(res, f, 2, 3, [1.0, 1.0, 2.0], :jac)
+
+    res = derivative(f, 2, 3, [1.0, 1.0, 2.0], :jac)
 
     @test res[1, 1] == 2.0
     @test res[1, 2] == 1.0
@@ -30,7 +27,7 @@ end
     @test res[2, 2] == 0.0
     @test res[2, 3] == 12.0
 end
-"""
+
 
 @testset "jac" begin
     # m > 1, n / 2 >= m
