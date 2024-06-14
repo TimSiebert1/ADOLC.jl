@@ -39,4 +39,6 @@ export derivative, derivative!, allocator, deallocator
 
 export erf, eps
 
+export gradient
+
 end # module ADOLC
