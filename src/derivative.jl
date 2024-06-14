@@ -285,9 +285,9 @@ end
 function tape_less_forward!(res, f, n::Int64, x::Union{Float64,Vector{Float64}})
     TladoubleModule.set_num_dir(n)
     a = Adouble{TlAlloc}(x, true)
-    ADOLC.init_gradient(a)
+    init_gradient(a)
     b = f(a)
-    return TladoubleModule.gradient(n, b, res)
+    return gradient(n, b, res)
 end
 
 function fos_reverse!(
@@ -303,9 +303,9 @@ function fos_reverse!(
     if !reuse_tape
         create_tape(f, m, n, x, tape_id; keep=1)
     else
-        ADOLC.zos_forward(tape_id, m, n, 1, x, [0.0 for _ in 1:m])
+        TbadoubleModule.zos_forward(tape_id, m, n, 1, x, [0.0 for _ in 1:m])
     end
-    return ADOLC.TbadoubleModule.fos_reverse(tape_id, m, n, weights, res)
+    return TbadoubleModule.fos_reverse(tape_id, m, n, weights, res)
 end
 
 function fov_reverse!(
@@ -338,10 +338,10 @@ function fov_reverse!(
     if !reuse_tape
         create_tape(f, m, n, x, tape_id; keep=1)
     else
-        ADOLC.TbadoubleModule.zos_forward(tape_id, m, n, 1, x, [0.0 for _ in 1:m])
+        TbadoubleModule.zos_forward(tape_id, m, n, 1, x, [0.0 for _ in 1:m])
     end
 
-    return ADOLC.TbadoubleModule.fov_reverse(tape_id, m, n, num_dir, weights, res)
+    return TbadoubleModule.fov_reverse(tape_id, m, n, num_dir, weights, res)
 end
 
 function fos_forward!(
@@ -357,7 +357,7 @@ function fos_forward!(
     if !reuse_tape
         create_tape(f, m, n, x, tape_id)
     end
-    return ADOLC.TbadoubleModule.fos_forward(
+    return TbadoubleModule.fos_forward(
         tape_id, m, n, 0, x, dir, [0.0 for _ in 1:m], res
     )
 end
@@ -392,7 +392,7 @@ function fov_forward!(
     if !reuse_tape
         create_tape(f, m, n, x, tape_id)
     end
-    return ADOLC.TbadoubleModule.fov_forward(
+    return TbadoubleModule.fov_forward(
         tape_id, m, n, num_dir, x, dir, [0.0 for _ in 1:m], res
     )
 end
@@ -435,16 +435,16 @@ function abs_normal!(
         create_tape(f, m, n, x, tape_id; enableMinMaxUsingAbs=true)
     else
         check_resue_abs_normal_problem(tape_id, m, n, abs_normal_problem)
-        ADOLC.array_types.vec_to_cxx(abs_normal_problem.x, x)
+        vec_to_cxx(abs_normal_problem.x, x)
     end
-    return ADOLC.abs_normal!(abs_normal_problem)
+    return abs_normal!(abs_normal_problem)
 end
 
 function init_abs_normal_form(
     f, m::Int64, n::Int64, x::Union{Float64,Vector{Float64}}; tape_id::Int64=0
 )
     create_tape(f, m, n, x, tape_id; enableMinMaxUsingAbs=true)
-    return ADOLC.AbsNormalForm(tape_id, m, n, x, [0.0 for _ in 1:m])
+    return AbsNormalForm(tape_id, m, n, x, [0.0 for _ in 1:m])
 end
 
 function vec_hess_vec!(
@@ -461,7 +461,7 @@ function vec_hess_vec!(
     if !(reuse_tape)
         create_tape(f, m, n, x, tape_id)
     end
-    return ADOLC.TbadoubleModule.lagra_hess_vec(tape_id, m, n, x, dir, weights, res)
+    return TbadoubleModule.lagra_hess_vec(tape_id, m, n, x, dir, weights, res)
 end
 
 function vec_hess_mat!(
@@ -548,19 +548,19 @@ function mat_hess_vec!(
         free_res_fos_tmp = true
     end
     if nz_tmp === nothing
-        nz_tmp = ADOLC.array_types.alloc_mat_short(num_weights, n)
+        nz_tmp = alloc_mat_short(num_weights, n)
         free_nz_tmp = true
     end
     degree = 1
     keep = degree + 1
     if res_hov_tmp === nothing
-        res_hov_tmp = ADOLC.array_types.myalloc3(num_weights, n, degree + 1)
+        res_hov_tmp = myalloc3(num_weights, n, degree + 1)
         free_res_hov_tmp = true
     end
-    ADOLC.TbadoubleModule.fos_forward(
+    TbadoubleModule.fos_forward(
         tape_id, m, n, keep, x, dir, [0.0 for _ in 1:m], res_fos_tmp
     )
-    ADOLC.TbadoubleModule.hov_reverse(
+    TbadoubleModule.hov_reverse(
         tape_id, m, n, degree, num_weights, weights, res_hov_tmp, nz_tmp
     )
     for i in 1:num_weights
@@ -616,8 +616,8 @@ function mat_hess_mat!(
     end
     res_tmp = myalloc2(num_weights, n)
     res_fos_tmp = alloc_vec_double(m)
-    nz_tmp = ADOLC.array_types.alloc_mat_short(num_weights, n)
-    res_hov_tmp = ADOLC.array_types.myalloc3(num_weights, n, 2)
+    nz_tmp = alloc_mat_short(num_weights, n)
+    res_hov_tmp = myalloc3(num_weights, n, 2)
     for i in axes(dir, 2)
         mat_hess_vec!(
             res_tmp,
@@ -740,7 +740,7 @@ function higher_order!(
     res_tmp = myalloc2(m, binomial(num_seeds + degree, degree))
     tensor_eval(tape_id, m, n, degree, num_seeds, x, res_tmp, seed)
     if !adolc_format
-        adolc_partial = zeros(Int32, degree)
+        adolc_partial = zeros(Cint, degree)
     end
     for (i, partial) in enumerate(partials)
         if !adolc_format
@@ -750,7 +750,7 @@ function higher_order!(
             if !adolc_format
                 res[j, i] = res_tmp[j, tensor_address(degree, adolc_partial)]
             else
-                res[j, i] = res_tmp[j, tensor_address(degree, collect(Int32, partial))]
+                res[j, i] = res_tmp[j, tensor_address(degree, partial)]
             end
         end
     end
@@ -767,7 +767,7 @@ function create_tape(
     enableMinMaxUsingAbs=false,
 )
     if enableMinMaxUsingAbs
-        ADOLC.TbadoubleModule.enableMinMaxUsingAbs()
+        TbadoubleModule.enableMinMaxUsingAbs()
     end
     a = n == 1 ? Adouble{TbAlloc}() : [Adouble{TbAlloc}() for _ in 1:n]
     b = m == 1 ? Adouble{TbAlloc}() : [Adouble{TbAlloc}() for _ in 1:m]
