@@ -14,7 +14,7 @@ makedocs(;
     repo="github.com/TimSiebert1/ADOLC.jl",
     modules=[ADOLC],
     format=Documenter.HTML(),
-    pages=["Home" => "index.md", "Reference" => "lib/reference.md"],
+    pages=["Home" => "index.md", "Derivative Modes" => "lib/derivative_modes.md", "Reference" => "lib/reference.md", "Wrapped Functions" => "lib/wrapped_fcts.md"],
 )
 
 deploydocs(; repo="github.com/TimSiebert1/ADOLC.jl", devbranch="master")

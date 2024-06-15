@@ -31,7 +31,7 @@ end
 """
     partial_to_adolc_format(partial::Vector{I_1}, degree::I_2) where {I_1<:Integer, I_2<:Integer}
 
-Transforms a given partial to the [ADOLC-Format](@ref). 
+Transforms a given `partial` to the [ADOLC-Format](@ref). 
 
 !!! note
 
