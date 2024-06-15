@@ -2,6 +2,7 @@
 
 
 ```@docs
+ADOLC.derivative
 ADOLC.tensor_address
 ADOLC.partial_to_adolc_format
 ADOLC.partial_to_adolc_format!
