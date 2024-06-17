@@ -432,8 +432,7 @@ function allocator(m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights
 end
 
 
-
-function deallocator(res, m::Int64, mode::Symbol)
+function deallocator(res, m, mode::Symbol)
     if mode === :jac
         if m > 1 
             return myfree2(res)

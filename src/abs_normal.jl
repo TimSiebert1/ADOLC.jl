@@ -32,7 +32,7 @@ mutable struct AbsNormalForm
     L::CxxMatrix{Float64}
 
     function AbsNormalForm(
-        tape_id::Int64, m::Int64, n::Int64, x::Vector{Float64}, y::Vector{Float64}
+        tape_id::Int64, m, n, x::Vector{Float64}, y::Vector{Float64}
     )
         num_switches = TbadoubleModule.get_num_switches(tape_id)
         z = CxxVector{Float64}(num_switches)

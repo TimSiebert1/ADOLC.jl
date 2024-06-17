@@ -12,8 +12,6 @@
 
     abs_normal_form = derivative(
         f,
-        1,
-        3,
         x,
         :abs_normal
     )
@@ -50,8 +48,6 @@ end
 
     abs_normal_form = derivative(
         f,
-        1,
-        3,
         x,
         :abs_normal
     )
@@ -62,8 +58,6 @@ end
     x = [-0.5, -0.5, -0.5]
     # reuse abs_normal_form with same id and without retaping
     abs_normal_form = derivative(f,
-        1,
-        3,
         x,
         :abs_normal;
         tape_id=abs_normal_form.tape_id,

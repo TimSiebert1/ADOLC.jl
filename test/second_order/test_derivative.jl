@@ -7,7 +7,7 @@
     x = [1.0, 2.0, 2.0]
     dir = [-1.0, 1.0, 3.0]
     weights = [2.0, 1.0]
-    res = derivative(f, 2, 3, x, :vec_hess_vec; dir=dir, weights=weights)
+    res = derivative(f, x, :vec_hess_vec; dir=dir, weights=weights)
 
     @test res[1] == 32.0
     @test res[2] == -4.0
@@ -22,7 +22,7 @@ end
     x = [1.0, 2.0, 2.0]
     dir = [[1.0, 2.0, 3.0] [-1.0, -2.0, -3.0]]
     weights = [2.0, 1.0]
-    res = derivative(f, 2, 3, x, :vec_hess_mat; dir=dir, weights=weights)
+    res = derivative(f, x, :vec_hess_mat; dir=dir, weights=weights)
 
     @test res[1, 1] == 52.0
     @test res[1, 2] == -52.0
@@ -42,7 +42,7 @@ end
 
     x = [1.0, 2.0, 2.0]
     weights = [-1.0]
-    res = derivative(f, 1, 3, x, :vec_hess; weights=weights)
+    res = derivative(f, x, :vec_hess; weights=weights)
 
     @test res[1, 1] == 0.0
     @test res[1, 2] == 0.0
@@ -66,7 +66,7 @@ end
     x = [1.0, 2.0, 2.0]
     weights = [-1.0, 1.0]
 
-    res = derivative(f, 2, 3, x, :vec_hess; weights=weights)
+    res = derivative(f, x, :vec_hess; weights=weights)
 
     @test res[1, 1] == -4.0
     @test res[1, 2] == -2.0
@@ -89,7 +89,7 @@ end
     x = [1.0, 2.0, 2.0]
     dir = [-1.0, 1.0, 3.0]
     weights = [[1.0, 0.0, 0.0] [0.0, 1.0, -1.0]]
-    res = derivative(f, 2, 3, x, :mat_hess_vec; dir=dir, weights=weights)
+    res = derivative(f, x, :mat_hess_vec; dir=dir, weights=weights)
 
     @test res[1, 1] == -2.0
     @test res[1, 2] == -2.0
@@ -109,7 +109,7 @@ end
         return x[1]^3 + x[2]^2 * x[3]
     end
 
-    res = derivative(f, 1, 3, [-1.0, 1.0, 2.0], :hess)
+    res = derivative(f, [-1.0, 1.0, 2.0], :hess)
 
     @test res[1, 1, 1] == -6.0
     @test res[1, 2, 1] == 0.0
@@ -130,7 +130,7 @@ end
     end
 
     x = [-1.0, 2.0, 2.0]
-    res = derivative(f, 2, 3, x, :hess; tape_id=1)
+    res = derivative(f, x, :hess; tape_id=1)
 
     @test res[1, 1, 1] == -6.0
     @test res[1, 2, 1] == 0.0
@@ -167,7 +167,7 @@ end
     dir = [[1.0, 2.0, 3.0] [-1.0, -2.0, -3.0]]
     weights = [[1.0, 0.0, 0.0] [0.0, 1.0, -1.0]]
 
-    res = derivative(f, 2, 3, x, :mat_hess_mat; dir=dir, weights=weights)
+    res = derivative(f, x, :mat_hess_mat; dir=dir, weights=weights)
 
     @test res[1, 1, 1] == 8.0
     @test res[1, 1, 2] == -8.0
@@ -205,7 +205,7 @@ end
     x = [1.0, 2.0, 2.0]
     dir = [-1.0, 1.0, 3.0]
 
-    res = derivative(f, 2, 3, x, :hess_vec; dir=dir)
+    res = derivative(f, x, :hess_vec; dir=dir)
 
     @test res[1, 1] == -2.0
     @test res[1, 2] == -2.0
@@ -225,7 +225,7 @@ end
     x = [1.0, 2.0, 2.0]
     weights = [[1.0, 0.0, 0.0] [0.0, 1.0, -1.0]]
 
-    res = derivative(f, 2, 3, x, :mat_hess; weights=weights)
+    res = derivative(f, x, :mat_hess; weights=weights)
 
     @test res[1, 1, 1] == 4.0
     @test res[1, 1, 2] == 2.0
@@ -274,7 +274,7 @@ end
     dir = [[1.0, 0.0, 0.0] [0.0, 1.0, -1.0]]
     
 
-    res = derivative(f, 1, 3, x, :hess_mat; dir=dir)
+    res = derivative(f, x, :hess_mat; dir=dir)
 
     @test res[1, 1, 1] == 0.0
     @test res[1, 1, 2] == -12.0
@@ -295,7 +295,7 @@ end
     dir = [-1.0, 1.0, 3.0]
     weights = [[1.0, 0.0, 0.0] [0.0, 1.0, -1.0]]
 
-    res = derivative(f, 2, 3, x, :mat_hess_vec; dir=dir, weights=weights)
+    res = derivative(f, x, :mat_hess_vec; dir=dir, weights=weights)
 
     @test res[1, 1] == -2.0
     @test res[1, 2] == -2.0

@@ -14,7 +14,7 @@
         [1, 1, 1, 1],
         [2, 0, 0, 0],
     ]
-    res = derivative(f, 1, 4, x, partials)
+    res = derivative(f, x, partials)
 
     @test res[1] ≈ 24.0
     @test res[2] ≈ 8.0
@@ -40,7 +40,7 @@ end
         [0, 0, 2, 1],
         [2, 0, 0, 0],
     ]
-    res = derivative(f, 2, length(x), x, partials)
+    res = derivative(f, x, partials)
 
     @test res[1, 1] ≈ 8.0
     @test res[2, 1] ≈ 0.0
@@ -72,7 +72,7 @@ end
     x = [1.0, 2.0, 3.0, 4.0]
     partials = [[1, 0, 0], [3, 0, 0], [2, 1, 0], [4, 3, 0], [3, 2, 1], [4, 3, 3], [1, 1, 0]]
 
-    res = derivative(f, 2, length(x), x, partials; adolc_format=true)
+    res = derivative(f, x, partials; adolc_format=true)
 
     @test res[1, 1] ≈ 8.0
     @test res[2, 1] ≈ 0.0
@@ -103,7 +103,7 @@ end
     end
     x = [1.0, 2.0, 3.0, 4.0]
     partials = [[1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 2, 0], [2, 0, 0, 0]]
-    res = derivative(f, 2, length(x), x, partials)
+    res = derivative(f, x, partials)
 
     @test res[1, 1] ≈ 8.0
     @test res[2, 1] ≈ 0.0
@@ -125,7 +125,7 @@ end
     end
     x = [1.0, 2.0, 3.0, 4.0]
     partials = [[1, 0], [3, 0], [3, 3], [1, 1]]
-    res = derivative(f, 2, length(x), x, partials; adolc_format=true)
+    res = derivative(f, x, partials; adolc_format=true)
 
     @test res[1, 1] ≈ 8.0
     @test res[2, 1] ≈ 0.0
@@ -161,7 +161,7 @@ end
     ]
 
     seed = [[1.0, 0.0] [0.0, 2.0] [1.0, 1.0]]
-    res = derivative(f, 1, length(x), x, partials, seed)
+    res = derivative(f, x, partials, seed)
 
     @test res[1] ≈ 8.0
     @test res[2] ≈ 8.0

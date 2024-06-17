@@ -2,8 +2,6 @@
 
     derivative(
         f::Function,
-        m::Integer,
-        n::Integer,
         x::Union{Float64,Vector{Float64}},
         mode::Symbol;
         dir::Union{Vector{Float64},Matrix{Float64}}=Vector{Float64}(),
@@ -15,8 +13,7 @@
 A variant of the [`derivative`](@ref) driver, which can be used to compute
 [first-order](@ref "First-Order") and [second-order](@ref "Second-Order") 
 derivatives, as well as the [abs-normal-form](@ref "Abs-Normal-Form") 
-of the given function `f` with output dimension `m`, input dimension `n` 
-at the point `x`. The mode has to be choosen from [`derivative modes`](@ref "Derivative Modes").
+of the given function `f` at the point `x`. The mode has to be choosen from [`derivative modes`](@ref "Derivative Modes").
 The corresponding formulas define `weights` (left multiplier) and `dir` (right multiplier).
 Most modes leverage a tape, which has the identifier `tape_id`. If there is already a valid 
 tape for the function `f` at the selected point `x` use `reuse_tape=true` and set the `tape_id`
@@ -27,7 +24,7 @@ accordingly to avoid the re-creation of the tape.
 First-Order:
 ```jldoctest
 f(x) = sin(x)
-res = derivative(f, 1, 1, float(π), :jac)
+res = derivative(f, float(π), :jac)
 
 # output
 
@@ -41,7 +38,7 @@ f(x) = [x[1]*x[2]^2, x[1]^2*x[3]^3]
 x = [1.0, 2.0, -1.0]
 dir = [1.0, 0.0, 0.0]
 weights = [1.0, 1.0]
-res = derivative(f, 2, 3, x, :vec_hess_vec, dir=dir, weights=weights)
+res = derivative(f, x, :vec_hess_vec, dir=dir, weights=weights)
 
 # output
 
@@ -55,7 +52,7 @@ Abs-Normal-Form:
 ```jldoctest
 f(x) = max(x[1]*x[2], x[1]^2)
 x = [1.0, 1.0]
-res = derivative(f, 1, 2, x, :abs_normal)
+res = derivative(f, x, :abs_normal)
 
 # output
 
@@ -64,8 +61,6 @@ AbsNormalForm(0, 1, 2, 1, [1.0, 1.0], [1.0], [0.0], [0.0], [1.0], [1.5 0.5], [0.
 """
 function derivative(
     f::Function,
-    m::Integer,
-    n::Integer,
     x::Union{Float64,Vector{Float64}},
     mode::Symbol;
     dir::Union{Vector{Float64},Matrix{Float64}}=Vector{Float64}(),
@@ -73,8 +68,20 @@ function derivative(
     tape_id::Integer=0,
     reuse_tape::Bool=false,
 )
+    if !reuse_tape
+        if mode == :abs_normal
+            m, n = create_tape(f, x, tape_id, enableMinMaxUsingAbs=true)
+        else
+            m, n = create_tape(f, x, tape_id)
+        end
+        reuse_tape = true
+    else
+        m = TbadoubleModule.num_dependents(tape_id)
+        n = TbadoubleModule.num_independents(tape_id)
+    end
+
     cxx_res = if mode === :abs_normal
-        init_abs_normal_form(f, m, n, x; tape_id=tape_id)
+        init_abs_normal_form(f, x; tape_id=tape_id, reuse_tape=reuse_tape)
     else
         allocator(m, n, mode, size(dir, 2)[1], size(weights, 1)[1])
     end
@@ -104,8 +111,6 @@ end
 """
     derivative(
         f::Function,
-        m::Integer,
-        n::Integer,
         x::Union{Float64,Vector{Float64}},
         partials::Vector{Vector{Int64}};
         tape_id::Int64=0,
@@ -114,8 +119,8 @@ end
         adolc_format::Bool=false,
     )
 A variant of the [`derivative`](@ref) driver, which can be used to compute
-[higher-order](@ref "Higher-Order") derivatives of the function `f` with output 
-dimension `m`, input dimension `n` at the point `x`. The derivatives are
+[higher-order](@ref "Higher-Order") derivatives of the function `f` 
+at the point `x`. The derivatives are
 specified as mixed-partials in the `partials` vector. To define the partial-derivatives use either
 the [Partial-Format](@ref) or the [ADOLC-Format](@ref) and set `adolc_format` accordingly.
 The flag `id_seed` is used to specify the method for [seed-matrix generation](@ref "Seed-Space").
@@ -132,7 +137,7 @@ Partial-Format:
 f(x) = [x[1]^2*x[2]^2, x[3]^2*x[4]^2]
 x = [1.0, 2.0, 3.0, 4.0]
 partials = [[1, 1, 0, 0], [0, 0, 1, 1], [2, 2, 0, 0]]
-res = derivative(f, 2, 4, x, partials)
+res = derivative(f, x, partials)
 
 # output
 
@@ -146,7 +151,7 @@ ADOLC-Format:
 f(x) = [x[1]^2*x[2]^2, x[3]^2*x[4]^2]
 x = [1.0, 2.0, 3.0, 4.0]
 partials = [[2, 1, 0, 0], [4, 3, 0, 0], [2, 2, 1, 1]]
-res = derivative(f, 2, 4, x, partials, adolc_format=true)
+res = derivative(f, x, partials, adolc_format=true)
 
 # output
 
@@ -157,8 +162,6 @@ res = derivative(f, 2, 4, x, partials, adolc_format=true)
 """
 function derivative(
     f,
-    m::Integer,
-    n::Integer,
     x::Union{Float64,Vector{Float64}},
     partials::Vector{Vector{Int64}};
     tape_id::Int64=0,
@@ -166,6 +169,13 @@ function derivative(
     id_seed::Bool=false,
     adolc_format::Bool=false,
 )
+    if !reuse_tape 
+        m, n = create_tape(f, x, tape_id)
+        reuse_tape = true
+    else
+        m = TbadoubleModule.num_dependents(tape_id)
+        n = TbadoubleModule.num_independents(tape_id)
+    end
     res = Matrix{Float64}(undef, m, length(partials))
     derivative!(
         res,
@@ -186,8 +196,6 @@ end
 """
     derivative(
         f::Function,
-        m::Int64,
-        n::Int64,
         x::Union{Float64,Vector{Float64}},
         partials::Vector{Vector{Int64}},
         seed::Matrix{Float64};
@@ -199,8 +207,6 @@ end
 """
 function derivative(
     f,
-    m::Int64,
-    n::Int64,
     x::Union{Float64,Vector{Float64}},
     partials::Vector{Vector{Int64}},
     seed::Matrix{Float64};
@@ -208,6 +214,14 @@ function derivative(
     reuse_tape::Bool=false,
     adolc_format::Bool=false,
 )
+    if !reuse_tape
+        m, n = create_tape(f, x, tape_id)
+        reuse_tape = true
+    else
+        m = TbadoubleModule.num_dependents(tape_id)
+        n = TbadoubleModule.num_independents(tape_id)
+    end
+
     res = Matrix{Float64}(undef, m, length(partials))
     derivative!(
         res,
@@ -224,11 +238,26 @@ function derivative(
     return res
 end
 
+
+"""
+    derivative!(
+        res,
+        f::Function,
+        m,
+        n,
+        x::Union{Float64,Vector{Float64}},
+        mode::Symbol;
+        dir::Union{Vector{Float64},Matrix{Float64}}=Vector{Float64}(),
+        weights::Union{Vector{Float64},Matrix{Float64}}=Vector{Float64}(),
+        tape_id::Int64=0,
+        reuse_tape::Bool=false,
+    )
+"""
 function derivative!(
     res,
     f::Function,
-    m::Int64,
-    n::Int64,
+    m,
+    n,
     x::Union{Float64,Vector{Float64}},
     mode::Symbol;
     dir::Union{Vector{Float64},Matrix{Float64}}=Vector{Float64}(),
@@ -361,7 +390,7 @@ function gradient!(
     res, f, n::Int64, x::Union{Float64,Vector{Float64}}, tape_id::Int64, reuse_tape
 )
     if !reuse_tape
-        create_tape(f, 1, n, x, tape_id)
+        create_tape(f, x, tape_id)
     end
     return TbadoubleModule.gradient(tape_id, n, x, res)
 end
@@ -385,7 +414,7 @@ function fos_reverse!(
     reuse_tape,
 )
     if !reuse_tape
-        create_tape(f, m, n, x, tape_id; keep=1)
+        create_tape(f, x, tape_id; keep=1)
     else
         TbadoubleModule.zos_forward(tape_id, m, n, 1, x, [0.0 for _ in 1:m])
     end
@@ -420,7 +449,7 @@ function fov_reverse!(
     reuse_tape,
 )
     if !reuse_tape
-        create_tape(f, m, n, x, tape_id; keep=1)
+        create_tape(f, x, tape_id; keep=1)
     else
         TbadoubleModule.zos_forward(tape_id, m, n, 1, x, [0.0 for _ in 1:m])
     end
@@ -439,7 +468,7 @@ function fos_forward!(
     reuse_tape,
 )
     if !reuse_tape
-        create_tape(f, m, n, x, tape_id)
+        create_tape(f, x, tape_id)
     end
     return TbadoubleModule.fos_forward(
         tape_id, m, n, 0, x, dir, [0.0 for _ in 1:m], res
@@ -474,7 +503,7 @@ function fov_forward!(
     reuse_tape,
 )
     if !reuse_tape
-        create_tape(f, m, n, x, tape_id)
+        create_tape(f, x, tape_id)
     end
     return TbadoubleModule.fov_forward(
         tape_id, m, n, num_dir, x, dir, [0.0 for _ in 1:m], res
@@ -482,7 +511,7 @@ function fov_forward!(
 end
 
 function check_resue_abs_normal_problem(
-    tape_id::Int64, m::Int64, n::Int64, abs_normal_problem::AbsNormalForm
+    tape_id::Int64, m, n, abs_normal_problem::AbsNormalForm
 )
     if abs_normal_problem.tape_id != tape_id
         throw(
@@ -509,14 +538,14 @@ end
 function abs_normal!(
     abs_normal_problem,
     f,
-    m::Int64,
-    n::Int64,
+    m,
+    n,
     x::Union{Float64,Vector{Float64}},
     tape_id::Int64,
     reuse_tape::Bool,
 )
     if !reuse_tape
-        create_tape(f, m, n, x, tape_id; enableMinMaxUsingAbs=true)
+        create_tape(f, x, tape_id; enableMinMaxUsingAbs=true)
     else
         check_resue_abs_normal_problem(tape_id, m, n, abs_normal_problem)
         vec_to_cxx(abs_normal_problem.x, x)
@@ -525,9 +554,15 @@ function abs_normal!(
 end
 
 function init_abs_normal_form(
-    f, m::Int64, n::Int64, x::Union{Float64,Vector{Float64}}; tape_id::Int64=0
+    f, x::Union{Float64,Vector{Float64}}; tape_id::Int64=0, reuse_tape=false
 )
-    create_tape(f, m, n, x, tape_id; enableMinMaxUsingAbs=true)
+    if !reuse_tape
+        m, n = create_tape(f, x, tape_id; enableMinMaxUsingAbs=true)
+        reuse_tape=true
+    else
+        m = TbadoubleModule.num_dependents(tape_id)
+        n = TbadoubleModule.num_independents(tape_id)
+    end
     return AbsNormalForm(tape_id, m, n, x, [0.0 for _ in 1:m])
 end
 
@@ -543,7 +578,7 @@ function vec_hess_vec!(
     reuse_tape::Bool,
 )
     if !(reuse_tape)
-        create_tape(f, m, n, x, tape_id)
+        create_tape(f, x, tape_id)
     end
     return TbadoubleModule.lagra_hess_vec(tape_id, m, n, x, dir, weights, res)
 end
@@ -560,7 +595,7 @@ function vec_hess_mat!(
     reuse_tape::Bool,
 )
     if !(reuse_tape)
-        create_tape(f, m, n, x, tape_id)
+        create_tape(f, x, tape_id)
     end
     res_tmp = alloc_vec_double(n)
     for i in axes(dir, 2)
@@ -621,7 +656,7 @@ function mat_hess_vec!(
     res_hov_tmp::Union{CxxPtr{CxxPtr{CxxPtr{Float64}}},Nothing}=nothing,
 )
     if !(reuse_tape)
-        create_tape(f, m, n, x, tape_id)
+        create_tape(f, x, tape_id)
     end
     free_res_fos_tmp = false
     free_nz_tmp = false
@@ -696,7 +731,7 @@ function mat_hess_mat!(
     lower_triag::Bool=false,
 )
     if !(reuse_tape)
-        create_tape(f, m, n, x, tape_id)
+        create_tape(f, x, tape_id)
     end
     res_tmp = myalloc2(num_weights, n)
     res_fos_tmp = alloc_vec_double(m)
@@ -814,7 +849,7 @@ function higher_order!(
     adolc_format::Bool,
 )
     if !reuse_tape
-        create_tape(f, m, n, x, tape_id)
+        create_tape(f, x, tape_id)
     end
     if adolc_format
         degree = length(partials[1])
@@ -843,8 +878,6 @@ end
 
 function create_tape(
     f,
-    m::Int64,
-    n::Int64,
     x::Union{Float64,Vector{Float64}},
     tape_id::Int64;
     keep::Int64=0,
@@ -853,14 +886,30 @@ function create_tape(
     if enableMinMaxUsingAbs
         TbadoubleModule.enableMinMaxUsingAbs()
     end
-    a = n == 1 ? Adouble{TbAlloc}() : [Adouble{TbAlloc}() for _ in 1:n]
-    b = m == 1 ? Adouble{TbAlloc}() : [Adouble{TbAlloc}() for _ in 1:m]
-
-    y = m == 1 ? 0.0 : [0.0 for _ in 1:m]
 
     trace_on(tape_id, keep)
-    a << x
+    a = create_independent(x)
     b = f(a)
-    b >> y
-    return trace_off()
+    dependent(b)
+    trace_off()
+
+    return length(b), length(x)
+end
+
+"""
+    create_independent(x::Union{Float64, Vector{Float64}})
+
+"""
+function create_independent(x)
+    n = length(x)
+    a = n == 1 ? Adouble{TbAlloc}() : [Adouble{TbAlloc}() for _ in 1:n]
+    a << x
+    return a  
+end
+
+
+function dependent(b)
+    m = length(b)
+    y = m == 1 ? 0.0 : [0.0 for _ in 1:m]
+    b >> y 
 end

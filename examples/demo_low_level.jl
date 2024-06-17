@@ -6,14 +6,14 @@ function demo_low_level()
     end
 
     m = 2
-    n = 3
+    n = 30
 
-    x = [1.0, 1.0, 2.0]
+    x = [1.0 for _ in 1:30]
     a = [Adouble{TbAlloc}() for _ in 1:n]
     y = [0.0 for _ in 1:m]
     b = [Adouble{TbAlloc}() for _ in 1:m]
 
-    tape_id = 0
+    tape_id = 1
     ADOLC.trace_on(tape_id)
     a << x
     b = f(a)

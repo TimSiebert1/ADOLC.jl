@@ -10,7 +10,7 @@
 
     x = [-0.5, -0.5, -0.5]
 
-    abs_normal_form = ADOLC.init_abs_normal_form(f, 1, 3, x)
+    abs_normal_form = ADOLC.init_abs_normal_form(f, x)
     derivative!(
         abs_normal_form,
         f,
@@ -52,7 +52,7 @@ end
 
     x = [-1.5, -1.5, -1.5]
 
-    abs_normal_form = ADOLC.init_abs_normal_form(f, 1, 3, x)
+    abs_normal_form = ADOLC.init_abs_normal_form(f, x)
     derivative!(
         abs_normal_form,
         f,
