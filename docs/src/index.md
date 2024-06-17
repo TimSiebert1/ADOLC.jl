@@ -1,6 +1,6 @@
 # ADOLC.jl
 
-*A Julia wrapper of the algorithmic differentiation package ADOL-C*
+*A Julia wrapper of the automatic differentiation package ADOL-C*
 
 
 
