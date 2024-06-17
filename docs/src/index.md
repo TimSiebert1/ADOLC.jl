@@ -3,25 +3,45 @@
 *A Julia wrapper of the algorithmic differentiation package ADOL-C*
 
 
+
+```@meta
+DocTestSetup = quote
+    using ADOLC
+end
+```
+
 To use this package, use 
 ```jl
 using Pkg; Pkg.add(url="https://github.com/TimSiebert1/ADOLC.jl")
 using ADOLC
 ```
 First- and second-order derivatives can be calculated as follows
-```jl
+```jldoctest
 f(x) = [x[1]*x[2]^2, x[1]^2*x[3]^3]
 x = [1.0, 2.0, -1.0]
 dir = [1.0, 0.0, 0.0]
 weights = [1.0, 1.0]
-res = derivative(f, 2, 3, x, :vec_hess_vec, dir=dir, weights=weights)
+res = derivative(f, x, :vec_hess_vec, dir=dir, weights=weights)
+
+# output
+
+3-element Vector{Float64}:
+ -2.0
+  4.0
+  6.0
 ```
 There are various available modes for [first-](@ref "First-Order") and [second-order](@ref "Second-Order") calculations. The computation of higher-order derivatives is explained [here](@ref "Higher-Order") and works as sketched below
-```jl
+```jldoctest
 f(x) = [x[1]^2*x[2]^2, x[3]^2*x[4]^2]
 x = [1.0, 2.0, 3.0, 4.0]
 partials = [[1, 1, 0, 0], [0, 0, 1, 1], [2, 2, 0, 0]]
-res = derivative(f, 2, 4, x, partials)
+res = derivative(f, x, partials)
+
+# output
+
+2×3 Matrix{Float64}:
+ 8.0   0.0  4.0
+ 0.0  48.0  0.0
 ```
 
 
