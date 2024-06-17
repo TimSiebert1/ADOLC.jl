@@ -2,7 +2,7 @@
 [![Coverage Status](https://codecov.io/github/TimSiebert1/ADOLC.jl/coverage.svg?branch=master)](https://app.codecov.io/gh/timsiebert1/ADOLC.jl)
 
 **ADOLC.jl**  
-*A Julia wrapper of the algorithmic differentiation package ADOL-C*
+*A Julia wrapper of the automatic differentiation package ADOL-C*
   
 This package wraps the C/C++ automatic differentiation library [ADOL-C](https://github.com/coin-or/ADOL-C) for use in [Julia](https://julialang.org/). 
 
