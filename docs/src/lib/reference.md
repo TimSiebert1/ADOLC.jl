@@ -1,5 +1,8 @@
 # API reference
 
+```@meta
+CollapsedDocStrings = true
+```
 
 ```@docs
 ADOLC.derivative

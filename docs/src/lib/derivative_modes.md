@@ -1,35 +1,35 @@
-## Derivative Modes
+# Derivative Modes
 
 
 
-# First-Order
+## First-Order
 | Mode          | Formula                  |
 |:---------------:|:--------------------------:|
-| jac         | $$Df(x)$$  |
-| jac_vec    |  $$Df(x)\dot{v}$$            |
-| jac_mat    |  $$Df(x)\dot{V}$$            |
-| vec_jac    | $$\bar{z}^T Df(x)$$         |
-| mat_jac    | $$\bar{Z}^T Df(x)$$       |
+| `:jac`         | $$Df(x)$$  |
+| `:jac_vec`    |  $$Df(x)\dot{v}$$            |
+| `:jac_mat`    |  $$Df(x)\dot{V}$$            |
+| `:vec_jac`    | $$\bar{z}^T Df(x)$$         |
+| `:mat_jac`    | $$\bar{Z}^T Df(x)$$       |
 
 
-# Second-Order
+## Second-Order
 | Mode             | Formula                       |
 |:------------------:|:-------------------------------:|
-| hess           | $$D^2f(x)$$               |
-| hess_vec      | $$D^2f(x) \dot{v}$$          |
-| hess_mat      | $$D^2f(x)  \dot{V}$$         |
-| vec_hess      | $$\bar{z}^T D^2f(x)$$       |
-| mat_hess      | $$\bar{Z}^T D^2f(x)$$       |
-| vec_hess_vec | $$\bar{z}^T D^2f(x)  \dot{v}$$  |
-| vec_hess_mat | $$\bar{z}^T D^2f(x)  \dot{V}$$ |
-| mat_hess_mat | $$\bar{Z}^T D^2f(x)  \dot{V}$$  |
-| mat_hess_vec | $$\bar{Z}^T D^2f(x)  \dot{v}$$  |
+| `:hess`           | $$D^2f(x)$$               |
+| `:hess_vec`      | $$D^2f(x) \dot{v}$$          |
+| `:hess_mat`      | $$D^2f(x)  \dot{V}$$         |
+| `:vec_hess`      | $$\bar{z}^T D^2f(x)$$       |
+| `:mat_hess`      | $$\bar{Z}^T D^2f(x)$$       |
+| `:vec_hess_vec` | $$\bar{z}^T D^2f(x)  \dot{v}$$  |
+| `:vec_hess_mat` | $$\bar{z}^T D^2f(x)  \dot{V}$$ |
+| `:mat_hess_mat` | $$\bar{Z}^T D^2f(x)  \dot{V}$$  |
+| `:mat_hess_vec` | $$\bar{Z}^T D^2f(x)  \dot{v}$$  |
 
 
-# Abs-Normal-Form
+## Abs-Normal-Form
 | Mode             | Formula                       |
 |:------------------:|:-------------------------------:|
-| abs_norm           | $$\Delta f(x)$$               |
+| `:abs_norm`           | $$\Delta f(x)$$               |
 
 
 
@@ -45,7 +45,7 @@ and we want to compute the mixed-partials
 ``` 
 leveraging the [`derivative`](@ref) driver. After defining the function `f` and the point for the derivative evaluation `x`, we have to select the format of the `partials`. There exist two options explained below that use `Vector{Int64}` to define a partial derivative.
 
-# ADOLC-Format
+## ADOLC-Format
 The ADOLC-Format repeats the index $$i$$ of a derivative direction $$x_i$$ up to the derivative order of this index: $$\frac{\partial^4 f(x)}{\partial^4 x_3} \to [3, 3, 3, 3]$$. Additionally, the resulting vector is sorted descendent; if the vector's length is less than the total derivative degree, it is filled with zeros. The requested mixed-partials results in:
 ```math 
 [
@@ -55,7 +55,7 @@ The ADOLC-Format repeats the index $$i$$ of a derivative direction $$x_i$$ up to
 ]
 ```
 
-# Partial-Format
+## Partial-Format
 The Partial-Format mimics the notation of the mixed-partial, as used above. The entry of the vector at index $$i$$ is the derivative degree corresponding to the derivative direction $$x_i$$. Therefore, `partials` is given as
 ```math 
 [
@@ -77,6 +77,6 @@ There are utilities to convert between the formats: [`partial_to_adolc_format`](
 
 
 
-# Seed-Space
+## Seed-Space
 
 ## Memory handling
