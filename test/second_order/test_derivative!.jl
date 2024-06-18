@@ -342,7 +342,8 @@ end
     @test res[1, 3, 2] == -12.0
 end
 
-@testset "mat_hess_vec" begin()
+@testset "mat_hess_vec" begin
+    ()
     function f(x)
         return [x[1]^2 * x[2], x[1] * x[3]^3]
     end

@@ -10,7 +10,7 @@ DocTestSetup = quote
 end
 ```
 
-To use this package, use 
+To use this package, type
 ```jl
 using Pkg; Pkg.add(url="https://github.com/TimSiebert1/ADOLC.jl")
 using ADOLC

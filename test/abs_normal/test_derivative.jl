@@ -1,5 +1,4 @@
 
-
 @testset "abs_normal" begin
     function f(x)
         return (
@@ -10,11 +9,7 @@
 
     x = [-0.5, -0.5, -0.5]
 
-    abs_normal_form = derivative(
-        f,
-        x,
-        :abs_normal
-    )
+    abs_normal_form = derivative(f, x, :abs_normal)
 
     @test abs_normal_form.Y[1, 1] == -1.5
     @test abs_normal_form.Y[1, 2] == -3.0
@@ -46,22 +41,15 @@ end
 
     x = [-1.5, -1.5, -1.5]
 
-    abs_normal_form = derivative(
-        f,
-        x,
-        :abs_normal
-    )
+    abs_normal_form = derivative(f, x, :abs_normal)
     y = f(x)
 
     @test abs_normal_form.y[1] == y
 
     x = [-0.5, -0.5, -0.5]
     # reuse abs_normal_form with same id and without retaping
-    abs_normal_form = derivative(f,
-        x,
-        :abs_normal;
-        tape_id=abs_normal_form.tape_id,
-        reuse_tape=true,
+    abs_normal_form = derivative(
+        f, x, :abs_normal; tape_id=abs_normal_form.tape_id, reuse_tape=true
     )
     y = f(x)
 
@@ -86,4 +74,3 @@ end
     @test abs_normal_form.L[2, 1] == 0.0
     @test abs_normal_form.L[2, 2] == 0.0
 end
-

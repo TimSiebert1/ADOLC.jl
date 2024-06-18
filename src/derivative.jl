@@ -13,8 +13,8 @@
 A variant of the [`derivative`](@ref) driver, which can be used to compute
 [first-order](@ref "First-Order") and [second-order](@ref "Second-Order") 
 derivatives, as well as the [abs-normal-form](@ref "Abs-Normal-Form") 
-of the given function `f` at the point `x`. The mode has to be choosen from [`derivative modes`](@ref "Derivative Modes").
-The corresponding formulas define `weights` (left multiplier) and `dir` (right multiplier).
+of the given function `f` at the point `x`. The available modes are listed [here](@ref "Derivative Modes").
+The formulas in the tables define `weights` (left multiplier) and `dir` (right multiplier).
 Most modes leverage a tape, which has the identifier `tape_id`. If there is already a valid 
 tape for the function `f` at the selected point `x` use `reuse_tape=true` and set the `tape_id`
 accordingly to avoid the re-creation of the tape.
@@ -70,7 +70,7 @@ function derivative(
 )
     if !reuse_tape
         if mode == :abs_normal
-            m, n = create_tape(f, x, tape_id, enableMinMaxUsingAbs=true)
+            m, n = create_tape(f, x, tape_id; enableMinMaxUsingAbs=true)
         else
             m, n = create_tape(f, x, tape_id)
         end
@@ -107,7 +107,6 @@ function derivative(
     return jl_res
 end
 
-
 """
     derivative(
         f::Function,
@@ -123,7 +122,7 @@ A variant of the [`derivative`](@ref) driver, which can be used to compute
 at the point `x`. The derivatives are
 specified as mixed-partials in the `partials` vector. To define the partial-derivatives use either
 the [Partial-Format](@ref) or the [ADOLC-Format](@ref) and set `adolc_format` accordingly.
-The flag `id_seed` is used to specify the method for [seed-matrix generation](@ref "Seed-Space").
+The flag `id_seed` is used to specify the method for [seed-matrix generation](@ref "Seed-Matrix").
 The underlying method leverages a tape, which has the identifier `tape_id`. If there is already a valid 
 tape for the function `f` at the selected point `x` use `reuse_tape=true` and set the `tape_id`
 accordingly to avoid the re-creation of the tape.
@@ -169,7 +168,7 @@ function derivative(
     id_seed::Bool=false,
     adolc_format::Bool=false,
 )
-    if !reuse_tape 
+    if !reuse_tape
         m, n = create_tape(f, x, tape_id)
         reuse_tape = true
     else
@@ -192,7 +191,6 @@ function derivative(
     return res
 end
 
-
 """
     derivative(
         f::Function,
@@ -203,7 +201,27 @@ end
         reuse_tape::Bool=false,
         adolc_format::Bool=false,
     )
+    Variant of the [`derivative`](@ref) driver for the computation of [higher-order](@ref "Higher-Order")
+    derivatives, that requires a `seed`. Details on the idea behind `seed` can be found 
+    [here](@ref "Seed-Matrix").
 
+
+Example:
+
+```jldoctest
+f(x) = [x[1]^4, x[2]^3*x[1]]
+x = [1.0, 2.0]
+partials = [[1], [2], [3]]
+seed = [[1.0, 1.0];;]
+res = derivative(f, x, partials, seed)
+
+
+# output
+
+2×3 Matrix{Float64}:
+  4.0  12.0  24.0
+ 20.0  36.0  42.0
+```
 """
 function derivative(
     f,
@@ -238,13 +256,12 @@ function derivative(
     return res
 end
 
-
 """
     derivative!(
         res,
         f::Function,
-        m,
-        n,
+        m::Int64,
+        n::Int64,
         x::Union{Float64,Vector{Float64}},
         mode::Symbol;
         dir::Union{Vector{Float64},Matrix{Float64}}=Vector{Float64}(),
@@ -252,6 +269,51 @@ end
         tape_id::Int64=0,
         reuse_tape::Bool=false,
     )
+A variant of the [`derivative`](@ref) driver for [first-](@ref "First-Order"),
+[second-order](@ref "Second-Order") and [abs-normal-form](@ref "Abs-Normal-Form") 
+computations that allows the user to provide a pre-allocated container for the result `res`. 
+In addition to the arguments of [`derivative`](@ref), the output dimension `m` and 
+input dimension `n` of the function `f` is required. If there is already a valid 
+tape for the function `f` at the selected point `x` use `reuse_tape=true` and set the `tape_id`
+accordingly to avoid the re-creation of the tape.
+
+!!! note
+    `res` must to be C++ memory and should be allocated by [`allocator`](@ref). 
+    Since the memory is not managed by Julia (only the pointer to it) at the moment, 
+    it has to be manually destroyed by the use of [`deallocator`](@ref). There is a
+    [guide](@ref "Working with C++ Memory") on how to work on these CxxPtr types. 
+
+Example:
+```jldoctest
+f(x) = [cos(x[1]), x[2]*x[3]]
+x = [0.0, 1.5, -1.0]
+mode = :hess_mat
+dir = [[1.0, -1.0, 1.0] [0.5, -0.5, 1.0]]
+m = 2
+n = 3
+res =  allocator(m, n, mode, size(dir, 2)[1], 0)
+derivative!(res, f, m, n, x, mode, dir=dir)
+for i in 1:m
+    for j in 1:n
+        for k in 1:size(dir, 2)
+            print(res[i, j, k], " ")
+        end
+        println("")
+    end
+    println("")
+end
+deallocator(res, m, mode)
+
+# output
+
+-1.0 -0.5 
+0.0 0.0 
+0.0 0.0 
+
+0.0 0.0 
+1.0 1.0 
+-1.0 -0.5 
+```
 """
 function derivative!(
     res,
@@ -305,6 +367,50 @@ function derivative!(
     end
 end
 
+
+"""
+    derivative!(
+        res,
+        f,
+        m::Int64,
+        n::Int64,
+        x::Union{Float64,Vector{Float64}},
+        partials::Vector{Vector{Int64}};
+        tape_id::Int64=0,
+        reuse_tape::Bool=false,
+        id_seed::Bool=false,
+        adolc_format::Bool=false,
+    )
+
+A variant of the [`derivative`](@ref) driver for the computation of 
+[higher-order](@ref "Higher-Order") derivatives that allows the user to provide 
+a pre-allocated container for the result `res`. In addition to the arguments of 
+[`derivative`](@ref), the output dimension `m` and input dimension `n` of the function `f`
+is required. If there is already a valid tape for the function `f` at the 
+selected point `x` use `reuse_tape=true` and set the `tape_id` accordingly to 
+avoid the re-creation of the tape.
+
+!!! note
+    In contrast to the [`derivative!`](@ref) method for the first- and second-order computations
+    `res` is of type `Matrix{Float64}` with the dimensions `(m, length(partials)`.
+
+Example: 
+```jldoctest
+f(x) = x[1]^4*x[2]*x[3]*x[4]^2
+x = [3.0, -1.5, 1.5, -2.0]
+partials = [[4, 0, 0, 0], [3, 0, 1, 2]]
+m = 1
+n = 4
+res = Matrix{Float64}(undef, m, length(partials))
+derivative!(res, f, m, n, x, partials)
+res
+
+# output
+
+1×2 Matrix{Float64}:
+ -216.0  -216.0
+```
+"""
 function derivative!(
     res,
     f,
@@ -336,6 +442,45 @@ function derivative!(
     return myfree2(seed)
 end
 
+
+"""
+    derivative!(
+        res,
+        f,
+        m::Int64,
+        n::Int64,
+        x::Union{Float64,Vector{Float64}},
+        partials::Vector{Vector{Int64}},
+        seed::Matrix{Float64};
+        tape_id::Int64=0,
+        reuse_tape::Bool=false,
+        adolc_format::Bool=false,
+    )
+Variant of the [`derivative!`](@ref) driver for the computation of [higher-order](@ref "Higher-Order")
+derivatives, that requires a `seed`. Details on the idea behind `seed` can be found 
+[here](@ref "Seed-Matrix").
+
+
+Example:
+
+```jldoctest
+f(x) = [x[1]^4, x[2]^3*x[1]]
+x = [1.0, 2.0]
+partials = [[1], [2], [3]]
+seed = [[1.0, 1.0];;]
+m = 2
+n = 2
+res = Matrix{Float64}(undef, m, length(partials))
+derivative!(res, f, m, n, x, partials, seed)
+res
+
+# output
+
+2×3 Matrix{Float64}:
+  4.0  12.0  24.0
+ 20.0  36.0  42.0
+```
+"""
 function derivative!(
     res,
     f,
@@ -470,9 +615,7 @@ function fos_forward!(
     if !reuse_tape
         create_tape(f, x, tape_id)
     end
-    return TbadoubleModule.fos_forward(
-        tape_id, m, n, 0, x, dir, [0.0 for _ in 1:m], res
-    )
+    return TbadoubleModule.fos_forward(tape_id, m, n, 0, x, dir, [0.0 for _ in 1:m], res)
 end
 
 function fov_forward!(
@@ -558,7 +701,7 @@ function init_abs_normal_form(
 )
     if !reuse_tape
         m, n = create_tape(f, x, tape_id; enableMinMaxUsingAbs=true)
-        reuse_tape=true
+        reuse_tape = true
     else
         m = TbadoubleModule.num_dependents(tape_id)
         n = TbadoubleModule.num_independents(tape_id)
@@ -904,12 +1047,11 @@ function create_independent(x)
     n = length(x)
     a = n == 1 ? Adouble{TbAlloc}() : [Adouble{TbAlloc}() for _ in 1:n]
     a << x
-    return a  
+    return a
 end
-
 
 function dependent(b)
     m = length(b)
     y = m == 1 ? 0.0 : [0.0 for _ in 1:m]
-    b >> y 
+    return b >> y
 end

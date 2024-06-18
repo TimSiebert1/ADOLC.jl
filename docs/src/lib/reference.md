@@ -17,4 +17,6 @@ ADOLC.seed_idxs_adolc_format
 ADOLC.partial_format_to_seed_space
 ADOLC.adolc_format_to_seed_space
 ADOLC.create_independent
+ADOLC.allocator
+ADOLC.deallocator
 ```

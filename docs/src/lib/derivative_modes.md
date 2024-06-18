@@ -73,10 +73,3 @@ The Partial-Format mimics the notation of the mixed-partial, as used above. The 
 
 
 There are utilities to convert between the formats: [`partial_to_adolc_format`](@ref)
-
-
-
-
-## Seed-Space
-
-## Memory handling

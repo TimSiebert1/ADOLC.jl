@@ -10,15 +10,15 @@ in an higher-order derivative tensor of derivative order `degree`.
 !!! note 
     The partial has to be in [ADOLC-Format](@ref).
 """
-function tensor_address(degree::I, adolc_partial::Vector{I}) where I <: Integer
+function tensor_address(degree::I, adolc_partial::Vector{I}) where {I<:Integer}
     return tensor_address(Cint(degree), convert(Vector{Cint}, adolc_partial))
 end
 
-function tensor_address(degree::Cint, adolc_partial::Vector{I}) where I <: Integer
+function tensor_address(degree::Cint, adolc_partial::Vector{I}) where {I<:Integer}
     return tensor_address(degree, convert(Vector{Cint}, adolc_partial))
 end
 
-function tensor_address(degree::I, adolc_partial::Vector{Cint}) where I <: Integer
+function tensor_address(degree::I, adolc_partial::Vector{Cint}) where {I<:Integer}
     return tensor_address(Cint(degree), adolc_partial)
 end
 
@@ -26,7 +26,6 @@ function tensor_address(degree::Cint, adolc_partial::Vector{Cint})
     # "+1" because c++ indexing is -1
     return TbadoubleModule.tensor_address(degree, adolc_partial) + 1
 end
-
 
 """
     partial_to_adolc_format(partial::Vector{I_1}, degree::I_2) where {I_1<:Integer, I_2<:Integer}
@@ -54,7 +53,9 @@ partial_to_adolc_format(partial, degree)
  1
 ```
 """
-function partial_to_adolc_format(partial::Vector{I_1}, degree::I_2) where {I_1<:Integer, I_2<:Integer}
+function partial_to_adolc_format(
+    partial::Vector{I_1}, degree::I_2
+) where {I_1<:Integer,I_2<:Integer}
     res = Vector{Cint}(undef, degree)
     partial_to_adolc_format!(res, partial, degree)
     return res
@@ -86,11 +87,15 @@ partial_to_adolc_format!(res, partial, degree)
  1
 ```
 """
-function partial_to_adolc_format!(res::Vector{Cint}, partial::Vector{I_1}, degree::I_2) where {I_1<:Integer, I_2<:Integer}
-    partial_to_adolc_format!(res, convert(Vector{Cint}, partial), degree)
+function partial_to_adolc_format!(
+    res::Vector{Cint}, partial::Vector{I_1}, degree::I_2
+) where {I_1<:Integer,I_2<:Integer}
+    return partial_to_adolc_format!(res, convert(Vector{Cint}, partial), degree)
 end
 
-function partial_to_adolc_format!(res::Vector{Cint}, partial::Vector{Cint}, degree::I) where I <: Integer
+function partial_to_adolc_format!(
+    res::Vector{Cint}, partial::Vector{Cint}, degree::I
+) where {I<:Integer}
     idx = 1
     for i in eachindex(partial)
         for _ in 1:partial[i]
@@ -126,7 +131,7 @@ end
 0.0 1.0 0.0 0.0
 ```
 """
-function create_cxx_identity(n::I_1, m::I_2) where {I_1 <: Integer, I_2 <: Integer}
+function create_cxx_identity(n::I_1, m::I_2) where {I_1<:Integer,I_2<:Integer}
     I = myalloc2(n, m)
     for i in 1:n
         for j in 1:m
@@ -138,7 +143,6 @@ function create_cxx_identity(n::I_1, m::I_2) where {I_1 <: Integer, I_2 <: Integ
     end
     return I
 end
-
 
 """
     create_partial_cxx_identity(n::I_1, idxs::Vector{I_2}) where {I_1 <: Integer, I_2 <: Integer}
@@ -191,10 +195,14 @@ end
 1.0 0.0 0.0
 ```
 """
-function create_partial_cxx_identity(n::I_1, idxs::Vector{I_2}) where {I_1 <: Integer, I_2 <: Integer}
+function create_partial_cxx_identity(
+    n::I_1, idxs::Vector{I_2}
+) where {I_1<:Integer,I_2<:Integer}
     if n < maximum(idxs)
-        throw("ArgumentError: The number of rows must be greater than the largest index: $n < $(maximum(idxs)).")
-    end       
+        throw(
+            "ArgumentError: The number of rows must be greater than the largest index: $n < $(maximum(idxs)).",
+        )
+    end
     m = length(idxs)
     I = myalloc2(n, m)
     for j in 1:m
@@ -231,7 +239,7 @@ seed_idxs_partial_format(partials)
  5
 ```
 """
-function seed_idxs_partial_format(partials::Vector{Vector{I}}) where I <: Integer
+function seed_idxs_partial_format(partials::Vector{Vector{I}}) where {I<:Integer}
     seed_idxs = Vector{I}()
     for partial in partials
         for i in eachindex(partial)
@@ -271,7 +279,7 @@ seed_idxs_adolc_format(partials)
  5
 ```
 """
-function seed_idxs_adolc_format(partials::Vector{Vector{I}}) where I <: Integer
+function seed_idxs_adolc_format(partials::Vector{Vector{I}}) where {I<:Integer}
     seed_idxs = Vector{I}()
     for partial in partials
         for i in partial
@@ -319,7 +327,9 @@ partial_format_to_seed_space(partials)
  [2, 0]
 ```
 """
-function partial_format_to_seed_space(partials::Vector{Vector{I_1}}, seed_idxs::Vector{I_2}) where {I_1 <: Integer, I_2 <: Integer}
+function partial_format_to_seed_space(
+    partials::Vector{Vector{I_1}}, seed_idxs::Vector{I_2}
+) where {I_1<:Integer,I_2<:Integer}
     seed_space_partials = Vector{Vector{Int64}}(undef, length(partials))
     for (i, partial) in enumerate(partials)
         seed_space_partials[i] = zeros(length(seed_idxs))
@@ -332,11 +342,10 @@ function partial_format_to_seed_space(partials::Vector{Vector{I_1}}, seed_idxs::
     return seed_space_partials
 end
 
-function partial_format_to_seed_space(partials::Vector{Vector{I}}) where I <: Integer
+function partial_format_to_seed_space(partials::Vector{Vector{I}}) where {I<:Integer}
     seed_idxs = seed_idxs_partial_format(partials)
     return partial_format_to_seed_space(partials, seed_idxs)
 end
-
 
 """
     adolc_format_to_seed_space(partials::Vector{Vector{I_1}}, seed_idxs::Vector{I_2}) where {I_1 <: Integer, I_2 <: Integer}
@@ -371,7 +380,9 @@ adolc_format_to_seed_space(partials, seed_idxs)
  [1, 1]
 ```
 """
-function adolc_format_to_seed_space(partials::Vector{Vector{I_1}}, seed_idxs::Vector{I_2}) where {I_1 <: Integer, I_2 <: Integer}
+function adolc_format_to_seed_space(
+    partials::Vector{Vector{I_1}}, seed_idxs::Vector{I_2}
+) where {I_1<:Integer,I_2<:Integer}
     new_partials = Vector{Vector{Int64}}(undef, length(partials))
     for (i, partial) in enumerate(partials)
         new_partials[i] = zeros(length(partial))
@@ -386,16 +397,18 @@ function adolc_format_to_seed_space(partials::Vector{Vector{I_1}}, seed_idxs::Ve
     return new_partials
 end
 
-function adolc_format_to_seed_space(partials::Vector{Vector{I}}) where I <: Integer
+function adolc_format_to_seed_space(partials::Vector{Vector{I}}) where {I<:Integer}
     seed_idxs = seed_idxs_adolc_format(partials)
     return adolc_format_to_seed_space(partials, seed_idxs)
 end
 
+"""
+    allocator(m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights::Int64)
 
-
-function allocator(m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights::Int64)
+"""
+function allocator(m, n, mode, num_dir, num_weights)
     if mode === :jac
-        if m > 1 
+        if m > 1
             return myalloc2(m, n)
         else
             return alloc_vec_double(n)
@@ -410,7 +423,6 @@ function allocator(m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights
         return alloc_vec_double(n)
     elseif mode === :mat_jac
         return myalloc2(num_weights, n)
-
 
     elseif mode === :hess_vec
         return myalloc2(m, n)
@@ -431,10 +443,13 @@ function allocator(m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights
     end
 end
 
+"""
+    deallocator(res, m::Int64, mode::Symbol)
 
-function deallocator(res, m, mode::Symbol)
+"""
+function deallocator(res, m, mode)
     if mode === :jac
-        if m > 1 
+        if m > 1
             return myfree2(res)
         else
             return free_vec_double(res)
@@ -467,6 +482,6 @@ function deallocator(res, m, mode::Symbol)
     elseif mode === :mat_hess_mat
         return myfree3(res)
     elseif mode === :abs_normal
-        return 
+        return nothing
     end
 end

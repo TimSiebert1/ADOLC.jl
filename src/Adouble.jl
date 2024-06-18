@@ -1,5 +1,4 @@
 
-
 TbAlloc = TbadoubleModule.TbadoubleCxxAllocated
 TlAlloc = TladoubleModule.TladoubleCxxAllocated
 

@@ -272,7 +272,6 @@ end
 
     x = [1.0, 2.0, 2.0]
     dir = [[1.0, 0.0, 0.0] [0.0, 1.0, -1.0]]
-    
 
     res = derivative(f, x, :hess_mat; dir=dir)
 
@@ -286,7 +285,8 @@ end
     @test res[1, 3, 2] == -12.0
 end
 
-@testset "mat_hess_vec" begin()
+@testset "mat_hess_vec" begin
+    ()
     function f(x)
         return [x[1]^2 * x[2], x[1] * x[3]^3]
     end

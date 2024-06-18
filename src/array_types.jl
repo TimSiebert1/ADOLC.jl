@@ -45,7 +45,6 @@ end
 
 ###### ptr-ptr wrapper #########################
 
-
 mutable struct CxxMatrix{T} <: AbstractMatrix{T}
     """
     Wrapper for c++ double** or short** data
@@ -174,7 +173,6 @@ function julia_mat_to_cxx_mat(mat::Matrix{Float64})
     return mat_cxx
 end
 
-
 function cxx_mat_to_julia_mat(mat_cxx::CxxPtr{CxxPtr{Float64}}, dim1, dim2)
     jl_mat = Matrix{Float64}(undef, dim1, dim2)
     for i in 1:dim2
@@ -193,7 +191,9 @@ function cxx_vec_to_julia_vec(cxx_vec::CxxPtr{Float64}, dim)
     return jl_vec
 end
 
-function cxx_tensor_to_julia_tensor(cxx_tensor::CxxPtr{CxxPtr{CxxPtr{Float64}}}, dim1, dim2, dim3)
+function cxx_tensor_to_julia_tensor(
+    cxx_tensor::CxxPtr{CxxPtr{CxxPtr{Float64}}}, dim1, dim2, dim3
+)
     jl_tensor = Array{Float64}(undef, dim1, dim2, dim3)
     for i in 1:dim3
         for j in 1:dim2
@@ -205,12 +205,11 @@ function cxx_tensor_to_julia_tensor(cxx_tensor::CxxPtr{CxxPtr{CxxPtr{Float64}}},
     return jl_tensor
 end
 
-
-
-
-function cxx_res_to_julia_res(cxx_res, m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights::Int64)
+function cxx_res_to_julia_res(
+    cxx_res, m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights::Int64
+)
     if mode === :jac
-        if m > 1 
+        if m > 1
             return cxx_mat_to_julia_mat(cxx_res, m, n)
         else
             return cxx_vec_to_julia_vec(cxx_res, n)
@@ -244,7 +243,7 @@ function cxx_res_to_julia_res(cxx_res, m::Int64, n::Int64, mode::Symbol, num_dir
     elseif mode === :mat_hess_mat
         return cxx_tensor_to_julia_tensor(cxx_res, num_weights, n, num_dir)
     elseif mode === :abs_normal
-        return 
+        return nothing
     end
 end
 
