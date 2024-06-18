@@ -22,6 +22,13 @@ x = [1.0, 2.0, -1.0]
 dir = [1.0, 0.0, 0.0]
 weights = [1.0, 1.0]
 res = derivative(f, x, :vec_hess_vec, dir=dir, weights=weights)
+
+# output
+
+3-element Vector{Float64}:
+ -2.0
+  4.0
+  6.0
 ```
 
 There are various available modes for [first-](https://timsiebert1.github.io/ADOLC.jl/dev/lib/derivative_modes/#First-Order) and [second-order](https://timsiebert1.github.io/ADOLC.jl/dev/lib/derivative_modes/#Second-Order) calculations. The computation of higher-order derivatives is explained [here](https://timsiebert1.github.io/ADOLC.jl/dev/lib/derivative_modes/#Higher-Order) and works as sketched below
