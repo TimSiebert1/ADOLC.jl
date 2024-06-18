@@ -1,6 +1,6 @@
-## List of wrapped ADOL-C drivers
+# List of wrapped ADOL-C drivers
 
-# TbadoubleModule
+## TbadoubleModule
 
     getValue
     gradient
@@ -32,7 +32,7 @@
     tensor_address
     tensor_eval
 
-# Abs-Smooth Utilities
+## Abs-Smooth Utilities
 
     enableMinMaxUsingAbs
     get_num_switches
@@ -42,7 +42,7 @@
     abs_normal
 
 
-# Tape Utilities
+## Tape Utilities
 
     << (in ADOL-C: <<=)
     >> (in ADOL-C: =>>)
@@ -54,7 +54,7 @@
 
 
 
-# TladoubleModule
+## TladoubleModule
 
     setNumDir(int const &n) 
     getValue()                      
@@ -63,7 +63,7 @@
     setADValue(double const val, int const &i)
 
 
-# Arithmethics
+## Arithmethics
 
     + 
     - 
@@ -71,7 +71,7 @@
     / 
     ^
 
-# Comparison
+## Comparison
 
     <
     >
@@ -79,7 +79,7 @@
     <=
     ==
 
-# Unary Functions
+## Unary Functions
 
     abs
     sqrt
