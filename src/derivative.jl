@@ -101,9 +101,9 @@ function derivative(
     jl_res = if mode === :abs_normal
         cxx_res
     else
-        cxx_res_to_julia_res(cxx_res, m, n, mode, size(dir, 2)[1], size(weights, 1)[1])
+        cxx_res_to_jl_res(cxx_res, m, n, mode, size(dir, 2)[1], size(weights, 1)[1])
     end
-    deallocator(cxx_res, m, mode)
+    deallocator!(cxx_res, m, mode)
     return jl_res
 end
 
@@ -280,7 +280,7 @@ accordingly to avoid the re-creation of the tape.
 !!! note
     `res` must to be C++ memory and should be allocated by [`allocator`](@ref). 
     Since the memory is not managed by Julia (only the pointer to it) at the moment, 
-    it has to be manually destroyed by the use of [`deallocator`](@ref). There is a
+    it has to be manually destroyed by the use of [`deallocator!`](@ref). There is a
     [guide](@ref "Working with C++ Memory") on how to work on these CxxPtr types. 
 
 Example:
@@ -302,7 +302,7 @@ for i in 1:m
     end
     println("")
 end
-deallocator(res, m, mode)
+deallocator!(res, m, mode)
 
 # output
 
@@ -366,7 +366,6 @@ function derivative!(
         throw("mode $mode not implemented!")
     end
 end
-
 
 """
     derivative!(
@@ -442,7 +441,6 @@ function derivative!(
     return myfree2(seed)
 end
 
-
 """
     derivative!(
         res,
@@ -493,7 +491,7 @@ function derivative!(
     reuse_tape::Bool=false,
     adolc_format::Bool=false,
 )
-    seed_cxx = julia_mat_to_cxx_mat(seed)
+    seed_cxx = jl_mat_to_cxx_mat(seed)
     higher_order!(
         res,
         f,
@@ -577,7 +575,7 @@ function fov_reverse!(
     reuse_tape,
 )
     num_dir = size(weights, 2)
-    weights_cxx = julia_mat_to_cxx_mat(weights)
+    weights_cxx = jl_mat_to_cxx_mat(weights)
     fov_reverse!(res, f, m, n, num_dir, x, weights_cxx, tape_id, reuse_tape)
     return myfree2(weights_cxx)
 end
@@ -629,7 +627,7 @@ function fov_forward!(
     reuse_tape,
 )
     num_dir = size(dir, 2)
-    dir_cxx = julia_mat_to_cxx_mat(dir)
+    dir_cxx = jl_mat_to_cxx_mat(dir)
     fov_forward!(res, f, m, n, x, dir_cxx, num_dir, tape_id, reuse_tape)
     return myfree2(dir_cxx)
 end
@@ -777,7 +775,7 @@ function mat_hess_vec!(
     reuse_tape::Bool,
 )
     num_weights = size(weights, 1)
-    weights_cxx = julia_mat_to_cxx_mat(weights)
+    weights_cxx = jl_mat_to_cxx_mat(weights)
     return mat_hess_vec!(
         res, f, m, n, x, dir, weights_cxx, num_weights, tape_id, reuse_tape
     )
@@ -854,7 +852,7 @@ function mat_hess_mat!(
     reuse_tape::Bool,
 )
     num_weights = size(weights, 1)
-    weights_cxx = julia_mat_to_cxx_mat(weights)
+    weights_cxx = jl_mat_to_cxx_mat(weights)
     return mat_hess_mat!(
         res, f, m, n, x, dir, weights_cxx, num_weights, tape_id, reuse_tape
     )
