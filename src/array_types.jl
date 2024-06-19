@@ -183,8 +183,26 @@ function cxx_mat_to_julia_mat(mat_cxx::CxxPtr{CxxPtr{Float64}}, dim1, dim2)
     return jl_mat
 end
 
+function cxx_mat_to_julia_mat!(
+    jl_mat::Matrix{Float64}, mat_cxx::CxxPtr{CxxPtr{Float64}}, dim1, dim2
+)
+    for i in 1:dim2
+        for j in 1:dim1
+            jl_mat[j, i] = mat_cxx[j, i]
+        end
+    end
+    return jl_mat
+end
+
 function cxx_vec_to_julia_vec(cxx_vec::CxxPtr{Float64}, dim)
     jl_vec = Vector{Float64}(undef, dim)
+    for i in 1:dim
+        jl_vec[i] = cxx_vec[i]
+    end
+    return jl_vec
+end
+
+function cxx_vec_to_julia_vec!(jl_vec::Vector{Float64}, cxx_vec::CxxPtr{Float64}, dim)
     for i in 1:dim
         jl_vec[i] = cxx_vec[i]
     end
@@ -195,6 +213,23 @@ function cxx_tensor_to_julia_tensor(
     cxx_tensor::CxxPtr{CxxPtr{CxxPtr{Float64}}}, dim1, dim2, dim3
 )
     jl_tensor = Array{Float64}(undef, dim1, dim2, dim3)
+    for i in 1:dim3
+        for j in 1:dim2
+            for k in 1:dim1
+                jl_tensor[k, j, i] = cxx_tensor[k, j, i]
+            end
+        end
+    end
+    return jl_tensor
+end
+
+function cxx_tensor_to_julia_tensor!(
+    jl_tensor::Array{Float64,3},
+    cxx_tensor::CxxPtr{CxxPtr{CxxPtr{Float64}}},
+    dim1,
+    dim2,
+    dim3,
+)
     for i in 1:dim3
         for j in 1:dim2
             for k in 1:dim1
@@ -259,6 +294,9 @@ export CxxMatrix,
     cxx_mat_to_julia_mat,
     cxx_vec_to_julia_vec,
     cxx_tensor_to_julia_tensor,
+    cxx_mat_to_julia_mat!,
+    cxx_vec_to_julia_vec!,
+    cxx_tensor_to_julia_tensor!,
     cxx_res_to_julia_res,
     vec_to_cxx
 
