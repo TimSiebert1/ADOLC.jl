@@ -3,28 +3,40 @@
 
 
 ## First-Order
-| Mode          | Formula                  |
-|:---------------:|:--------------------------:|
-| `:jac`         | $$Df(x)$$  |
-| `:jac_vec`    |  $$Df(x)\dot{v}$$            |
-| `:jac_mat`    |  $$Df(x)\dot{V}$$            |
-| `:vec_jac`    | $$\bar{z}^T Df(x)$$         |
-| `:mat_jac`    | $$\bar{Z}^T Df(x)$$       |
+
+A list of the available `modes` for first-order derivative computation using [`derivative`](@ref) or [`derivative!`](@ref) is presented below.  
+
+| Mode          | Formula                | Output Space                   |
+|:-------------:|:----------------------:|:------------------------------:|
+| `:jac`        |  $$Df(x)$$             |   $$\mathbb{R}^{m \times n}$$  |
+| `:jac_vec`    |  $$Df(x)\dot{v}$$      |   $$\mathbb{R}^{m}$$           |
+| `:jac_mat`    |  $$Df(x)\dot{V}$$      |   $$\mathbb{R}^{m \times p}$$  |
+| `:vec_jac`    |  $$\bar{z}^T Df(x)$$   |   $$\mathbb{R}^{n}$$           |
+| `:mat_jac`    |  $$\bar{Z}^T Df(x)$$   |   $$\mathbb{R}^{q \times n}$$  |
+
+Each `mode`'s formula symbolizes the underlying computation. A user can read-off the dimension of the result from the last column, where it is assumed that $$f:\mathbb{R}^{n} \to \mathbb{R}^{m}$$,
+$$\dot{v} \in \mathbb{R}^{n}$$, $$\dot{V} \in \mathbb{R}^{n \times p}$$, $$\bar{z}  \in \mathbb{R}^{m}$$ and $$\bar{Z} \in \mathbb{R}^{m \times q}$$.
+
 
 
 ## Second-Order
-| Mode             | Formula                       |
-|:------------------:|:-------------------------------:|
-| `:hess`           | $$D^2f(x)$$               |
-| `:hess_vec`      | $$D^2f(x) \dot{v}$$          |
-| `:hess_mat`      | $$D^2f(x)  \dot{V}$$         |
-| `:vec_hess`      | $$\bar{z}^T D^2f(x)$$       |
-| `:mat_hess`      | $$\bar{Z}^T D^2f(x)$$       |
-| `:vec_hess_vec` | $$\bar{z}^T D^2f(x)  \dot{v}$$  |
-| `:vec_hess_mat` | $$\bar{z}^T D^2f(x)  \dot{V}$$ |
-| `:mat_hess_mat` | $$\bar{Z}^T D^2f(x)  \dot{V}$$  |
-| `:mat_hess_vec` | $$\bar{Z}^T D^2f(x)  \dot{v}$$  |
 
+A list of the available `modes` for second-order derivative computation using [`derivative`](@ref) or [`derivative!`](@ref) is presented below.  
+
+| Mode               | Formula                          | Output Space                          |
+|:------------------:|:--------------------------------:|:-------------------------------------:|
+| `:hess`            | $$D^2f(x)$$                      | $$\mathbb{R}^{m \times n \times n}$$  |
+| `:hess_vec`        | $$D^2f(x) \dot{v}$$              | $$\mathbb{R}^{m \times n}$$           |
+| `:hess_mat`        | $$D^2f(x)  \dot{V}$$             | $$\mathbb{R}^{m \times n \times p}$$  |
+| `:vec_hess`        | $$\bar{z}^T D^2f(x)$$            | $$\mathbb{R}^{n \times n}$$           |
+| `:mat_hess`        | $$\bar{Z}^T D^2f(x)$$            | $$\mathbb{R}^{q \times n \times n}$$  |
+| `:vec_hess_vec`    | $$\bar{z}^T D^2f(x)  \dot{v}$$   | $$\mathbb{R}^{n}$$                    |
+| `:vec_hess_mat`    | $$\bar{z}^T D^2f(x)  \dot{V}$$   | $$\mathbb{R}^{n \times p}$$           |
+| `:mat_hess_mat`    | $$\bar{Z}^T D^2f(x)  \dot{V}$$   | $$\mathbb{R}^{q \times n \times p}$$  |
+| `:mat_hess_vec`    | $$\bar{Z}^T D^2f(x)  \dot{v}$$   | $$\mathbb{R}^{q \times n}$$           |
+
+Each `mode`'s formula symbolizes the underlying computation. A user can read-off the dimension of the result from the last column, where it is assumed that $$f:\mathbb{R}^{n} \to \mathbb{R}^{m}$$,
+$$\dot{v} \in \mathbb{R}^{n}$$, $$\dot{V} \in \mathbb{R}^{n \times p}$$, $$\bar{z}  \in \mathbb{R}^{m}$$ and $$\bar{Z} \in \mathbb{R}^{m \times q}$$.
 
 ## Abs-Normal-Form
 | Mode             | Formula                       |

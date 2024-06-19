@@ -15,7 +15,7 @@ To use this package, type
 using Pkg; Pkg.add(url="https://github.com/TimSiebert1/ADOLC.jl")
 using ADOLC
 ```
-First- and second-order derivatives can be calculated as follows
+[First-](@ref "First-Order") and [second-order](@ref "Second-Order") derivatives can be calculated as follows
 ```jldoctest
 f(x) = [x[1]*x[2]^2, x[1]^2*x[3]^3]
 x = [1.0, 2.0, -1.0]
