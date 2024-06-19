@@ -20,8 +20,8 @@ mode = :jac_vec
 num_dir = size(dir, 2)[1]
 num_weights = 0
 cxx_res = allocator(m, n, mode, num_dir, num_weights)
-derivative!(res, f, m, n, x, mode, dir=dir)
-deallocator!(res, m, mode)
+derivative!(cxx_res, f, m, n, x, mode, dir=dir)
+deallocator!(cxx_res, m, mode)
 ```
 The first critical point is tackled by using the [`deallocator!`](@ref) function, which handles the release of the C++ memory. Of course, one wants to conduct computations with `cxx_res`. The recommended way to do so is to pre-allocate a corresponding Julia container (`Vector{Float64}`, `Matrix{Float64}` or `Array{Float64, 3}`) obtained from [`jl_allocator`](@ref) and copy the data from `cxx_res` the Julia storage `jl_res` by leveraging [`cxx_res_to_jl_res!`](@ref):
 ```@example
@@ -51,7 +51,8 @@ deallocator!(cxx_res, m, mode)
 ```
 Since you actually work with Julia data, the procedure above avoids the second and third point of the ciritical aspects, but includes an additional allocation.  
 
- *Please note: `cxx_res` still stores a pointer. The corresponding memory is destroyed but `cxx_res` itself is manage by Julia's garbage collector. Do not use it.*  
+!!! warning 
+    `cxx_res` still stores a pointer. The corresponding memory is destroyed but `cxx_res` itself is managed by Julia's garbage collector. Do not use it.
 
 
 In the future, the plan is to implement a struct that combines the Julia and C++ arrays with a finalizer that enables Julia's garbage collector to manage the C++ memory. 
