@@ -444,44 +444,83 @@ function allocator(m, n, mode, num_dir, num_weights)
 end
 
 """
+    jl_allocator(m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights::Int64)
+
+"""
+function jl_allocator(m, n, mode, num_dir, num_weights)
+    if mode === :jac
+        if m > 1
+            return Matrix{Float64}(undef, m, n)
+        else
+            return Vector{Float64}(undef, n)
+        end
+    elseif mode === :hess
+        return Array{Float64}(undef, m, n, n)
+    elseif mode === :jac_vec
+        return Vector{Float64}(undef, m)
+    elseif mode === :jac_mat
+        return Matrix{Float64}(undef, m, num_dir)
+    elseif mode === :vec_jac
+        return Vector{Float64}(undef, n)
+    elseif mode === :mat_jac
+        return Matrix{Float64}(undef, num_weights, n)
+
+    elseif mode === :hess_vec
+        return Matrix{Float64}(undef, m, n)
+    elseif mode === :hess_mat
+        return Array{Float64}(undef, m, n, num_dir)
+    elseif mode === :vec_hess
+        return Matrix{Float64}(undef, n, n)
+    elseif mode === :mat_hess
+        return Array{Float64}(undef, num_weights, n, n)
+    elseif mode === :vec_hess_vec
+        return Vector{Float64}(undef, n)
+    elseif mode === :mat_hess_vec
+        return Matrix{Float64}(undef, num_weights, n)
+    elseif mode === :vec_hess_mat
+        return Matrix{Float64}(undef, n, num_dir)
+    elseif mode === :mat_hess_mat
+        return Array{Float64}(undef, num_weights, n, num_dir)
+    end
+end
+
+"""
     deallocator(res, m::Int64, mode::Symbol)
 
 """
-function deallocator(res, m, mode)
+function deallocator!(res, m, mode)
     if mode === :jac
         if m > 1
-            return myfree2(res)
+            myfree2(res)
         else
-            return free_vec_double(res)
+            free_vec_double(res)
         end
     elseif mode === :hess
-        return myfree3(res)
+        myfree3(res)
     elseif mode === :jac_vec
-        return free_vec_double(res)
+        free_vec_double(res)
     elseif mode === :jac_mat
-        return myfree2(res)
+        myfree2(res)
     elseif mode === :hess_vec
-        return myfree2(res)
+        myfree2(res)
     elseif mode === :hess_mat
-        return myfree3(res)
+        myfree3(res)
     elseif mode === :vec_jac
-        return free_vec_double(res)
+        free_vec_double(res)
     elseif mode === :mat_jac
-        return myfree2(res)
+        myfree2(res)
     elseif mode === :vec_hess
-        return myfree2(res)
+        myfree2(res)
     elseif mode === :mat_hess
-        return myfree3(res)
+        myfree3(res)
 
     elseif mode === :vec_hess_vec
-        return free_vec_double(res)
+        free_vec_double(res)
     elseif mode === :mat_hess_vec
-        return myfree2(res)
+        myfree2(res)
     elseif mode === :vec_hess_mat
-        return myfree2(res)
+        myfree2(res)
     elseif mode === :mat_hess_mat
-        return myfree3(res)
-    elseif mode === :abs_normal
-        return nothing
+        myfree3(res)
     end
 end
