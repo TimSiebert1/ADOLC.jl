@@ -32,7 +32,14 @@ export TbAlloc, TlAlloc, Adouble, getValue, get_gradient
 
 export abs_normal!, AbsNormalForm
 
-export derivative, derivative!, allocator, deallocator, create_independent, dependent
+export derivative,
+    derivative!,
+    allocator,
+    jl_allocator,
+    deallocator!,
+    create_independent,
+    dependent,
+    cxx_res_to_jl_res!
 
 export erf, eps
 
