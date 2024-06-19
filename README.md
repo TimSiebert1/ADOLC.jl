@@ -46,5 +46,5 @@ res = derivative(f, x, partials)
 ```
 
 
-For advanced users, there is a [list](https://timsiebert1.github.io/ADOLC.jl/dev/lib/wrapped_fcts/) of all functions wrapped from ADOL-C. 
+For advanced users, there is a [list](https://timsiebert1.github.io/ADOLC.jl/dev/lib/wrapped_fcts/) of all functions wrapped from [ADOL-C](https://github.com/coin-or/ADOL-C). 
 
