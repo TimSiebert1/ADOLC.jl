@@ -131,7 +131,7 @@ function abs_normal!(
     z::Vector{Float64},
 )
 
-    # julia matrix to c++ matrix
+    # jl matrix to c++ matrix
     Y_cxx = CxxMatrix(Y)
     J_cxx = CxxMatrix(J)
     Z_cxx = CxxMatrix(Z)
