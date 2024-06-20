@@ -53,3 +53,6 @@ For advanced user, there is a [list](@ref "List of wrapped ADOL-C drivers") of a
 ```@index
 Pages = ["lib/reference.md"]
 ```
+
+```@bibliography
+```

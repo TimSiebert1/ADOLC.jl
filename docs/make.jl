@@ -1,11 +1,13 @@
-using Documenter
+using Documenter 
 using ADOLC
+
 
 DocMeta.setdocmeta!(ADOLC, :DocTestSetup, :(using ADOLC); recursive=true)
 
 makedocs(;
     sitename="ADOLC.jl",
     authors="Tim Siebert",
+    #plugins = [bib], 
     repo="github.com/TimSiebert1/ADOLC.jl",
     modules=[ADOLC],
     format=Documenter.HTML(),

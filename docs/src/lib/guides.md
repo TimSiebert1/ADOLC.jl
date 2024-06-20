@@ -60,3 +60,27 @@ In the future, the plan is to implement a struct that combines the Julia and C++
 
 
 ## Seed-Matrix
+This guide is related to the [higher-order](@ref "Higher-Order") derivative computation with 
+[`derivative`](@ref) or [`derivative!`](@ref). Internally, the drivers are based on the propagation of univariate Taylor polynomials. The underlying method leverages a `seed` matrix $$S\in \mathbb{R}^{n \times p}$$ to compute mixed-partials of arbitrary order for a function $$f:\mathbb{R}^n \to \mathbb{R}^m$$ in the form: 
+```math
+    \frac{\partial^k f(x + Sz)}{\partial^k z}\big|_{z=0} 
+```
+for some $$z \in \mathbb{R}^p$$. Usually $$S$$ is the identity or the partial identity (see [`create_partial_cxx_identity`](@ref)). In case of the identity the formula above boils down to 
+```math
+    \frac{\partial^k f(x + Sz)}{\partial^k z}\big|_{z=0}= \frac{\partial^k f(x)}{\partial^k x}
+```
+and the partial identity results in the same but being more efficient. It ensures to compute only the derivatives of the requested derivative directions and is explained briefly in the following paragraph.   
+
+Assume we want to compute the derivatives specified in the [Partial-Format](@ref): [[4, 0, 0, 3], [2, 0, 0, 4], [1, 0, 0, 1]].  
+Obviously, none of the derivatives includes $$x_2$$ and $$x_3$$. To avoid the propagation of univariate Polynomials for these directions, the partial identity is created stacking only those canonical basis vector that are related to the required derivative directions. In our case the partial identity looks like this:  
+```math
+\left[
+    \begin{matrix}
+    1 & 0 \\
+    0 & 0 \\
+    0 & 0 \\
+    0 & 1 
+    \end{matrix}
+ \right].
+```
+As you can see, the directions of are reduced from four to two. In general, the number of required univariate Polynomial propagations to compute all mixed-partials up to degree $$d$$ of for $$f$$ is $$\left( \begin{matrix} n - 1 + d \\ d \end{matrix} \right)$$. Leveraging the `seed`$$S$$ reduces this number to $$\left( \begin{matrix} p - 1 + d \\ d \end{matrix} \right)$$, where $$p$$ is often much smaller than $$n$$.
