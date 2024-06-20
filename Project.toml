@@ -1,6 +1,6 @@
 name = "ADOLC"
 uuid = "a7293fd6-5c8a-477e-b6cc-312e3ac044ef"
-authors = ["Tim Siebert <tim.siebert96@outlook.com>"]
+authors = ["Tim Siebert <tim.siebert96@outlook.com>", "Jürgen Fuhrmann"]
 version = "1.0.0"
 
 [deps]
