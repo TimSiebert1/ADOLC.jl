@@ -70,9 +70,9 @@ mutable struct CxxMatrix{T} <: AbstractMatrix{T}
     end
 end
 
-Base.size(A::CxxMatrix)=(A.n, A.m)
-Base.setindex!(A::CxxMatrix{T}, v, i,j) where T= setindex!(A.data,T(v),i,j)
-Base.getindex(A::CxxMatrix,i,j) = getindex(A.data,i,j)
+Base.size(A::CxxMatrix) = (A.n, A.m)
+Base.setindex!(A::CxxMatrix{T}, v, i, j) where {T} = setindex!(A.data, T(v), i, j)
+Base.getindex(A::CxxMatrix, i, j) = getindex(A.data, i, j)
 
 function check_type_mat(::Type{T}) where {T<:Real}
     if !(T <: Union{Cdouble})
