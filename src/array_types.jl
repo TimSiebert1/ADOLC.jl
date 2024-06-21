@@ -57,7 +57,7 @@ mutable struct CxxMatrix{T} <: AbstractMatrix{T}
         x = new{T}(alloc_mat(T, n, m), n, m)
         return finalizer(cxx_mat_finalizer, x)
     end
-    function CxxMatrix{T}(Y::Matrix{T}) where {T<:Real}
+    function CxxMatrix{T}(Y::AbstractMatrix{T}) where {T<:Real}
         check_type_mat(T)
         n, m = size(Y)
         X = new{T}(alloc_mat(T, n, m), n, m)
@@ -69,6 +69,10 @@ mutable struct CxxMatrix{T} <: AbstractMatrix{T}
         return finalizer(cxx_mat_finalizer, X)
     end
 end
+
+Base.size(A::CxxMatrix) = (A.n, A.m)
+Base.setindex!(A::CxxMatrix{T}, v, i, j) where {T} = setindex!(A.data, T(v), i, j)
+Base.getindex(A::CxxMatrix, i, j) = getindex(A.data, i, j)
 
 function check_type_mat(::Type{T}) where {T<:Real}
     if !(T <: Union{Cdouble})
