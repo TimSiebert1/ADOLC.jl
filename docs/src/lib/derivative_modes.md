@@ -1,5 +1,6 @@
 # Derivative Modes
 
+The following sections provide some details about the available `mode`s and possibilities for the computation of derivatives with [`derivative`](@ref) or [`derivative!`](@ref).
 
 
 ## First-Order
@@ -39,11 +40,14 @@ Each `mode`'s formula symbolizes the underlying computation. A user can read-off
 $$\dot{v} \in \mathbb{R}^{n}$$, $$\dot{V} \in \mathbb{R}^{n \times p}$$, $$\bar{z}  \in \mathbb{R}^{m}$$ and $$\bar{Z} \in \mathbb{R}^{m \times q}$$.
 
 ## Abs-Normal-Form
-| Mode             | Formula                       |
-|:------------------:|:-------------------------------:|
-| `:abs_norm`           | $$\Delta f(x)$$               |
 
+There is one `mode` to compute the `abs-normal-form` of a function using [`derivative`](@ref) or [`derivative!`](@ref):
 
+| Mode               | Formula                          |
+|:------------------:|:--------------------------------:|
+| `:abs_norm`        | $$\Delta f(x)$$                  |
+
+The theory behind this method can be found in [Gr13](@cite).
 
 
 ## Higher-Order 
@@ -55,7 +59,7 @@ and we want to compute the mixed-partials
 ```math
 \left[\frac{\partial^3\partial^2 f(x)}{\partial^3 x_2 \partial^2 x_1}, \frac{\partial^4 f(x)}{\partial^4 x_3}, \frac{\partial^2 f(x)}{\partial^2 x_1}\right]
 ``` 
-leveraging the [`derivative`](@ref) driver. After defining the function `f` and the point for the derivative evaluation `x`, we have to select the format of the `partials`. There exist two options explained below that use `Vector{Int64}` to define a partial derivative.
+leveraging the [`derivative`](@ref) ([`derivative!`](@ref)) driver. After defining the function `f` and the point for the derivative evaluation `x`, we have to select the format of the `partials`. There exist two options explained below that use `Vector{Int64}` to define a partial derivative.
 
 ## ADOLC-Format
 The ADOLC-Format repeats the index $$i$$ of a derivative direction $$x_i$$ up to the derivative order of this index: $$\frac{\partial^4 f(x)}{\partial^4 x_3} \to [3, 3, 3, 3]$$. Additionally, the resulting vector is sorted descendent; if the vector's length is less than the total derivative degree, it is filled with zeros. The requested mixed-partials results in:

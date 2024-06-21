@@ -201,9 +201,9 @@ end
         reuse_tape::Bool=false,
         adolc_format::Bool=false,
     )
-    Variant of the [`derivative`](@ref) driver for the computation of [higher-order](@ref "Higher-Order")
-    derivatives, that requires a `seed`. Details on the idea behind `seed` can be found 
-    [here](@ref "Seed-Matrix").
+Variant of the [`derivative`](@ref) driver for the computation of [higher-order](@ref "Higher-Order")
+derivatives, that requires a `seed`. Details on the idea behind `seed` can be found 
+[here](@ref "Seed-Matrix").
 
 
 Example:

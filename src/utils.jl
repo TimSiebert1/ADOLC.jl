@@ -149,7 +149,7 @@ end
 
 Creates a matrix of shape (`n`, `length(idxs)`) of type CxxPtr{CxxPtr{Float64}} (wrapper of C++'s double**).
 The columns are canonical basis vectors corresponding to the entries of `idxs`. The order of the basis vectors
-is defined by the order of the indices in `idxs`.
+is defined by the order of the indices in `idxs`. Details about the application can be found in this [guide](@ref "Seed-Matrix").
 
 !!! warning
     The number of rows `n` must be smaller than the maximal index of `idxs`!

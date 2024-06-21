@@ -1,6 +1,6 @@
 name = "ADOLC"
 uuid = "a7293fd6-5c8a-477e-b6cc-312e3ac044ef"
-authors = ["Tim Siebert <tim.siebert96@outlook.com>"]
+authors = ["Tim Siebert <tim.siebert96@outlook.com>", "Jürgen Fuhrmann"]
 version = "1.0.0"
 
 [deps]
@@ -10,8 +10,8 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 
 [compat]
+ADOLC_jll = "1.1.1"
 CxxWrap = "0.16"
 LinearAlgebra = "1.9"
 SpecialFunctions = "2.4"
 julia = "1.9"
-ADOLC_jll = "1.1.1"
