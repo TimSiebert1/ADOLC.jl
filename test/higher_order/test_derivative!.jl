@@ -164,7 +164,7 @@ end
         [0, 1, 3],
     ]
 
-    seed = [[1.0, 0.0] [0.0, 2.0] [1.0, 1.0]]
+    seed = CxxMatrix([[1.0, 0.0] [0.0, 2.0] [1.0, 1.0]])
 
     res = Matrix{Float64}(undef, 1, length(partials))
     derivative!(res, f, 1, length(x), x, partials, seed)

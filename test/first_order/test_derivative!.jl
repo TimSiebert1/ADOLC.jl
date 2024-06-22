@@ -4,7 +4,7 @@
     function f(x)
         return x[1]^2 + x[2] * x[3]
     end
-    res = alloc_vec_double(3)
+    res = CxxVector(3)
     derivative!(res, f, 1, 3, [1.0, 1.0, 2.0], :jac)
 
     @test res[1] == 2.0
@@ -17,7 +17,7 @@ end
     function f(x)
         return x[1]^2 + x[2] * x[3]
     end
-    res = alloc_vec_double(3)
+    res = CxxVector(3)
     derivative!(res, f, 1, 3, [1.0, 1.0, 2.0], :jac)
 
     @test res[1] == 2.0
@@ -36,7 +36,7 @@ end
     function f(x)
         return [x[1]^2 + x[2], x[3]^3]
     end
-    res = myalloc2(2, 3)
+    res = CxxMatrix(2, 3)
     derivative!(res, f, 2, 3, [1.0, 1.0, 2.0], :jac)
 
     @test res[1, 1] == 2.0
@@ -53,7 +53,7 @@ end
     function f(x)
         return [x[1]^2 + x[2], x[3]^2 * x[4]]
     end
-    res = myalloc2(2, 4)
+    res = CxxMatrix(2, 4)
 
     derivative!(res, f, 2, 4, [1.0, 1.0, 2.0, -1.0], :jac)
 
@@ -73,7 +73,7 @@ end
     function f(x)
         return [x[1]^2 + x[2], x[3]^2 * x[4]]
     end
-    res = myalloc2(2, 4)
+    res = CxxMatrix(2, 4)
 
     derivative!(res, f, 2, 4, [1.0, 1.0, 2.0, -1.0], :jac)
 
@@ -104,7 +104,7 @@ end
     function f(x)
         return [x[1]^2 + x[2], x[3]^3]
     end
-    res = alloc_vec_double(2)
+    res = CxxVector(2)
     derivative!(res, f, 2, 3, [1.0, 1.0, 2.0], :jac_vec; dir=[-1.0, 1.0, 0.0])
 
     @test res[1] == -1.0
@@ -115,7 +115,7 @@ end
     function f(x)
         return [x[1]^2 + x[2], x[3]^3]
     end
-    res = alloc_vec_double(2)
+    res = CxxVector(2)
     derivative!(res, f, 2, 3, [1.0, 1.0, 2.0], :jac_vec; dir=[-1.0, 1.0, 0.0])
 
     @test res[1] == -1.0
@@ -140,7 +140,7 @@ end
     function f(x)
         return [x[1]^2 + x[2], x[3]^3]
     end
-    res = myalloc2(2, 3)
+    res = CxxMatrix(2, 3)
     dir = Matrix{Float64}(undef, 3, 3)
     for i in 1:3
         for j in 1:3
@@ -167,7 +167,7 @@ end
     function f(x)
         return [x[1]^2 + x[2], x[3]^3]
     end
-    res = myalloc2(2, 3)
+    res = CxxMatrix(2, 3)
     dir = Matrix{Float64}(undef, 3, 3)
     for i in 1:3
         for j in 1:3
@@ -215,7 +215,7 @@ end
     function f(x)
         return [x[1]^2 + x[2], x[3]^3]
     end
-    res = alloc_vec_double(3)
+    res = CxxVector(3)
     derivative!(res, f, 2, 3, [1.0, 1.0, 2.0], :vec_jac; weights=[-1.0, 1.0])
 
     @test res[1] == -2
@@ -227,7 +227,7 @@ end
     function f(x)
         return [x[1]^2 + x[2], x[3]^3]
     end
-    res = alloc_vec_double(3)
+    res = CxxVector(3)
     derivative!(res, f, 2, 3, [1.0, 1.0, 2.0], :vec_jac; weights=[-1.0, 1.0])
 
     @test res[1] == -2
@@ -267,7 +267,7 @@ end
     end
     weights[1, 2] = -1.0
 
-    res = myalloc2(3, 3)
+    res = CxxMatrix(3, 3)
     derivative!(res, f, 2, 3, [1.0, 1.0, 2.0], :mat_jac; weights=weights)
 
     @test res[1, 1] == 2.0
@@ -299,7 +299,8 @@ end
     end
     weights[1, 2] = -1.0
 
-    res = myalloc2(3, 3)
+    #res = myalloc2(3, 3)
+    res = CxxMatrix(3, 3)
     derivative!(res, f, 2, 3, [1.0, 1.0, 2.0], :mat_jac; weights=weights)
 
     @test res[1, 1] == 2.0

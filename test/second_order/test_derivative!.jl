@@ -6,7 +6,7 @@
     x = [1.0, 2.0, 2.0]
     dir = [-1.0, 1.0, 3.0]
     weights = [2.0, 1.0]
-    res = alloc_vec_double(3)
+    res = CxxVector(3)
     derivative!(res, f, 2, 3, x, :vec_hess_vec; dir=dir, weights=weights)
 
     @test res[1] == 32.0
@@ -30,7 +30,7 @@ end
     x = [1.0, 2.0, 2.0]
     dir = [[1.0, 2.0, 3.0] [-1.0, -2.0, -3.0]]
     weights = [2.0, 1.0]
-    res = myalloc2(3, 2)
+    res = CxxMatrix(3, 2)
     derivative!(res, f, 2, 3, x, :vec_hess_mat; dir=dir, weights=weights)
 
     @test res[1, 1] == 52.0
@@ -56,7 +56,7 @@ end
     # 
     x = [1.0, 2.0, 2.0]
     weights = [-1.0]
-    res = myalloc2(3, 3)
+    res = CxxMatrix(3, 3)
     derivative!(res, f, 1, 3, x, :vec_hess; weights=weights)
 
     @test res[1, 1] == 0.0
@@ -89,7 +89,7 @@ end
     x = [1.0, 2.0, 2.0]
     weights = [-1.0, 1.0]
 
-    res = myalloc2(3, 3)
+    res = CxxMatrix(3, 3)
     derivative!(res, f, 2, 3, x, :vec_hess; weights=weights)
 
     @test res[1, 1] == -4.0
@@ -130,7 +130,7 @@ end
         end
     end
     weights[3, 2] = -1.0
-    res = myalloc2(3, 3)
+    res = CxxMatrix(3, 3)
     derivative!(res, f, 2, 3, x, :mat_hess_vec; dir=dir, weights=weights)
 
     @test res[1, 1] == -2.0
@@ -150,7 +150,7 @@ end
     function f(x)
         return x[1]^3 + x[2]^2 * x[3]
     end
-    res = myalloc3(1, 3, 3)
+    res = CxxTensor(1, 3, 3)
     derivative!(res, f, 1, 3, [-1.0, 1.0, 2.0], :hess)
 
     @test res[1, 1, 1] == -6.0
@@ -172,7 +172,7 @@ end
     end
 
     x = [-1.0, 2.0, 2.0]
-    res = myalloc3(2, 3, 3)
+    res = CxxTensor(2, 3, 3)
     derivative!(res, f, 2, 3, x, :hess; tape_id=1)
 
     @test res[1, 1, 1] == -6.0
@@ -210,7 +210,7 @@ end
     dir = [[1.0, 2.0, 3.0] [-1.0, -2.0, -3.0]]
     weights = [[1.0, 0.0, 0.0] [0.0, 1.0, -1.0]]
 
-    res = myalloc3(3, 3, 2)
+    res = CxxTensor(3, 3, 2)
 
     derivative!(res, f, 2, 3, x, :mat_hess_mat; dir=dir, weights=weights)
 
@@ -250,7 +250,7 @@ end
     x = [1.0, 2.0, 2.0]
     dir = [-1.0, 1.0, 3.0]
 
-    res = myalloc2(2, 3)
+    res = CxxMatrix(2, 3)
     derivative!(res, f, 2, 3, x, :hess_vec; dir=dir)
 
     @test res[1, 1] == -2.0
@@ -271,7 +271,7 @@ end
     x = [1.0, 2.0, 2.0]
     weights = [[1.0, 0.0, 0.0] [0.0, 1.0, -1.0]]
 
-    res = myalloc3(3, 3, 3)
+    res = CxxTensor(3, 3, 3)
 
     derivative!(res, f, 2, 3, x, :mat_hess; weights=weights)
 
@@ -329,7 +329,7 @@ end
         end
     end
     dir[3, 2] = -1.0
-    res = myalloc3(1, 3, 2)
+    res = CxxTensor(1, 3, 2)
     derivative!(res, f, 1, 3, x, :hess_mat; dir=dir)
 
     @test res[1, 1, 1] == 0.0
@@ -368,7 +368,7 @@ end
         end
     end
     weights[3, 2] = -1.0
-    res = myalloc2(3, 3)
+    res = CxxMatrix(3, 3)
     derivative!(res, f, 2, 3, x, :mat_hess_vec; dir=dir, weights=weights)
 
     @test res[1, 1] == -2.0
