@@ -177,7 +177,7 @@ function jl_mat_to_cxx_mat(mat::Matrix{Float64})
     return mat_cxx
 end
 
-function cxx_mat_to_jl_mat(mat_cxx::CxxPtr{CxxPtr{Float64}}, dim1, dim2)
+function cxx_mat_to_jl_mat(mat_cxx::CxxPtr{CxxPtr{Float64}}, dim1::Integer, dim2::Integer)
     jl_mat = Matrix{Float64}(undef, dim1, dim2)
     for i in 1:dim2
         for j in 1:dim1
@@ -189,11 +189,11 @@ end
 
 """
     cxx_mat_to_jl_mat!(
-        jl_mat::Matrix{Float64}, mat_cxx::CxxPtr{CxxPtr{Float64}}, dim1, dim2
+        jl_mat::Matrix{Float64}, mat_cxx::CxxPtr{CxxPtr{Float64}}, dim1::Integer, dim2::Integer
     )
 """
 function cxx_mat_to_jl_mat!(
-    jl_mat::Matrix{Float64}, mat_cxx::CxxPtr{CxxPtr{Float64}}, dim1, dim2
+    jl_mat::Matrix{Float64}, mat_cxx::CxxPtr{CxxPtr{Float64}}, dim1::Integer, dim2::Integer
 )
     for i in 1:dim2
         for j in 1:dim1
@@ -203,7 +203,7 @@ function cxx_mat_to_jl_mat!(
     return jl_mat
 end
 
-function cxx_vec_to_jl_vec(cxx_vec::CxxPtr{Float64}, dim)
+function cxx_vec_to_jl_vec(cxx_vec::CxxPtr{Float64}, dim::Integer)
     jl_vec = Vector{Float64}(undef, dim)
     for i in 1:dim
         jl_vec[i] = cxx_vec[i]
@@ -212,10 +212,10 @@ function cxx_vec_to_jl_vec(cxx_vec::CxxPtr{Float64}, dim)
 end
 
 """
-    cxx_vec_to_jl_vec!(jl_vec::Vector{Float64}, cxx_vec::CxxPtr{Float64}, dim)
+    cxx_vec_to_jl_vec!(jl_vec::Vector{Float64}, cxx_vec::CxxPtr{Float64}, dim::Integer)
 
 """
-function cxx_vec_to_jl_vec!(jl_vec::Vector{Float64}, cxx_vec::CxxPtr{Float64}, dim)
+function cxx_vec_to_jl_vec!(jl_vec::Vector{Float64}, cxx_vec::CxxPtr{Float64}, dim::Integer)
     for i in 1:dim
         jl_vec[i] = cxx_vec[i]
     end
@@ -223,7 +223,7 @@ function cxx_vec_to_jl_vec!(jl_vec::Vector{Float64}, cxx_vec::CxxPtr{Float64}, d
 end
 
 function cxx_tensor_to_jl_tensor(
-    cxx_tensor::CxxPtr{CxxPtr{CxxPtr{Float64}}}, dim1, dim2, dim3
+    cxx_tensor::CxxPtr{CxxPtr{CxxPtr{Float64}}}, dim1::Integer, dim2::Integer, dim3::Integer
 )
     jl_tensor = Array{Float64}(undef, dim1, dim2, dim3)
     for i in 1:dim3
@@ -240,18 +240,18 @@ end
     cxx_tensor_to_jl_tensor!(
         jl_tensor::Array{Float64,3},
         cxx_tensor::CxxPtr{CxxPtr{CxxPtr{Float64}}},
-        dim1,
-        dim2,
-        dim3,
+        dim1::Integer,
+        dim2::Integer,
+        dim3::Integer
     )
 
 """
 function cxx_tensor_to_jl_tensor!(
     jl_tensor::Array{Float64,3},
     cxx_tensor::CxxPtr{CxxPtr{CxxPtr{Float64}}},
-    dim1,
-    dim2,
-    dim3,
+    dim1::Integer,
+    dim2::Integer,
+    dim3::Integer,
 )
     for i in 1:dim3
         for j in 1:dim2
@@ -264,7 +264,7 @@ function cxx_tensor_to_jl_tensor!(
 end
 
 function cxx_res_to_jl_res(
-    cxx_res, m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights::Int64
+    cxx_res, m::Integer, n::Integer, mode::Symbol, num_dir::Integer, num_weights::Integer
 )
     if mode === :jac
         if m > 1
@@ -307,12 +307,12 @@ end
 
 """
     cxx_res_to_jl_res!(
-        jl_res, cxx_res, m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights::Int64
+        jl_res, cxx_res, m::Integer, n::Integer, mode::Symbol, num_dir::Integer, num_weights::Integer
     )
 
 """
 function cxx_res_to_jl_res!(
-    jl_res, cxx_res, m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights::Int64
+    jl_res, cxx_res, m::Integer, n::Integer, mode::Symbol, num_dir::Integer, num_weights::Integer
 )
     if mode === :jac
         if m > 1

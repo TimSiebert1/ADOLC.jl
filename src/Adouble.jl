@@ -94,14 +94,14 @@ function getADValue(a::Adouble{TlAlloc}, i::Int64)
     return TladoubleModule.getADValue(a.val, i)
 end
 
-function gradient(n::Int64, a::Adouble{TlAlloc}, res)
+function gradient(n::Integer, a::Adouble{TlAlloc}, res)
     for i in 1:n
         res[i] = getADValue(a, i)
     end
 end
 
-function gradient(n::Int64, a::Vector{Adouble{TlAlloc}}, res)
-    for i in 1:length(a)
+function gradient(n::Integer, a::Vector{Adouble{TlAlloc}}, res)
+    for i in eachindex(a)
         for j in 1:n
             res[i, j] = getADValue(a[i], j)
         end
