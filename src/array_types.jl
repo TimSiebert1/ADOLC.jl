@@ -8,163 +8,225 @@ function __init__()
     @initcxx
 end
 
-#CxxMatrix{T} = CxxPtr{CxxPtr{T}} where T <: Real
-#CxxTensor{T} = CxxPtr{CxxPtr{CxxPtr{T}}} where T <: Real
-
-###### Array getter and setter ###### 
-Base.getindex(X::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64) = getindex_tens(X, dim)
+function Base.getindex(cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64)
+    return getindex_tens(cxx_ptr_ptr_ptr, dim)
+end
 function Base.getindex(
-    X::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64, row::Int64, col::Int64
+    cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64, row::Int64, col::Int64
 )
-    return getindex_tens(X, dim, row, col)
+    return getindex_tens(cxx_ptr_ptr_ptr, dim, row, col)
 end
 function Base.setindex!(
-    X::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, val::Cdouble, dim::Int64, row::Int64, col::Int64
+    cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}},
+    val::Cdouble,
+    dim::Int64,
+    row::Int64,
+    col::Int64,
 )
-    return setindex_tens(X, val, dim, row, col)
+    return setindex_tens(cxx_ptr_ptr_ptr, val, dim, row, col)
 end
 
-function Base.getindex(X::CxxPtr{CxxPtr{Cdouble}}, row::Int64, col::Int64)
-    return getindex_mat(X, row, col)
+function Base.getindex(cxx_ptr_ptr::CxxPtr{CxxPtr{Cdouble}}, row::Int64, col::Int64)
+    return getindex_mat(cxx_ptr_ptr, row, col)
 end
-function Base.setindex!(X::CxxPtr{CxxPtr{Cdouble}}, val::Cdouble, row::Int64, col::Int64)
-    return setindex_mat(X, val, row, col)
-end
-
-Base.getindex(X::CxxPtr{Cdouble}, row::Int64) = getindex_vec(X, row)
-Base.setindex!(X::CxxPtr{Cdouble}, val::Cdouble, row::Int64) = setindex_vec(X, val, row)
-
-Base.getindex(X::CxxPtr{Cshort}, row::Int64) = getindex_vec(X, row)
-Base.setindex!(X::CxxPtr{Cshort}, val::Cshort, row::Int64) = setindex_vec(X, val, row)
-
-################################################
-
-function cxx_mat_finalizer(t)
-    return myfree2(t.data)
+function Base.setindex!(
+    cxx_ptr_ptr::CxxPtr{CxxPtr{Cdouble}}, val::Cdouble, row::Int64, col::Int64
+)
+    return setindex_mat(cxx_ptr_ptr, val, row, col)
 end
 
-###### ptr-ptr wrapper #########################
+Base.getindex(cxx_ptr::CxxPtr{Cdouble}, row::Int64) = getindex_vec(cxx_ptr, row)
+function Base.setindex!(cxx_ptr::CxxPtr{Cdouble}, val::Cdouble, row::Int64)
+    return setindex_vec(cxx_ptr, val, row)
+end
 
-mutable struct CxxMatrix{T} <: AbstractMatrix{T}
-    """
-    Wrapper for c++ double** or short** data
-    """
-    data::CxxPtr{CxxPtr{T}}
-    n::Int64
-    m::Int64
-    function CxxMatrix{T}(n::Integer, m::Integer) where {T<:Real}
-        check_type_mat(T)
-        x = new{T}(alloc_mat(T, n, m), n, m)
-        return finalizer(cxx_mat_finalizer, x)
+Base.getindex(cxx_ptr::CxxPtr{Cshort}, row::Int64) = getindex_vec(cxx_ptr, row)
+function Base.setindex!(cxx_ptr::CxxPtr{Cshort}, val::Cshort, row::Int64)
+    return setindex_vec(cxx_ptr, val, row)
+end
+
+function cxx_tensor_finalizer(cxx_tensor)
+    return myfree3(cxx_tensor.data)
+end
+
+"""
+    mutable struct CxxTensor <: AbstractArray{Cdouble, 3}
+
+Wrapper for `CxxPtr{CxxPtr{CxxPtr{Cdouble}}}`, which is used as `double***` in C++.
+"""
+mutable struct CxxTensor <: AbstractArray{Cdouble,3}
+    data::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}
+    dim1::Integer
+    dim2::Integer
+    dim3::Integer
+
+    function CxxTensor(dim1::Integer, dim2::Integer, dim3::Integer)
+        cxx_tensor = new(myalloc3(dim1, dim2, dim3), dim1, dim2, dim3)
+        return finalizer(cxx_tensor_finalizer, cxx_tensor)
     end
-    function CxxMatrix{T}(Y::AbstractMatrix{T}) where {T<:Real}
-        check_type_mat(T)
-        n, m = size(Y)
-        X = new{T}(alloc_mat(T, n, m), n, m)
-        for i in 1:n
-            for j in 1:m
-                X[i, j] = Y[i, j]
+    function CxxTensor(
+        x::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim1::Integer, dim2::Integer, dim3::Integer
+    )
+        cxx_tensor = new(x, dim1, dim2, dim3)
+        return finalizer(cxx_tensor_finalizer, cxx_tensor)
+    end
+    function CxxTensor(jl_tensor::AbstractArray{Cdouble,3})
+        dim1, dim2, dim3 = size(jl_tensor)
+        cxx_tensor = new(myalloc3(dim1, dim2, dim3), dim1, dim2, dim3)
+        for k in 1:dim3
+            for j in 1:dim2
+                for i in 1:dim1
+                    cxx_tensor[i, j, k] = jl_mat[i, j, k]
+                end
             end
         end
-        return finalizer(cxx_mat_finalizer, X)
+        return finalizer(cxx_tensor_finalizer, cxx_tensor)
     end
 end
 
-Base.size(A::CxxMatrix) = (A.n, A.m)
-Base.setindex!(A::CxxMatrix{T}, v, i, j) where {T} = setindex!(A.data, T(v), i, j)
-Base.getindex(A::CxxMatrix, i, j) = getindex(A.data, i, j)
-
-function check_type_mat(::Type{T}) where {T<:Real}
-    if !(T <: Union{Cdouble})
-        throw("Not implemented for type $T")
-    end
+Base.size(cxx_tensor::CxxTensor) = (cxx_tensor.dim1, cxx_tensor.dim2, cxx_tensor.dim3)
+function Base.axes(cxx_tensor::CxxTensor)
+    return (
+        Base.OneTo(cxx_tensor.dim1),
+        Base.OneTo(cxx_tensor.dim2),
+        Base.OneTo(cxx_tensor.dim3),
+    )
 end
-
-alloc_mat(::Type{Float64}, n::Integer, m::Integer) = myalloc2(n, m)
-
-function Base.axes(X::CxxMatrix{T}, n::Int64) where {T<:Real}
-    if n == 1
-        return Base.OneTo(X.n)
-    elseif n == 2
-        return Base.OneTo(X.m)
+function Base.axes(cxx_tensor::CxxTensor, dim::Integer)
+    if dim == 1
+        return Base.OneTo(cxx_tensor.dim1)
+    elseif dim == 2
+        return Base.OneTo(cxx_tensor.dim2)
+    elseif dim == 3
+        return Base.OneTo(cxx_tensor.dim3)
     else
         return Base.OneTo(1)
     end
 end
-
-Base.axes(X::CxxMatrix{T}) where {T<:Real} = (Base.OneTo(X.n), Base.OneTo(X.m))
-
-Base.size(X::CxxMatrix{T}) where {T<:Real} = (X.n, X.m)
-function Base.getindex(X::CxxMatrix{T}, row::Int64, col::Int64) where {T<:Real}
-    return getindex(X.data, row, col)
+function Base.setindex!(
+    cxx_tensor::CxxTensor, val::Number, dim1::Integer, dim2::Integer, dim3::Integer
+)
+    return setindex!(cxx_tensor.data, Cdouble(val), dim1, dim2, dim3)
 end
-function Base.setindex!(X::CxxMatrix{T}, val::T, row::Int64, col::Int64) where {T<:Real}
-    return setindex!(X.data, val, row, col)
+function Base.getindex(cxx_tensor::CxxTensor, dim1::Integer, dim2::Integer, dim3::Integer)
+    return getindex(cxx_tensor.data, dim1, dim2, dim3)
+end
+
+function cxx_mat_finalizer(cxx_mat)
+    return myfree2(cxx_mat.data)
+end
+
+"""
+    mutable struct CxxMatrix <: AbstractMatrix{Cdouble}
+
+Wrapper for `CxxPtr{CxxPtr{Cdouble}}`, which is used as `double**` in C++.
+"""
+mutable struct CxxMatrix <: AbstractMatrix{Cdouble}
+    data::CxxPtr{CxxPtr{Cdouble}}
+    dim1::Integer
+    dim2::Integer
+    function CxxMatrix(dim1::Integer, dim2::Integer)
+        cxx_mat = new(myalloc2(dim1, dim2), dim1, dim2)
+        return finalizer(cxx_mat_finalizer, cxx_mat)
+    end
+
+    function CxxMatrix(x::CxxPtr{CxxPtr{Cdouble}}, dim1::Integer, dim2::Integer)
+        cxx_mat = new(x, dim1, dim2)
+        return finalizer(cxx_mat_finalizer, cxx_mat)
+    end
+
+    function CxxMatrix(jl_mat::AbstractMatrix{Cdouble})
+        dim1, dim2 = size(jl_mat)
+        cxx_mat = new(myalloc2(dim1, dim2), dim1, dim2)
+        for j in 1:dim2
+            for i in 1:dim1
+                cxx_mat[i, j] = jl_mat[i, j]
+            end
+        end
+        return finalizer(cxx_mat_finalizer, cxx_mat)
+    end
+end
+
+Base.size(cxx_mat::CxxMatrix) = (cxx_mat.dim1, cxx_mat.dim2)
+Base.axes(cxx_mat::CxxMatrix) = (Base.OneTo(cxx_mat.dim1), Base.OneTo(cxx_mat.dim2))
+function Base.axes(cxx_mat::CxxMatrix, dim::Integer)
+    if dim == 1
+        return Base.OneTo(cxx_mat.dim1)
+    elseif dim == 2
+        return Base.OneTo(cxx_mat.dim2)
+    else
+        return Base.OneTo(1)
+    end
+end
+function Base.setindex!(cxx_mat::CxxMatrix, val::Number, dim1::Integer, dim2::Integer)
+    return setindex!(cxx_mat.data, Cdouble(val), dim1, dim2)
+end
+function Base.getindex(cxx_mat::CxxMatrix, dim1::Integer, dim2::Integer)
+    return getindex(cxx_mat.data, dim1, dim2)
 end
 
 #######################################
 
-alloc_vec(::Type{Cdouble}, n::Integer) = alloc_vec_double(n)
-alloc_vec(::Type{Cshort}, n::Integer) = alloc_vec_short(n)
-
-function cxx_vec_finalizer(x)
-    return free_vec_double(x.data)
+function cxx_vec_finalizer(cxx_vec)
+    return free_vec_double(cxx_vec.data)
 end
 
-mutable struct CxxVector{T} <: AbstractVector{T}
-    data::CxxPtr{T}
-    n::Int64
-    function CxxVector{T}(n::Integer) where {T<:Real}
-        check_type_vec(T)
-        x = new{T}(alloc_vec(T, n), n)
-        return finalizer(cxx_vec_finalizer, x)
+"""
+    mutable struct CxxVector <: AbstractVector{Cdouble}
+Wrapper of a `double*` (`CxxPtr{Cdouble}`).
+"""
+mutable struct CxxVector <: AbstractVector{Cdouble}
+    data::CxxPtr{Cdouble}
+    dim::Integer
+    function CxxVector(dim::Integer)
+        cxx_vec = new(alloc_vec_double(dim), dim)
+        return finalizer(cxx_vec_finalizer, cxx_vec)
     end
-    function CxxVector{T}(y::Vector{T}) where {T<:Real}
-        check_type_vec(T)
-        n = length(y)
-        x = new{T}(alloc_vec(T, n), n)
-        for i in 1:n
-            x[i] = y[i]
+    function CxxVector(x::CxxPtr{Cdouble}, dim::Integer)
+        cxx_vec = new(x, dim)
+        return finalizer(cxx_vec_finalizer, cxx_vec)
+    end
+
+    function CxxVector(jl_vec::Vector{Cdouble})
+        dim = size(jl_vec)[1]
+        cxx_vec = new(alloc_vec_double(dim), dim)
+        for i in 1:dim
+            cxx_vec[i] = jl_vec[i]
         end
-        return finalizer(cxx_vec_finalizer, x)
+        return finalizer(cxx_vec_finalizer, cxx_vec)
     end
 end
 
-function check_type_vec(::Type{T}) where {T<:Real}
-    if !(T <: Union{Cdouble,Cshort})
-        throw("Not implemented for type $T")
-    end
+function Base.axes(cxx_vec::CxxVector, dim::Integer)
+    return dim == 1 ? Base.OneTo(cxx_vec.dim) : Base.OneTo(1)
+end
+Base.axes(cxx_vec::CxxVector) = (Base.OneTo(cxx_vec.n),)
+Base.size(cxx_vec::CxxVector) = (cxx_vec.dim,)
+Base.getindex(cxx_vec::CxxVector, dim::Integer) = getindex(cxx_vec.data, dim)
+function Base.setindex!(cxx_vec::CxxVector, val::Number, dim::Integer)
+    return setindex!(cxx_vec.data, Cdouble(val), dim)
 end
 
-function mat_to_cxx(cxx_mat::CxxMatrix{Float64}, mat::Matrix{Float64})
-    if cxx_mat.n != size(mat, 1) || cxx_mat.m != size(mat, 2)
+##### until here
+
+function mat_to_cxx(cxx_mat::CxxMatrix, mat::Matrix{Float64})
+    if cxx_mat.dim1 != size(mat, 1) || cxx_mat.dim2 != size(mat, 2)
         throw("dimension mistmatch!")
     end
-    for i in 1:size(mat, 1)
-        for j in 1:size(mat, 2)
+    for j in 1:size(mat, 2)
+        for i in 1:size(mat, 1)
             cxx_mat[i, j] = mat[i, j]
         end
     end
 end
 
-function vec_to_cxx(cxx_vec::CxxVector{Float64}, vec::Vector{Float64})
-    if cxx_vec.n != size(vec, 1)
+function vec_to_cxx(cxx_vec::CxxVector, vec::Vector{Float64})
+    if cxx_vec.dim != size(vec, 1)
         throw("dimension mistmatch!")
     end
     for i in 1:size(vec, 1)
         cxx_vec[i] = vec[i]
     end
-end
-
-function Base.axes(X::CxxVector{T}, n::Int64) where {T<:Real}
-    return n == 1 ? Base.OneTo(X.n) : Base.OneTo(1)
-end
-Base.axes(X::CxxVector{T}) where {T<:Real} = (Base.OneTo(X.n),)
-
-Base.size(X::CxxVector{T}) where {T<:Real} = X.n
-Base.getindex(X::CxxVector{T}, row::Int64) where {T<:Real} = getindex(X.data, row)
-function Base.setindex!(X::CxxVector{T}, val::T, row::Int64) where {T<:Real}
-    return setindex!(X.data, val, row)
 end
 
 function jl_mat_to_cxx_mat(mat::Matrix{Float64})
@@ -312,7 +374,13 @@ end
 
 """
 function cxx_res_to_jl_res!(
-    jl_res, cxx_res, m::Integer, n::Integer, mode::Symbol, num_dir::Integer, num_weights::Integer
+    jl_res,
+    cxx_res,
+    m::Integer,
+    n::Integer,
+    mode::Symbol,
+    num_dir::Integer,
+    num_weights::Integer,
 )
     if mode === :jac
         if m > 1
@@ -355,6 +423,7 @@ end
 
 export CxxMatrix,
     CxxVector,
+    CxxTensor,
     myalloc3,
     myalloc2,
     alloc_vec_double,

@@ -1,8 +1,6 @@
 """
-    tensor_address(degree::I, adolc_partial::Vector{I}) where I <: Integer
-    tensor_address(degree::Cint, adolc_partial::Vector{I}) where I <: Integer
-    tensor_address(degree::I, adolc_partial::Vector{Cint}) where I <: Integer
-    tensor_address(degree::Cint, adolc_partial::Vector{Cint})
+    tensor_address(degree::Integer, adolc_partial::Vector{Integer})
+    tensor_address(degree::Integer, adolc_partial::Vector{Cint})
 
 Generates the index (address) of the mixed-partial specified by `adolc_partial`
 in an higher-order derivative tensor of derivative order `degree`.
@@ -10,19 +8,11 @@ in an higher-order derivative tensor of derivative order `degree`.
 !!! note 
     The partial has to be in [ADOLC-Format](@ref).
 """
-function tensor_address(degree::I, adolc_partial::Vector{I}) where {I<:Integer}
-    return tensor_address(Cint(degree), convert(Vector{Cint}, adolc_partial))
-end
-
-function tensor_address(degree::Cint, adolc_partial::Vector{I}) where {I<:Integer}
+function tensor_address(degree, adolc_partial)
     return tensor_address(degree, convert(Vector{Cint}, adolc_partial))
 end
 
-function tensor_address(degree::I, adolc_partial::Vector{Cint}) where {I<:Integer}
-    return tensor_address(Cint(degree), adolc_partial)
-end
-
-function tensor_address(degree::Cint, adolc_partial::Vector{Cint})
+function tensor_address(degree::Integer, adolc_partial::Vector{Cint})
     # "+1" because c++ indexing is -1
     return TbadoubleModule.tensor_address(degree, adolc_partial) + 1
 end
@@ -409,37 +399,37 @@ end
 function allocator(m, n, mode, num_dir, num_weights)
     if mode === :jac
         if m > 1
-            return myalloc2(m, n)
+            return CxxMatrix(m, n)
         else
-            return alloc_vec_double(n)
+            return CxxVector(n)
         end
     elseif mode === :hess
-        return myalloc3(m, n, n)
+        return CxxTensor(m, n, n)
     elseif mode === :jac_vec
-        return alloc_vec_double(m)
+        return CxxVector(m)
     elseif mode === :jac_mat
-        return myalloc2(m, num_dir)
+        return CxxMatrix(m, num_dir)
     elseif mode === :vec_jac
-        return alloc_vec_double(n)
+        return CxxVector(n)
     elseif mode === :mat_jac
-        return myalloc2(num_weights, n)
+        return CxxMatrix(num_weights, n)
 
     elseif mode === :hess_vec
-        return myalloc2(m, n)
+        return CxxMatrix(m, n)
     elseif mode === :hess_mat
-        return myalloc3(m, n, num_dir)
+        return CxxTensor(m, n, num_dir)
     elseif mode === :vec_hess
-        return myalloc2(n, n)
+        return CxxMatrix(n, n)
     elseif mode === :mat_hess
-        return myalloc3(num_weights, n, n)
+        return CxxTensor(num_weights, n, n)
     elseif mode === :vec_hess_vec
-        return alloc_vec_double(n)
+        return CxxVector(n)
     elseif mode === :mat_hess_vec
-        return myalloc2(num_weights, n)
+        return CxxMatrix(num_weights, n)
     elseif mode === :vec_hess_mat
-        return myalloc2(n, num_dir)
+        return CxxMatrix(n, num_dir)
     elseif mode === :mat_hess_mat
-        return myalloc3(num_weights, n, num_dir)
+        return CxxTensor(num_weights, n, num_dir)
     end
 end
 

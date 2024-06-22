@@ -19,44 +19,32 @@ mutable struct AbsNormalForm
     n::Int64
     num_switches::Int32
 
-    x::CxxVector{Float64}
-    y::CxxVector{Float64}
-    z::CxxVector{Float64}
+    x::CxxVector
+    y::CxxVector
+    z::CxxVector
 
-    cz::CxxVector{Float64}
-    cy::CxxVector{Float64}
+    cz::CxxVector
+    cy::CxxVector
 
-    Y::CxxMatrix{Float64}
-    J::CxxMatrix{Float64}
-    Z::CxxMatrix{Float64}
-    L::CxxMatrix{Float64}
+    Y::CxxMatrix
+    J::CxxMatrix
+    Z::CxxMatrix
+    L::CxxMatrix
 
     function AbsNormalForm(tape_id::Int64, m, n, x::Vector{Float64}, y::Vector{Float64})
         num_switches = TbadoubleModule.get_num_switches(tape_id)
-        z = CxxVector{Float64}(num_switches)
+        z = CxxVector(num_switches)
 
-        cz = CxxVector{Float64}(num_switches)
-        cy = CxxVector{Float64}(length(y))
+        cz = CxxVector(num_switches)
+        cy = CxxVector(length(y))
 
-        Y = CxxMatrix{Float64}(length(y), length(x))
-        J = CxxMatrix{Float64}(length(y), num_switches)
-        Z = CxxMatrix{Float64}(num_switches, length(x))
-        L = CxxMatrix{Float64}(num_switches, num_switches)
+        Y = CxxMatrix(length(y), length(x))
+        J = CxxMatrix(length(y), num_switches)
+        Z = CxxMatrix(num_switches, length(x))
+        L = CxxMatrix(num_switches, num_switches)
 
         problem = new(
-            tape_id,
-            m,
-            n,
-            num_switches,
-            CxxVector{Float64}(x),
-            CxxVector{Float64}(y),
-            z,
-            cz,
-            cy,
-            Y,
-            J,
-            Z,
-            L,
+            tape_id, m, n, num_switches, CxxVector(x), CxxVector(y), z, cz, cy, Y, J, Z, L
         )
         return finalizer(abs_normal_finalizer, problem)
     end
@@ -83,18 +71,18 @@ end
 
 function _abs_normal!(
     tape_id::Int64,
-    z_cxx::CxxVector{Float64},
-    cz_cxx::CxxVector{Float64},
-    cy_cxx::CxxVector{Float64},
-    Y_cxx::CxxMatrix{Float64},
-    J_cxx::CxxMatrix{Float64},
-    Z_cxx::CxxMatrix{Float64},
-    L_cxx::CxxMatrix{Float64},
-    m::Int64,
-    n::Int64,
+    z_cxx::CxxVector,
+    cz_cxx::CxxVector,
+    cy_cxx::CxxVector,
+    Y_cxx::CxxMatrix,
+    J_cxx::CxxMatrix,
+    Z_cxx::CxxMatrix,
+    L_cxx::CxxMatrix,
+    m::Integer,
+    n::Integer,
     num_switches::Int32,
-    x_cxx::CxxVector{Float64},
-    y_cxx::CxxVector{Float64},
+    x_cxx::CxxVector,
+    y_cxx::CxxVector,
 )
 
     # use c++ double*

@@ -76,18 +76,18 @@ function derivative(
         end
         reuse_tape = true
     else
-        m = TbadoubleModule.num_dependents(Cint(tape_id))
-        n = TbadoubleModule.num_independents(Cint(tape_id))
+        m = TbadoubleModule.num_dependents(tape_id)
+        n = TbadoubleModule.num_independents(tape_id)
     end
 
-    cxx_res = if mode === :abs_normal
+    res = if mode === :abs_normal
         init_abs_normal_form(f, x; tape_id=tape_id, reuse_tape=reuse_tape)
     else
         allocator(m, n, mode, size(dir, 2)[1], size(weights, 1)[1])
     end
     # allocator creates tape in case of :abs_normal
     derivative!(
-        cxx_res,
+        res,
         f,
         m,
         n,
@@ -95,16 +95,11 @@ function derivative(
         mode;
         dir=dir,
         weights=weights,
-        tape_id=mode === :abs_normal ? cxx_res.tape_id : tape_id,
+        tape_id=mode === :abs_normal ? res.tape_id : tape_id,
         reuse_tape=mode === :abs_normal ? true : reuse_tape,
     )
-    jl_res = if mode === :abs_normal
-        cxx_res
-    else
-        cxx_res_to_jl_res(cxx_res, m, n, mode, size(dir, 2)[1], size(weights, 1)[1])
-    end
-    deallocator!(cxx_res, m, mode)
-    return jl_res
+
+    return res
 end
 
 """
@@ -172,10 +167,10 @@ function derivative(
         m, n = create_tape(f, x, tape_id)
         reuse_tape = true
     else
-        m = TbadoubleModule.num_dependents(Cint(tape_id))
-        n = TbadoubleModule.num_independents(Cint(tape_id))
+        m = TbadoubleModule.num_dependents(tape_id)
+        n = TbadoubleModule.num_independents(tape_id)
     end
-    res = Matrix{Float64}(undef, m, length(partials))
+    res = CxxMatrix(m, length(partials))
     derivative!(
         res,
         f,
@@ -227,7 +222,7 @@ function derivative(
     f,
     x::Union{Float64,Vector{Float64}},
     partials::Vector{Vector{Int64}},
-    seed::Matrix{Float64};
+    seed;
     tape_id::Integer=0,
     reuse_tape::Bool=false,
     adolc_format::Bool=false,
@@ -236,8 +231,8 @@ function derivative(
         m, n = create_tape(f, x, tape_id)
         reuse_tape = true
     else
-        m = TbadoubleModule.num_dependents(Cint(tape_id))
-        n = TbadoubleModule.num_independents(Cint(tape_id))
+        m = TbadoubleModule.num_dependents(tape_id)
+        n = TbadoubleModule.num_independents(tape_id)
     end
 
     res = Matrix{Float64}(undef, m, length(partials))
@@ -423,7 +418,7 @@ function derivative!(
     adolc_format::Bool=false,
 )
     if id_seed
-        seed = create_cxx_identity(n, n)
+        seed = CxxMatrix(create_cxx_identity(n, n), n, n)
     else
         seed_idxs = if adolc_format
             seed_idxs_adolc_format(partials)
@@ -435,10 +430,11 @@ function derivative!(
         else
             partial_format_to_seed_space(partials, seed_idxs)
         end
-        seed = create_partial_cxx_identity(n, seed_idxs)
+        seed = CxxMatrix(create_partial_cxx_identity(n, seed_idxs), n, length(seed_idxs))
     end
-    higher_order!(res, f, m, n, x, partials, seed, n, tape_id, reuse_tape, adolc_format)
-    return myfree2(seed)
+    return higher_order!(
+        res, f, m, n, x, partials, seed, n, tape_id, reuse_tape, adolc_format
+    )
 end
 
 """
@@ -486,26 +482,14 @@ function derivative!(
     n::Integer,
     x::Union{Float64,Vector{Float64}},
     partials::Vector{Vector{Int64}},
-    seed::Matrix{Float64};
+    seed;
     tape_id::Integer=0,
     reuse_tape::Bool=false,
     adolc_format::Bool=false,
 )
-    seed_cxx = jl_mat_to_cxx_mat(seed)
-    higher_order!(
-        res,
-        f,
-        m,
-        n,
-        x,
-        partials,
-        seed_cxx,
-        size(seed, 2),
-        tape_id,
-        reuse_tape,
-        adolc_format,
+    return higher_order!(
+        res, f, m, n, x, partials, seed, size(seed, 2), tape_id, reuse_tape, adolc_format
     )
-    return myfree2(seed_cxx)
 end
 
 function jac!(
@@ -530,16 +514,21 @@ function jac!(
 end
 
 function gradient!(
-    res, f, n::Integer, x::Union{Float64,Vector{Float64}}, tape_id::Integer, reuse_tape::Bool
+    res,
+    f,
+    n::Integer,
+    x::Union{Float64,Vector{Float64}},
+    tape_id::Integer,
+    reuse_tape::Bool,
 )
     if !reuse_tape
         create_tape(f, x, tape_id)
     end
-    return TbadoubleModule.gradient(Cint(tape_id), Cint(n), x, res)
+    return TbadoubleModule.gradient(tape_id, n, x, res.data)
 end
 
 function tape_less_forward!(res, f, n::Integer, x::Union{Float64,Vector{Float64}})
-    TladoubleModule.set_num_dir(Cint(n))
+    TladoubleModule.set_num_dir(n)
     a = Adouble{TlAlloc}(x, true)
     init_gradient(a)
     b = f(a)
@@ -559,9 +548,9 @@ function fos_reverse!(
     if !reuse_tape
         create_tape(f, x, tape_id; keep=1)
     else
-        TbadoubleModule.zos_forward(Cint(tape_id), Cint(m), Cint(n), 1, x, [0.0 for _ in 1:m])
+        TbadoubleModule.zos_forward(tape_id, m, n, 1, x, [0.0 for _ in 1:m])
     end
-    return TbadoubleModule.fos_reverse(Cint(tape_id), Cint(m), Cint(n), weights, res)
+    return TbadoubleModule.fos_reverse(tape_id, m, n, weights, res.data)
 end
 
 function fov_reverse!(
@@ -587,17 +576,17 @@ function fov_reverse!(
     n::Integer,
     num_dir::Integer,
     x::Union{Float64,Vector{Float64}},
-    weights::CxxPtr{CxxPtr{Float64}},
+    weights,
     tape_id::Integer,
     reuse_tape,
 )
     if !reuse_tape
         create_tape(f, x, tape_id; keep=1)
     else
-        TbadoubleModule.zos_forward(Cint(tape_id), Cint(m), Cint(n), Cint(1), x, [0.0 for _ in 1:m])
+        TbadoubleModule.zos_forward(tape_id, m, n, 1, x, [0.0 for _ in 1:m])
     end
 
-    return TbadoubleModule.fov_reverse(Cint(tape_id), Cint(m), Cint(n), Cint(num_dir), weights, res)
+    return TbadoubleModule.fov_reverse(tape_id, m, n, num_dir, weights, res.data)
 end
 
 function fos_forward!(
@@ -613,7 +602,9 @@ function fos_forward!(
     if !reuse_tape
         create_tape(f, x, tape_id)
     end
-    return TbadoubleModule.fos_forward(Cint(tape_id), Cint(m), Cint(n), Cint(0), x, dir, [0.0 for _ in 1:m], res)
+    return TbadoubleModule.fos_forward(
+        tape_id, m, n, 0, x, dir, [0.0 for _ in 1:m], res.data
+    )
 end
 
 function fov_forward!(
@@ -638,7 +629,7 @@ function fov_forward!(
     m::Integer,
     n::Integer,
     x::Union{Float64,Vector{Float64}},
-    dir::CxxPtr{CxxPtr{Float64}},
+    dir,
     num_dir::Integer,
     tape_id,
     reuse_tape,
@@ -647,7 +638,7 @@ function fov_forward!(
         create_tape(f, x, tape_id)
     end
     return TbadoubleModule.fov_forward(
-        Cint(tape_id), Cint(m), Cint(n), Cint(num_dir), x, dir, [0.0 for _ in 1:m], res
+        tape_id, m, n, num_dir, x, dir, [0.0 for _ in 1:m], res.data
     )
 end
 
@@ -701,8 +692,8 @@ function init_abs_normal_form(
         m, n = create_tape(f, x, tape_id; enableMinMaxUsingAbs=true)
         reuse_tape = true
     else
-        m = TbadoubleModule.num_dependents(Cint(tape_id))
-        n = TbadoubleModule.num_independents(Cint(tape_id))
+        m = TbadoubleModule.num_dependents(tape_id)
+        n = TbadoubleModule.num_independents(tape_id)
     end
     return AbsNormalForm(tape_id, m, n, x, [0.0 for _ in 1:m])
 end
@@ -721,11 +712,11 @@ function vec_hess_vec!(
     if !(reuse_tape)
         create_tape(f, x, tape_id)
     end
-    return TbadoubleModule.lagra_hess_vec(Cint(tape_id), Cint(m), Cint(n), x, dir, weights, res)
+    return TbadoubleModule.lagra_hess_vec(tape_id, m, n, x, dir, weights, res.data)
 end
 
 function vec_hess_mat!(
-    res::CxxPtr{CxxPtr{Float64}},
+    res,
     f,
     m::Integer,
     n::Integer,
@@ -738,7 +729,7 @@ function vec_hess_mat!(
     if !(reuse_tape)
         create_tape(f, x, tape_id)
     end
-    res_tmp = alloc_vec_double(n)
+    res_tmp = CxxVector(n)
     for i in axes(dir, 2)
         vec_hess_vec!(res_tmp, f, m, n, x, dir[:, i], weights, tape_id, true)
         for j in 1:n
@@ -746,11 +737,10 @@ function vec_hess_mat!(
             res_tmp[j] = 0.0
         end
     end
-    return free_vec_double(res_tmp)
 end
 
 function vec_hess!(
-    res::CxxPtr{CxxPtr{Float64}},
+    res,
     f,
     m::Integer,
     n::Integer,
@@ -775,9 +765,9 @@ function mat_hess_vec!(
     reuse_tape::Bool,
 )
     num_weights = size(weights, 1)
-    weights_cxx = jl_mat_to_cxx_mat(weights)
+    cxx_weights = CxxMatrix(weights)
     return mat_hess_vec!(
-        res, f, m, n, x, dir, weights_cxx, num_weights, tape_id, reuse_tape
+        res, f, m, n, x, dir, cxx_weights, num_weights, tape_id, reuse_tape
     )
 end
 
@@ -788,25 +778,22 @@ function mat_hess_vec!(
     n::Integer,
     x::Union{Float64,Vector{Float64}},
     dir::Vector{Float64},
-    weights::CxxPtr{CxxPtr{Float64}},
+    weights,
     num_weights::Integer,
     tape_id::Integer,
     reuse_tape::Bool;
-    res_fos_tmp::Union{CxxPtr{Float64},Nothing}=nothing,
-    nz_tmp::Union{CxxPtr{CxxPtr{Int16}},Nothing}=nothing,
-    res_hov_tmp::Union{CxxPtr{CxxPtr{CxxPtr{Float64}}},Nothing}=nothing,
+    res_fos_tmp=nothing,
+    nz_tmp=nothing,
+    res_hov_tmp=nothing,
 )
     if !(reuse_tape)
         create_tape(f, x, tape_id)
     end
-    free_res_fos_tmp = false
-    free_nz_tmp = false
-    free_res_hov_tmp = false
 
     if res_fos_tmp === nothing
-        res_fos_tmp = alloc_vec_double(m)
-        free_res_fos_tmp = true
+        res_fos_tmp = CxxVector(m)
     end
+    free_nz_tmp = false
     if nz_tmp === nothing
         nz_tmp = alloc_mat_short(num_weights, n)
         free_nz_tmp = true
@@ -814,14 +801,13 @@ function mat_hess_vec!(
     degree = 1
     keep = degree + 1
     if res_hov_tmp === nothing
-        res_hov_tmp = myalloc3(num_weights, n, degree + 1)
-        free_res_hov_tmp = true
+        res_hov_tmp = CxxTensor(num_weights, n, degree + 1)
     end
     TbadoubleModule.fos_forward(
-        Cint(tape_id), Cint(m), Cint(n), Cint(keep), x, dir, [0.0 for _ in 1:m], res_fos_tmp
+        tape_id, m, n, keep, x, dir, [0.0 for _ in 1:m], res_fos_tmp.data
     )
     TbadoubleModule.hov_reverse(
-        Cint(tape_id), Cint(m), Cint(n), Cint(degree), Cint(num_weights), weights, res_hov_tmp, nz_tmp
+        tape_id, m, n, degree, num_weights, weights.data, res_hov_tmp.data, nz_tmp
     )
     for i in 1:num_weights
         for j in 1:n
@@ -829,19 +815,13 @@ function mat_hess_vec!(
             res_hov_tmp[i, j, degree + 1] = 0.0
         end
     end
-    if free_res_fos_tmp
-        free_vec_double(res_fos_tmp)
-    end
     if free_nz_tmp
         free_mat_short(nz_tmp, num_weights)
-    end
-    if free_res_hov_tmp
-        myfree3(res_hov_tmp)
     end
 end
 
 function mat_hess_mat!(
-    res::CxxPtr{CxxPtr{CxxPtr{Float64}}},
+    res,
     f,
     m::Integer,
     n::Integer,
@@ -852,20 +832,20 @@ function mat_hess_mat!(
     reuse_tape::Bool,
 )
     num_weights = size(weights, 1)
-    weights_cxx = jl_mat_to_cxx_mat(weights)
+    cxx_weights = CxxMatrix(weights)
     return mat_hess_mat!(
-        res, f, m, n, x, dir, weights_cxx, num_weights, tape_id, reuse_tape
+        res, f, m, n, x, dir, cxx_weights, num_weights, tape_id, reuse_tape
     )
 end
 
 function mat_hess_mat!(
-    res::CxxPtr{CxxPtr{CxxPtr{Float64}}},
+    res,
     f,
     m::Integer,
     n::Integer,
     x::Union{Float64,Vector{Float64}},
     dir::Matrix{Float64},
-    weights::CxxPtr{CxxPtr{Float64}},
+    weights,
     num_weights::Integer,
     tape_id::Integer,
     reuse_tape::Bool;
@@ -874,10 +854,10 @@ function mat_hess_mat!(
     if !(reuse_tape)
         create_tape(f, x, tape_id)
     end
-    res_tmp = myalloc2(num_weights, n)
-    res_fos_tmp = alloc_vec_double(m)
+    res_tmp = CxxMatrix(num_weights, n)
+    res_fos_tmp = CxxVector(m)
     nz_tmp = alloc_mat_short(num_weights, n)
-    res_hov_tmp = myalloc3(num_weights, n, 2)
+    res_hov_tmp = CxxTensor(num_weights, n, 2)
     for i in axes(dir, 2)
         mat_hess_vec!(
             res_tmp,
@@ -912,14 +892,11 @@ function mat_hess_mat!(
             end
         end
     end
-    myfree2(res_tmp)
-    free_vec_double(res_fos_tmp)
-    free_mat_short(nz_tmp, num_weights)
-    return myfree3(res_hov_tmp)
+    return free_mat_short(nz_tmp, num_weights)
 end
 
 function hessian!(
-    res::CxxPtr{CxxPtr{CxxPtr{Float64}}},
+    res,
     f::Function,
     m::Integer,
     n::Integer,
@@ -928,9 +905,9 @@ function hessian!(
     reuse_tape::Bool,
 )
     dir = Matrix{Float64}(I, n, n)
-    weights = create_cxx_identity(m, m)
+    cxx_weights = CxxMatrix(create_cxx_identity(m, m), m, m)
     return mat_hess_mat!(
-        res, f, m, n, x, dir, weights, m, tape_id, reuse_tape; lower_triag=true
+        res, f, m, n, x, dir, cxx_weights, m, tape_id, reuse_tape; lower_triag=true
     )
 end
 
@@ -949,7 +926,7 @@ function hess_vec!(
 end
 
 function mat_hess!(
-    res::CxxPtr{CxxPtr{CxxPtr{Float64}}},
+    res,
     f,
     m::Integer,
     n::Integer,
@@ -963,7 +940,7 @@ function mat_hess!(
 end
 
 function hess_mat!(
-    res::CxxPtr{CxxPtr{CxxPtr{Float64}}},
+    res,
     f,
     m::Integer,
     n::Integer,
@@ -972,8 +949,8 @@ function hess_mat!(
     tape_id::Integer,
     reuse_tape::Bool,
 )
-    weights = create_cxx_identity(m, m)
-    return mat_hess_mat!(res, f, m, n, x, dir, weights, m, tape_id, reuse_tape)
+    cxx_weights = CxxMatrix(create_cxx_identity(m, m), m, m)
+    return mat_hess_mat!(res, f, m, n, x, dir, cxx_weights, m, tape_id, reuse_tape)
 end
 
 function higher_order!(
@@ -983,7 +960,7 @@ function higher_order!(
     n::Integer,
     x::Vector{Float64},
     partials::Vector{Vector{Int64}},
-    seed::CxxPtr{CxxPtr{Float64}},
+    seed,
     num_seeds::Integer,
     tape_id::Integer,
     reuse_tape::Bool,
@@ -997,8 +974,8 @@ function higher_order!(
     else
         degree = maximum(map(sum, partials))
     end
-    res_tmp = myalloc2(m, binomial(num_seeds + degree, degree))
-    tensor_eval(tape_id, m, n, degree, num_seeds, x, res_tmp, seed)
+    res_tmp = CxxMatrix(m, binomial(num_seeds + degree, degree))
+    tensor_eval(tape_id, m, n, degree, num_seeds, x, res_tmp.data, seed.data)
     if !adolc_format
         adolc_partial = zeros(Cint, degree)
     end
@@ -1014,7 +991,6 @@ function higher_order!(
             end
         end
     end
-    return myfree2(res_tmp)
 end
 
 function create_tape(
