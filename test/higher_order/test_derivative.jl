@@ -71,7 +71,6 @@ end
     end
     x = [1.0, 2.0, 3.0, 4.0]
     partials = [[1, 0, 0], [3, 0, 0], [2, 1, 0], [4, 3, 0], [3, 2, 1], [4, 3, 3], [1, 1, 0]]
-
     res = derivative(f, x, partials; adolc_format=true)
 
     @test res[1, 1] ≈ 8.0
@@ -161,6 +160,7 @@ end
     ]
 
     seed = [[1.0, 0.0] [0.0, 2.0] [1.0, 1.0]]
+
     res = derivative(f, x, partials, seed)
 
     @test res[1] ≈ 8.0
