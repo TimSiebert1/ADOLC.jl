@@ -100,8 +100,27 @@ res = derivative(f, x, partials, seed)
 ```
 
 ## Tape Management
+[ADOL-C](https://github.com/coin-or/ADOL-C) (and therefore ADOLC.jl) leverages a *tape* for its 
+derivative calculations except for its tape-less forward-mode, which is applied to compute Jacobians for certain inputs. The tape's task is to save information of all operations in which [ADOL-C]
+(https://github.com/coin-or/ADOL-C)'s derivative types are involved and the connection to other 
+operations. Thus, the tape represents a variant of the computational graph of the user-defined function `f` at a given point `x`. The stored information is used for univariate Taylor polynomial propagation computing [higher-order](@ref "Higher-Order") derivatives, and for the application of the reverse-mode in [first-](@ref "First-Order") and [second-order](@ref "Second-Order") calucations. Since the tape only stores the calling sequence for the first given input point `x`, a derivative computation based on the tape could lead to wrong results for other input points. However, the tape's construction is expensive, which makes it beneficial to create the tape only once and 
+recreate it only if the computational graph of `f` changes. For examples, changes in the computational graph of the `f` might occur if the function is composed by several `if`-statements. In most cases [ADOL-C](https://github.com/coin-or/ADOL-C) stops the program with an error, whenever the tape has to be recreated for a new input. In ADOLC.jl, the [`derivative`](@ref) ([`derivative!`](@ref)) driver builds the tape automatically. Users can use the `resue_tape` flag to suppress this build process. In a first call to the driver, the tape identifier `tape_id` has to be specified. In the following calls of [`derivative`](@ref) ([`derivative!`](@ref)), set the flag `reuse_tape` to `true` and pass the  identifier again. As demonstrated in the following example, the application is straightforward.
 
-
+```@example
+using ADOLC
+f(x) = 2x[1]*x[2]^2 - x[3]^3
+x = [0.5, 1.0, -1.5]
+dir = [1.0, 0.0, -1.0]
+mode = :hess_vec
+tape_id = 1
+num_iters = 100
+res = derivative(f, x, mode, dir=dir, tape_id=tape_id)
+# update x ....
+for i in 1:num_iters
+    res = derivative(f, x, mode, dir=dir, tape_id=tape_id, reuse_tape=true)
+    # do computations ....
+end
+```
 ## Performance Tips
 The following tips are meant to decrease the derivative computation's runtime complexity, especially when derivatives of the same function are needed repeatedly. There are two major modifications for all kinds of derivatives: 
 1) Use the [`derivative!`](@ref) driver, and work with [`allocator`](@ref), [`deallocator!`](@ref), and [`jl_res_to_cxx_res!`] as explained in the guide [Working with C++ Memory](@ref)
@@ -133,7 +152,7 @@ cxx_res_to_jl_res!(jl_res, cxx_res, m, n, mode, num_dir, num_weights)
 # do computations ....
 
 for i in 1:num_iters
-    # update x
+    # update x ...
     derivative!(cxx_res, f, m, n, x, mode, dir=dir, tape_id=tape_id, reuse_tape=true)
     cxx_res_to_jl_res!(jl_res, cxx_res, m, n, mode, num_dir, num_weights)
     # do computations ... 
