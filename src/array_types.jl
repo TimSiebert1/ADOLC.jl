@@ -26,6 +26,24 @@ function Base.setindex!(
     return setindex_tens(cxx_ptr_ptr_ptr, Cdouble(val), dim, row, col)
 end
 
+function Base.getindex(cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64)
+    return getindex_tens(cxx_ptr_ptr_ptr, dim)
+end
+function Base.getindex(
+    cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64, row::Int64, col::Int64
+)
+    return getindex_tens(cxx_ptr_ptr_ptr, dim, row, col)
+end
+function Base.setindex!(
+    cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}},
+    val::Cdouble,
+    dim::Int64,
+    row::Int64,
+    col::Int64,
+)
+    return setindex_tens(cxx_ptr_ptr_ptr, val, dim, row, col)
+end
+
 function Base.getindex(cxx_ptr_ptr::CxxPtr{CxxPtr{Cdouble}}, row, col)
     return getindex_mat(cxx_ptr_ptr, row, col)
 end
@@ -35,17 +53,32 @@ function Base.setindex!(
     return setindex_mat(cxx_ptr_ptr, Cdouble(val), row, col)
 end
 
-Base.getindex(cxx_ptr::CxxPtr{Cdouble}, row::Int64) = getindex_vec(cxx_ptr, row)
-function Base.setindex!(cxx_ptr::CxxPtr{Cdouble}, val, row::Int64)
-    return setindex_vec(cxx_ptr, Cdouble(val), row)
+
+function Base.getindex(cxx_ptr_ptr::CxxPtr{CxxPtr{Cdouble}}, row::Int64, col::Int64)
+    return getindex_mat(cxx_ptr_ptr, row, col)
+end
+function Base.setindex!(
+    cxx_ptr_ptr::CxxPtr{CxxPtr{Cdouble}}, val::Cdouble, row::Int64, col::Int64
+)
+    return setindex_mat(cxx_ptr_ptr, val, row, col)
 end
 
+
+
+Base.getindex(cxx_ptr::CxxPtr{Cdouble}, row::Int64) = getindex_vec(cxx_ptr, row)
+function Base.setindex!(cxx_ptr::CxxPtr{Cdouble}, val::Cdouble, row::Int64)
+    return setindex_vec(cxx_ptr, val, row)
+end
 Base.getindex(cxx_ptr::CxxPtr{Cdouble}, row) = getindex_vec(cxx_ptr, row)
 function Base.setindex!(cxx_ptr::CxxPtr{Cdouble}, val, row)
     return setindex_vec(cxx_ptr, Cdouble(val), row)
 end
-
 Base.getindex(cxx_ptr::CxxPtr{Cshort}, row::Int64) = getindex_vec(cxx_ptr, row)
+function Base.setindex!(cxx_ptr::CxxPtr{Cshort}, val::Cshort, row::Int64)
+    return setindex_vec(cxx_ptr, val, row)
+end
+
+Base.getindex(cxx_ptr::CxxPtr{Cshort}, row) = getindex_vec(cxx_ptr, row)
 function Base.setindex!(cxx_ptr::CxxPtr{Cshort}, val, row)
     return setindex_vec(cxx_ptr, Cshort(val), row)
 end
