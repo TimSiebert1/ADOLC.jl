@@ -22,7 +22,6 @@ num_dir = size(dir, 2)[1]
 num_weights = 0
 cxx_res = allocator(m, n, mode, num_dir, num_weights)
 derivative!(cxx_res, f, m, n, x, mode, dir=dir)
-deallocator!(cxx_res, m, mode)
 ```
 The first critical point is tackled using the [`deallocator!`](@ref) function, which handles the release of the C++ memory. Of course, one wants to conduct computations with `cxx_res`. The recommended way to do so is to pre-allocate a corresponding Julia container (`Vector{Float64}`, `Matrix{Float64}` or `Array{Float64, 3}`) obtained from [`jl_allocator`](@ref) and copy the data from `cxx_res` the Julia storage `jl_res` by leveraging [`cxx_res_to_jl_res!`](@ref):
 ```@example
@@ -90,7 +89,7 @@ using ADOLC
 f(x) = x[1]^3*x[2]^2 - x[2]^3
 x = [1.0, 1.0]
 partials = [[1], [2], [3]]
-seed = [[1.0, 1.0];;]
+seed = CxxMatrix([[1.0, 1.0];;])
 res = derivative(f, x, partials, seed)
 
 # output
