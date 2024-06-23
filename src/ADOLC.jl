@@ -26,7 +26,10 @@ export partial_to_adolc_format,
     seed_idxs_adolc_format,
     partial_format_to_seed_space,
     adolc_format_to_seed_space,
-    myalloc2
+    myalloc2,
+    CxxVector,
+    CxxMatrix,
+    CxxTensor
 
 export TbAlloc, TlAlloc, Adouble, getValue, get_gradient
 
