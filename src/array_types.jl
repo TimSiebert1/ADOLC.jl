@@ -203,7 +203,6 @@ function Base.getindex(cxx_mat::CxxMatrix, dim1::Integer, dim2::Integer)
     return getindex(cxx_mat.data, dim1, dim2)
 end
 
-#######################################
 
 function cxx_vec_finalizer(cxx_vec)
     return free_vec_double(cxx_vec.data)
@@ -245,9 +244,10 @@ function Base.setindex!(cxx_vec::CxxVector, val::Number, dim::Integer)
     return setindex!(cxx_vec.data, Cdouble(val), dim)
 end
 
-##### until here
 
-function mat_to_cxx(cxx_mat::CxxMatrix, mat::Matrix{Float64})
+
+
+function jl_mat_to_cxx_mat!(cxx_mat::CxxMatrix, mat::Matrix{Cdouble})
     if cxx_mat.dim1 != size(mat, 1) || cxx_mat.dim2 != size(mat, 2)
         throw("dimension mistmatch!")
     end
@@ -258,74 +258,61 @@ function mat_to_cxx(cxx_mat::CxxMatrix, mat::Matrix{Float64})
     end
 end
 
-function vec_to_cxx(cxx_vec::CxxVector, vec::Vector{Float64})
-    if cxx_vec.dim != size(vec, 1)
-        throw("dimension mistmatch!")
-    end
-    for i in 1:size(vec, 1)
-        cxx_vec[i] = vec[i]
-    end
-end
 
-function jl_mat_to_cxx_mat(mat::Matrix{Float64})
-    mat_cxx = myalloc2(size(mat)...)
-    for i in 1:size(mat, 1)
-        for j in 1:size(mat, 2)
-            mat_cxx[i, j] = mat[i, j]
-        end
-    end
-    return mat_cxx
-end
-
-function cxx_mat_to_jl_mat(mat_cxx::CxxPtr{CxxPtr{Float64}}, dim1::Integer, dim2::Integer)
-    jl_mat = Matrix{Float64}(undef, dim1, dim2)
+function cxx_mat_to_jl_mat(cxx_mat::CxxMatrix)
+    dim1 = cxx_mat.dim1
+    dim2 = cxx_mat.dim2
+    jl_mat = Matrix{Cdouble}(undef, dim1, dim2)
     for i in 1:dim2
         for j in 1:dim1
-            jl_mat[j, i] = mat_cxx[j, i]
+            jl_mat[j, i] = cxx_mat[j, i]
         end
     end
     return jl_mat
 end
 
 """
-    cxx_mat_to_jl_mat!(
-        jl_mat::Matrix{Float64}, mat_cxx::CxxPtr{CxxPtr{Float64}}, dim1::Integer, dim2::Integer
+    mat_cxx_to_jl_mat!(
+        jl_mat::Matrix{Cdouble}, cxx_mat::CxxMatrix
     )
 """
 function cxx_mat_to_jl_mat!(
-    jl_mat::Matrix{Float64}, mat_cxx::CxxPtr{CxxPtr{Float64}}, dim1::Integer, dim2::Integer
+    jl_mat::Matrix{Cdouble}, cxx_mat::CxxMatrix
 )
-    for i in 1:dim2
-        for j in 1:dim1
-            jl_mat[j, i] = mat_cxx[j, i]
+    for i in 1:cxx_mat.dim2
+        for j in 1:cxx_mat.dim1
+            jl_mat[j, i] = cxx_mat[j, i]
         end
     end
     return jl_mat
 end
 
-function cxx_vec_to_jl_vec(cxx_vec::CxxPtr{Float64}, dim::Integer)
-    jl_vec = Vector{Float64}(undef, dim)
-    for i in 1:dim
+function cxx_vec_to_jl_vec(cxx_vec::CxxVector)
+    jl_vec = Vector{Cdouble}(undef, cxx_vec.dim)
+    for i in 1:cxx_vec.dim
         jl_vec[i] = cxx_vec[i]
     end
     return jl_vec
 end
 
 """
-    cxx_vec_to_jl_vec!(jl_vec::Vector{Float64}, cxx_vec::CxxPtr{Float64}, dim::Integer)
+    cxx_vec_to_jl_vec!(jl_vec::Vector{Cdouble}, cxx_vec::CxxVector)
 
 """
-function cxx_vec_to_jl_vec!(jl_vec::Vector{Float64}, cxx_vec::CxxPtr{Float64}, dim::Integer)
-    for i in 1:dim
+function cxx_vec_to_jl_vec!(jl_vec::Vector{Cdouble}, cxx_vec::CxxVector)
+    for i in 1:cxx_vec.dim
         jl_vec[i] = cxx_vec[i]
     end
     return jl_vec
 end
 
 function cxx_tensor_to_jl_tensor(
-    cxx_tensor::CxxPtr{CxxPtr{CxxPtr{Float64}}}, dim1::Integer, dim2::Integer, dim3::Integer
+    cxx_tensor::CxxTensor
 )
-    jl_tensor = Array{Float64}(undef, dim1, dim2, dim3)
+    dim1 = cxx_tensor.dim1
+    dim2 = cxx_tensor.dim2
+    dim3 = cxx_tensor.dim3
+    jl_tensor = Array{Cdouble}(undef, dim1, dim2, dim3)
     for i in 1:dim3
         for j in 1:dim2
             for k in 1:dim1
@@ -338,21 +325,18 @@ end
 
 """
     cxx_tensor_to_jl_tensor!(
-        jl_tensor::Array{Float64,3},
-        cxx_tensor::CxxPtr{CxxPtr{CxxPtr{Float64}}},
-        dim1::Integer,
-        dim2::Integer,
-        dim3::Integer
+        jl_tensor::Array{Cdouble,3},
+        cxx_tensor::CxxTensor,
     )
 
 """
 function cxx_tensor_to_jl_tensor!(
-    jl_tensor::Array{Float64,3},
-    cxx_tensor::CxxPtr{CxxPtr{CxxPtr{Float64}}},
-    dim1::Integer,
-    dim2::Integer,
-    dim3::Integer,
+    jl_tensor::Array{Cdouble,3},
+    cxx_tensor::CxxTensor,
 )
+    dim1 = cxx_tensor.dim1
+    dim2 = cxx_tensor.dim2
+    dim3 = cxx_tensor.dim3
     for i in 1:dim3
         for j in 1:dim2
             for k in 1:dim1
@@ -363,97 +347,90 @@ function cxx_tensor_to_jl_tensor!(
     return jl_tensor
 end
 
-function cxx_res_to_jl_res(
-    cxx_res, m::Integer, n::Integer, mode::Symbol, num_dir::Integer, num_weights::Integer
-)
+function cxx_res_to_jl_res(cxx_res, m::Integer, mode::Symbol)
     if mode === :jac
         if m > 1
-            return cxx_mat_to_jl_mat(cxx_res, m, n)
+            return cxx_mat_to_jl_mat(cxx_res)
         else
-            return cxx_vec_to_jl_vec(cxx_res, n)
+            return cxx_vec_to_jl_vec(cxx_res)
         end
     elseif mode === :hess
-        return cxx_tensor_to_jl_tensor(cxx_res, m, n, n)
+        return cxx_tensor_to_jl_tensor(cxx_res)
     elseif mode === :jac_vec
-        return cxx_vec_to_jl_vec(cxx_res, m)
+        return cxx_vec_to_jl_vec(cxx_res)
     elseif mode === :jac_mat
-        return cxx_mat_to_jl_mat(cxx_res, m, num_dir)
+        return cxx_mat_to_jl_mat(cxx_res)
     elseif mode === :vec_jac
-        return cxx_vec_to_jl_vec(cxx_res, n)
+        return cxx_vec_to_jl_vec(cxx_re)
     elseif mode === :mat_jac
-        return cxx_mat_to_jl_mat(cxx_res, num_weights, n)
+        return cxx_mat_to_jl_mat(cxx_res)
 
     elseif mode === :hess_vec
-        return cxx_mat_to_jl_mat(cxx_res, m, n)
+        return cxx_mat_to_jl_mat(cxx_res)
     elseif mode === :hess_mat
-        return cxx_tensor_to_jl_tensor(cxx_res, m, n, num_dir)
+        return cxx_tensor_to_jl_tensor(cxx_res)
     elseif mode === :vec_hess
-        return cxx_mat_to_jl_mat(cxx_res, n, n)
+        return cxx_mat_to_jl_mat(cxx_res)
     elseif mode === :mat_hess
-        return cxx_tensor_to_jl_tensor(cxx_res, num_weights, n, n)
+        return cxx_tensor_to_jl_tensor(cxx_res)
 
     elseif mode === :vec_hess_vec
-        return cxx_vec_to_jl_vec(cxx_res, n)
+        return cxx_vec_to_jl_vec(cxx_res)
     elseif mode === :mat_hess_vec
-        return cxx_mat_to_jl_mat(cxx_res, num_weights, n)
+        return cxx_mat_to_jl_mat(cxx_res)
     elseif mode === :vec_hess_mat
-        return cxx_mat_to_jl_mat(cxx_res, n, num_dir)
+        return cxx_mat_to_jl_mat(cxx_res)
     elseif mode === :mat_hess_mat
-        return cxx_tensor_to_jl_tensor(cxx_res, num_weights, n, num_dir)
+        return cxx_tensor_to_jl_tensor(cxx_res)
     elseif mode === :abs_normal
         return nothing
     end
 end
 
 """
-    cxx_res_to_jl_res!(
-        jl_res, cxx_res, m::Integer, n::Integer, mode::Symbol, num_dir::Integer, num_weights::Integer
-    )
+    cxx_res_to_jl_res!(jl_res, cxx_res, m::Integer, mode::Symbol)
 
 """
 function cxx_res_to_jl_res!(
     jl_res,
     cxx_res,
     m::Integer,
-    n::Integer,
     mode::Symbol,
-    num_dir::Integer,
-    num_weights::Integer,
 )
     if mode === :jac
         if m > 1
-            return cxx_mat_to_jl_mat!(jl_res, cxx_res, m, n)
+            return cxx_mat_to_jl_mat!(jl_res, cxx_res)
         else
-            return cxx_vec_to_jl_vec!(jl_res, cxx_res, n)
+            return cxx_vec_to_jl_vec!(jl_res, cxx_res)
         end
     elseif mode === :hess
-        return cxx_tensor_to_jl_tensor!(jl_res, cxx_res, m, n, n)
+        return cxx_tensor_to_jl_tensor!(jl_res, cxx_res)
     elseif mode === :jac_vec
-        return cxx_vec_to_jl_vec!(jl_res, cxx_res, m)
+        return cxx_vec_to_jl_vec!(jl_res, cxx_res)
     elseif mode === :jac_mat
-        return cxx_mat_to_jl_mat!(jl_res, cxx_res, m, num_dir)
+        return cxx_mat_to_jl_mat!(jl_res, cxx_res)
     elseif mode === :vec_jac
-        return cxx_vec_to_jl_vec!(jl_res, cxx_res, n)
+        return cxx_vec_to_jl_vec!(jl_res, cxx_res)
     elseif mode === :mat_jac
-        return cxx_mat_to_jl_mat!(jl_res, cxx_res, num_weights, n)
+        return cxx_mat_to_jl_mat!(jl_res, cxx_res)
 
     elseif mode === :hess_vec
-        return cxx_mat_to_jl_mat!(jl_res, cxx_res, m, n)
+        return cxx_mat_to_jl_mat!(jl_res, cxx_res)
     elseif mode === :hess_mat
-        return cxx_tensor_to_jl_tensor!(jl_res, cxx_res, m, n, num_dir)
+        return cxx_tensor_to_jl_tensor!(jl_res, cxx_res)
     elseif mode === :vec_hess
-        return cxx_mat_to_jl_mat!(jl_res, cxx_res, n, n)
+        return cxx_mat_to_jl_mat!(jl_res, cxx_res)
     elseif mode === :mat_hess
-        return cxx_tensor_to_jl_tensor!(jl_res, cxx_res, num_weights, n, n)
+        return cxx_tensor_to_jl_tensor!(jl_res, cxx_res)
 
     elseif mode === :vec_hess_vec
-        return cxx_vec_to_jl_vec!(jl_res, cxx_res, n)
+        return cxx_vec_to_jl_vec!(jl_res, cxx_res)
     elseif mode === :mat_hess_vec
-        return cxx_mat_to_jl_mat!(jl_res, cxx_res, num_weights, n)
+        return cxx_mat_to_jl_mat!(jl_res, cxx_res)
     elseif mode === :vec_hess_mat
-        return cxx_mat_to_jl_mat!(jl_res, cxx_res, n, num_dir)
+        return cxx_mat_to_jl_mat!(jl_res, cxx_res)
     elseif mode === :mat_hess_mat
-        return cxx_tensor_to_jl_tensor!(jl_res, cxx_res, num_weights, n, num_dir)
+        return cxx_tensor_to_jl_tensor!(jl_res, cxx_res)
     elseif mode === :abs_normal
         return nothing
     end
@@ -468,7 +445,6 @@ export CxxMatrix,
     alloc_vec_short,
     alloc_vec,
     alloc_mat_short,
-    jl_mat_to_cxx_mat,
     cxx_mat_to_jl_mat,
     cxx_vec_to_jl_vec,
     cxx_tensor_to_jl_tensor,
@@ -476,8 +452,7 @@ export CxxMatrix,
     cxx_vec_to_jl_vec!,
     cxx_tensor_to_jl_tensor!,
     cxx_res_to_jl_res,
-    cxx_res_to_jl_res!,
-    vec_to_cxx
+    cxx_res_to_jl_res!
 
 export myfree3, myfree2, free_vec_double, free_vec_short, free_mat_short
 end # module arry_types

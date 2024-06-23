@@ -498,8 +498,8 @@ function jac!(
         if n / 2 < m
             tape_less_forward!(res, f, n, x)
         else
-            weights = create_cxx_identity(m, m)
-            fov_reverse!(res, f, m, n, m, x, weights, tape_id, reuse_tape)
+            cxx_weights = CxxMatrix(create_cxx_identity(m, m), m, m)
+            fov_reverse!(res, f, m, n, m, x, cxx_weights, tape_id, reuse_tape)
         end
     end
 end
@@ -582,9 +582,8 @@ function fov_reverse!(
     reuse_tape,
 )
     num_dir = size(weights, 2)
-    weights_cxx = jl_mat_to_cxx_mat(weights)
-    fov_reverse!(res, f, m, n, num_dir, x, weights_cxx, tape_id, reuse_tape)
-    return myfree2(weights_cxx)
+    cxx_weights = CxxMatrix(weights)
+    fov_reverse!(res, f, m, n, num_dir, x, cxx_weights, tape_id, reuse_tape)
 end
 
 function fov_reverse!(
@@ -604,7 +603,7 @@ function fov_reverse!(
         TbadoubleModule.zos_forward(tape_id, m, n, 1, x, [0.0 for _ in 1:m])
     end
 
-    return TbadoubleModule.fov_reverse(tape_id, m, n, num_dir, weights, res.data)
+    return TbadoubleModule.fov_reverse(tape_id, m, n, num_dir, weights.data, res.data)
 end
 
 function fos_forward!(
@@ -636,9 +635,8 @@ function fov_forward!(
     reuse_tape,
 )
     num_dir = size(dir, 2)
-    dir_cxx = jl_mat_to_cxx_mat(dir)
-    fov_forward!(res, f, m, n, x, dir_cxx, num_dir, tape_id, reuse_tape)
-    return myfree2(dir_cxx)
+    cxx_dir = CxxMatrix(dir)
+    fov_forward!(res, f, m, n, x, cxx_dir, num_dir, tape_id, reuse_tape)
 end
 
 function fov_forward!(
@@ -656,7 +654,7 @@ function fov_forward!(
         create_tape(f, x, tape_id)
     end
     return TbadoubleModule.fov_forward(
-        tape_id, m, n, num_dir, x, dir, [0.0 for _ in 1:m], res.data
+        tape_id, m, n, num_dir, x, dir.data, [0.0 for _ in 1:m], res.data
     )
 end
 
@@ -698,7 +696,7 @@ function abs_normal!(
         create_tape(f, x, tape_id; enableMinMaxUsingAbs=true)
     else
         check_resue_abs_normal_problem(tape_id, m, n, abs_normal_problem)
-        vec_to_cxx(abs_normal_problem.x, x)
+        copy!(abs_normal_problem.x, x)
     end
     return abs_normal!(abs_normal_problem)
 end
