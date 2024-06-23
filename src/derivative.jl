@@ -28,7 +28,7 @@ res = derivative(f, float(π), :jac)
 
 # output
 
-1-element Vector{Float64}:
+1-element CxxVector:
  -1.0
 ```
 
@@ -42,7 +42,7 @@ res = derivative(f, x, :vec_hess_vec, dir=dir, weights=weights)
 
 # output
 
-3-element Vector{Float64}:
+3-element CxxVector:
  -2.0
   4.0
   6.0
@@ -135,7 +135,7 @@ res = derivative(f, x, partials)
 
 # output
 
-2×3 Matrix{Float64}:
+2×3 CxxMatrix:
  8.0   0.0  4.0
  0.0  48.0  0.0
 ```
@@ -149,7 +149,7 @@ res = derivative(f, x, partials, adolc_format=true)
 
 # output
 
-2×3 Matrix{Float64}:
+2×3 CxxMatrix:
  8.0   0.0  4.0
  0.0  48.0  0.0
 ```
@@ -213,7 +213,7 @@ res = derivative(f, x, partials, seed)
 
 # output
 
-2×3 Matrix{Float64}:
+2×3 CxxMatrix:
   4.0  12.0  24.0
  20.0  36.0  42.0
 ```
@@ -288,26 +288,17 @@ m = 2
 n = 3
 res =  allocator(m, n, mode, size(dir, 2)[1], 0)
 derivative!(res, f, m, n, x, mode, dir=dir)
-for i in 1:m
-    for j in 1:n
-        for k in 1:size(dir, 2)
-            print(res[i, j, k], " ")
-        end
-        println("")
-    end
-    println("")
-end
-deallocator!(res, m, mode)
-
+res
 # output
 
--1.0 -0.5 
-0.0 0.0 
-0.0 0.0 
+2×3×2 CxxTensor:
+[:, :, 1] =
+ -1.0  0.0   0.0
+  0.0  1.0  -1.0
 
-0.0 0.0 
-1.0 1.0 
--1.0 -0.5 
+[:, :, 2] =
+ -0.5  0.0   0.0
+  0.0  1.0  -0.5
 ```
 """
 function derivative!(
