@@ -461,7 +461,7 @@ Example:
 f(x) = [x[1]^4, x[2]^3*x[1]]
 x = [1.0, 2.0]
 partials = [[1], [2], [3]]
-seed = [[1.0, 1.0];;]
+seed = CxxMatrix([[1.0, 1.0];;])
 m = 2
 n = 2
 res = Matrix{Float64}(undef, m, length(partials))
@@ -527,12 +527,39 @@ function gradient!(
     return TbadoubleModule.gradient(tape_id, n, x, res.data)
 end
 
+
+
+function gradient!(res, n::Integer, a::Adouble{TlAlloc})
+    for i in 1:n
+        res[i] = getADValue(a, i)
+    end
+end
+
+function gradient!(res, n::Integer, a::Vector{Adouble{TlAlloc}})
+    for i in eachindex(a)
+        for j in 1:n
+            res[i, j] = getADValue(a[i], j)
+        end
+    end
+end
+
+function init_tl_gradient(a::Vector{Adouble{TlAlloc}})
+    for j in eachindex(a)
+        for i in eachindex(a)
+            TladoubleModule.setADValue(a[i].val, 0.0, j)
+            if i == j
+                TladoubleModule.setADValue(a[i].val, 1.0, i)
+            end
+        end
+    end
+end
+
 function tape_less_forward!(res, f, n::Integer, x::Union{Float64,Vector{Float64}})
     TladoubleModule.set_num_dir(n)
-    a = Adouble{TlAlloc}(x, true)
-    init_gradient(a)
+    a = Adouble{TlAlloc}(x, adouble=true)
+    init_tl_gradient(a)
     b = f(a)
-    return gradient(n, b, res)
+    return gradient!(res, n, b)
 end
 
 function fos_reverse!(
