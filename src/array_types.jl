@@ -200,7 +200,7 @@ end
 function Base.axes(cxx_vec::CxxVector, dim::Integer)
     return dim == 1 ? Base.OneTo(cxx_vec.dim) : Base.OneTo(1)
 end
-Base.axes(cxx_vec::CxxVector) = (Base.OneTo(cxx_vec.n),)
+Base.axes(cxx_vec::CxxVector) = (Base.OneTo(cxx_vec.dim),)
 Base.size(cxx_vec::CxxVector) = (cxx_vec.dim,)
 Base.getindex(cxx_vec::CxxVector, dim::Integer) = getindex(cxx_vec.data, dim)
 function Base.setindex!(cxx_vec::CxxVector, val::Number, dim::Integer)
