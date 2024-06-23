@@ -19,7 +19,6 @@ ADOLC.adolc_format_to_seed_space
 ADOLC.create_independent
 ADOLC.allocator
 ADOLC.jl_allocator
-ADOLC.deallocator!
 ADOLC.cxx_mat_to_jl_mat!
 ADOLC.cxx_vec_to_jl_vec!
 ADOLC.cxx_tensor_to_jl_tensor!

@@ -39,7 +39,6 @@ export derivative,
     derivative!,
     allocator,
     jl_allocator,
-    deallocator!,
     create_independent,
     dependent,
     cxx_res_to_jl_res!
