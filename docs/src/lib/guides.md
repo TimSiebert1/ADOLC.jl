@@ -8,8 +8,10 @@ the pre-allocated data to the C++ functions called from Julia. The first option 
 2. There is no out-of-bounds error checking to prevent accessing or setting of  data outside of the allocated area, which may lead to segmentation faults and program crashes.
 3. If you want to do computations with the C++ data, you either have to copy these to a corresponding Julia type or write access  methods to work with the C++  allocated data.
 
-ADOLC.jl implements the second option. The critical aspects can still be avoided using the driver [`derivative`](@ref), which handles the C++ allocated memory for you. However, the best performance is obtained when using [`derivative!`](@ref).
-For first- and second-order derivative computations, the [`derivative!`](@ref) driver requires  a pre-allocated container of C++ allocated data. The allocation is done using [`allocator`](@ref). This function allocates C++ memory for your specific case (i.e., for the problem-specific parameters `m`, `n`, `mode`, `num_dir`, `num_weights`). Thus, the computation of the derivative just  utilizes [`derivative`](@ref). For example:
+ADOLC.jl implements the second option and wrapps the C++ memory in a `mutable struct` in Julia: There are three types [`CxxVector`](@ref), [`CxxMatrix`](@ref) and [`CxxTensor`](@ref). The first critical aspect is avoided by attaching the structs with a `finalizer` allowing Julia's garbage collector to release the C++ owned memory. We implement the usual utilities for Array-data to handle the access and tackle the second critical aspect. Since these types are subtypes of `AbstractVector{Cdouble}`, `AbstractMatrix{Cdouble}` and `AbstractArray{Cdouble, 3}` you can work with them like corresponding Julia data. Therefore, point three is also avoided and you work with them as with Julia data. 
+The intended of the data types is show below.
+
+For first- and second-order derivative computations, the [`derivative!`](@ref) driver requires  a pre-allocated [`CxxVector`](@ref), [`CxxMatrix`](@ref) or [`CxxTensor`](@ref). The problem-specific allocation is done using [`allocator`](@ref). This function allocates the wrapped C++ memory for your specific case (i.e., for the problem-specific parameters `m`, `n`, `mode`, `num_dir`, `num_weights`). Thus, the computation of the derivative just utilizes [`derivative`](@ref). For example:
 ```@example
 using ADOLC
 f(x) = (x[1] - x[2])^2
@@ -23,7 +25,7 @@ num_weights = 0
 cxx_res = allocator(m, n, mode, num_dir, num_weights)
 derivative!(cxx_res, f, m, n, x, mode, dir=dir)
 ```
-The first critical point is tackled using the [`deallocator!`](@ref) function, which handles the release of the C++ memory. Of course, one wants to conduct computations with `cxx_res`. The recommended way to do so is to pre-allocate a corresponding Julia container (`Vector{Float64}`, `Matrix{Float64}` or `Array{Float64, 3}`) obtained from [`jl_allocator`](@ref) and copy the data from `cxx_res` the Julia storage `jl_res` by leveraging [`cxx_res_to_jl_res!`](@ref):
+If you really need the Julia types `Vector{Cdouble}`, `Matrix{Cdouble}` or `AbstractArray{Cdouble, 3}` feel free to use [`jl_allocator`](@ref) and [`cxx_res_to_jl_res!`](@ref):
 ```@example
 using ADOLC
 f(x) = (x[1] - x[2])^2
@@ -34,24 +36,14 @@ n = 2
 mode = :jac_vec
 num_dir = size(dir, 2)[1]
 num_weights = 0
-
-# pre-allocation 
-jl_res = jl_allocator(m, n, mode, num_dir, num_weights)
 cxx_res = allocator(m, n, mode, num_dir, num_weights)
-
+jl_res = jl_allocator(m, n, mode, num_dir, num_weights)
 derivative!(cxx_res, f, m, n, x, mode, dir=dir)
 
 # conversion 
+cxx_res_to_jl_res!(jl_res, cxx_res)
 
-# do computations .... 
 ```
-Since you work with Julia data, the procedure above avoids the second and third points of the critical aspects but includes an additional allocation.  
-
-!!! warning 
-    `cxx_res` still stores a pointer. The corresponding memory is destroyed, but `cxx_res` is managed by Julia's garbage collector. Do not use it.
-
-
-In the future, the plan is to implement a struct that combines the Julia and C++ arrays with a finalizer that enables Julia's garbage collector to manage the C++ memory. 
 
 
 
@@ -118,7 +110,7 @@ end
 ```
 ## Performance Tips
 The following tips are meant to decrease the derivative computation's runtime complexity, especially when derivatives of the same function are needed repeatedly. There are two major modifications for all kinds of derivatives: 
-1) Use the [`derivative!`](@ref) driver, and work with [`allocator`](@ref), [`deallocator!`](@ref), and [`jl_res_to_cxx_res!`] as explained in the guide [Working with C++ Memory](@ref)
+1) Use the [`derivative!`](@ref) driver, and work with [`allocator`](@ref) as explained in the guide [Working with C++ Memory](@ref)
 2) Reuse the tape as often as possible. [`derivative!`](@ref) ([`derivative`](@ref)) supply the flag `reuse_tape`, which if set to `true` suppresses the creation of the tape, in addition the identifiyer of an existing tape must be provided as the parameter `tape_id`. More details can be found [here](@ref "Tape Management").
 An example could look like this:
 ```@example
@@ -137,7 +129,6 @@ tape_id = 1
 num_iters = 100
 
 # pre-allocation 
-jl_res = jl_allocator(m, n, mode, num_dir, num_weights)
 cxx_res = allocator(m, n, mode, num_dir, num_weights)
 
 derivative!(cxx_res, f, m, n, x, mode, dir=dir, tape_id=tape_id)
