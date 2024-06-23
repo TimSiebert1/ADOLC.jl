@@ -42,12 +42,8 @@ cxx_res = allocator(m, n, mode, num_dir, num_weights)
 derivative!(cxx_res, f, m, n, x, mode, dir=dir)
 
 # conversion 
-cxx_res_to_jl_res!(jl_res, cxx_res, m, n, mode, num_dir, num_weights)
 
 # do computations .... 
-
-
-deallocator!(cxx_res, m, mode)
 ```
 Since you work with Julia data, the procedure above avoids the second and third points of the critical aspects but includes an additional allocation.  
 
@@ -147,16 +143,14 @@ cxx_res = allocator(m, n, mode, num_dir, num_weights)
 derivative!(cxx_res, f, m, n, x, mode, dir=dir, tape_id=tape_id)
 
 # conversion 
-cxx_res_to_jl_res!(jl_res, cxx_res, m, n, mode, num_dir, num_weights)
+
 # do computations ....
 
 for i in 1:num_iters
     # update x ...
     derivative!(cxx_res, f, m, n, x, mode, dir=dir, tape_id=tape_id, reuse_tape=true)
-    cxx_res_to_jl_res!(jl_res, cxx_res, m, n, mode, num_dir, num_weights)
     # do computations ... 
 end
-deallocator!(cxx_res, m, mode)
 ```
 Moreover, for [higher-order](@ref "Higher-Order") derivatives you might consider the generation of a `seed`. However, if you do not pass a `seed` to the [`derivative!`](@ref) ([`derivative`](@ref)) driver, the partial identity is created as the `seed` automatically (see [here](@ref "Seed-Matrix")). 
 

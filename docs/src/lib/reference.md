@@ -24,4 +24,7 @@ ADOLC.cxx_mat_to_jl_mat!
 ADOLC.cxx_vec_to_jl_vec!
 ADOLC.cxx_tensor_to_jl_tensor!
 ADOLC.cxx_res_to_jl_res!
+ADOLC.array_types.CxxTensor
+ADOLC.array_types.CxxVector
+ADOLC.array_types.CxxMatrix
 ```
