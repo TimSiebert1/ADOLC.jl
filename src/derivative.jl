@@ -207,7 +207,7 @@ Example:
 f(x) = [x[1]^4, x[2]^3*x[1]]
 x = [1.0, 2.0]
 partials = [[1], [2], [3]]
-seed = [[1.0, 1.0];;]
+seed = CxxMatrix([[1.0, 1.0];;])
 res = derivative(f, x, partials, seed)
 
 
