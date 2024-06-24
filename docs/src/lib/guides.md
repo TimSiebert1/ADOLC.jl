@@ -93,7 +93,7 @@ res = derivative(f, x, partials, seed)
 
 # output
 
-1×3 Matrix{Float64}:
+1×3 CxxMatrix:
  2.0  14.0  54.0
 ```
 
