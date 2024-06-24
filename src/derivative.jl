@@ -272,12 +272,6 @@ input dimension `n` of the function `f` is required. If there is already a valid
 tape for the function `f` at the selected point `x` use `reuse_tape=true` and set the `tape_id`
 accordingly to avoid the re-creation of the tape.
 
-!!! note
-    `res` must to be C++ memory and should be allocated by [`allocator`](@ref). 
-    Since the memory is not managed by Julia (only the pointer to it) at the moment, 
-    it has to be manually destroyed by the use of [`deallocator!`](@ref). There is a
-    [guide](@ref "Working with C++ Memory") on how to work on these CxxPtr types. 
-
 Example:
 ```jldoctest
 f(x) = [cos(x[1]), x[2]*x[3]]
@@ -375,9 +369,6 @@ is required. If there is already a valid tape for the function `f` at the
 selected point `x` use `reuse_tape=true` and set the `tape_id` accordingly to 
 avoid the re-creation of the tape.
 
-!!! note
-    In contrast to the [`derivative!`](@ref) method for the first- and second-order computations
-    `res` is of type `Matrix{Float64}` with the dimensions `(m, length(partials)`.
 
 Example: 
 ```jldoctest
