@@ -347,93 +347,34 @@ function cxx_tensor_to_jl_tensor!(
     return jl_tensor
 end
 
-function cxx_res_to_jl_res(cxx_res, m::Integer, mode::Symbol)
-    if mode === :jac
-        if m > 1
-            return cxx_mat_to_jl_mat(cxx_res)
-        else
-            return cxx_vec_to_jl_vec(cxx_res)
-        end
-    elseif mode === :hess
-        return cxx_tensor_to_jl_tensor(cxx_res)
-    elseif mode === :jac_vec
-        return cxx_vec_to_jl_vec(cxx_res)
-    elseif mode === :jac_mat
-        return cxx_mat_to_jl_mat(cxx_res)
-    elseif mode === :vec_jac
-        return cxx_vec_to_jl_vec(cxx_re)
-    elseif mode === :mat_jac
-        return cxx_mat_to_jl_mat(cxx_res)
-
-    elseif mode === :hess_vec
-        return cxx_mat_to_jl_mat(cxx_res)
-    elseif mode === :hess_mat
-        return cxx_tensor_to_jl_tensor(cxx_res)
-    elseif mode === :vec_hess
-        return cxx_mat_to_jl_mat(cxx_res)
-    elseif mode === :mat_hess
-        return cxx_tensor_to_jl_tensor(cxx_res)
-
-    elseif mode === :vec_hess_vec
-        return cxx_vec_to_jl_vec(cxx_res)
-    elseif mode === :mat_hess_vec
-        return cxx_mat_to_jl_mat(cxx_res)
-    elseif mode === :vec_hess_mat
-        return cxx_mat_to_jl_mat(cxx_res)
-    elseif mode === :mat_hess_mat
-        return cxx_tensor_to_jl_tensor(cxx_res)
-    elseif mode === :abs_normal
-        return nothing
-    end
+function cxx_res_to_jl_res(cxx_res::CxxVector)
+    cxx_vec_to_jl_vec(cxx_res)
 end
 
-"""
-    cxx_res_to_jl_res!(jl_res, cxx_res, m::Integer, mode::Symbol)
+function cxx_res_to_jl_res(cxx_res::CxxMatrix)
+    cxx_mat_to_jl_mat(cxx_res)
+end
+
+function cxx_res_to_jl_res(cxx_res::CxxTensor)
+    cxx_tensor_to_jl_tensor(cxx_res)
+end
+
 
 """
-function cxx_res_to_jl_res!(
-    jl_res,
-    cxx_res,
-    m::Integer,
-    mode::Symbol,
-)
-    if mode === :jac
-        if m > 1
-            return cxx_mat_to_jl_mat!(jl_res, cxx_res)
-        else
-            return cxx_vec_to_jl_vec!(jl_res, cxx_res)
-        end
-    elseif mode === :hess
-        return cxx_tensor_to_jl_tensor!(jl_res, cxx_res)
-    elseif mode === :jac_vec
-        return cxx_vec_to_jl_vec!(jl_res, cxx_res)
-    elseif mode === :jac_mat
-        return cxx_mat_to_jl_mat!(jl_res, cxx_res)
-    elseif mode === :vec_jac
-        return cxx_vec_to_jl_vec!(jl_res, cxx_res)
-    elseif mode === :mat_jac
-        return cxx_mat_to_jl_mat!(jl_res, cxx_res)
+    cxx_res_to_jl_res!(jl_res::Vector{Cdouble}, cxx_res::CxxVector)
+    cxx_res_to_jl_res!(jl_res::Matrix{Float64}, cxx_res::CxxMatrix)
+    cxx_res_to_jl_res!(jl_res::Array{Float64, 3}, cxx_res::CxxTensor)
+"""
+function cxx_res_to_jl_res!(jl_res::Vector{Cdouble}, cxx_res::CxxVector)
+    cxx_vec_to_jl_vec!(jl_res, cxx_res)
+end
 
-    elseif mode === :hess_vec
-        return cxx_mat_to_jl_mat!(jl_res, cxx_res)
-    elseif mode === :hess_mat
-        return cxx_tensor_to_jl_tensor!(jl_res, cxx_res)
-    elseif mode === :vec_hess
-        return cxx_mat_to_jl_mat!(jl_res, cxx_res)
-    elseif mode === :mat_hess
-        return cxx_tensor_to_jl_tensor!(jl_res, cxx_res)
+function cxx_res_to_jl_res!(jl_res::Matrix{Float64}, cxx_res::CxxMatrix)
+    cxx_mat_to_jl_mat!(jl_res, cxx_res)
+end
 
-    elseif mode === :vec_hess_vec
-        return cxx_vec_to_jl_vec!(jl_res, cxx_res)
-    elseif mode === :mat_hess_vec
-        return cxx_mat_to_jl_mat!(jl_res, cxx_res)
-    elseif mode === :vec_hess_mat
-        return cxx_mat_to_jl_mat!(jl_res, cxx_res)
-    elseif mode === :mat_hess_mat
-        return cxx_tensor_to_jl_tensor!(jl_res, cxx_res)
-    elseif mode === :abs_normal
-        return nothing
-    end
+function cxx_res_to_jl_res!(jl_res::Array{Float64, 3}, cxx_res::CxxTensor)
+    cxx_tensor_to_jl_tensor!(jl_res, cxx_res)
 end
 
 export CxxMatrix,
