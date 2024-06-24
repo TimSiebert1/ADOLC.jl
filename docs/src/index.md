@@ -10,9 +10,9 @@ DocTestSetup = quote
 end
 ```
 
-To use this package, type
+To add this package, use
 ```jl
-using Pkg; Pkg.add(url="https://github.com/TimSiebert1/ADOLC.jl")
+using Pkg; Pkg.add("ADOLC")
 using ADOLC
 ```
 [First-](@ref "First-Order") and [second-order](@ref "Second-Order") derivatives can be calculated as follows
@@ -45,7 +45,7 @@ res = derivative(f, x, partials)
 ```
 
 
-For advanced user, there is a [list](@ref "List of wrapped ADOL-C drivers") of all functions, wrapped from ADOL-C.
+For advanced users, there is a [list](@ref "List of wrapped ADOL-C drivers") of all functions, wrapped from ADOL-C.
 
 
 

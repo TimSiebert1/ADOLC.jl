@@ -9,9 +9,9 @@
 This package wraps the C/C++ automatic differentiation library [ADOL-C](https://github.com/coin-or/ADOL-C) for use in [Julia](https://julialang.org/). 
 
 Currently, the ADOL-C binaries are built for Julia 1.9, 1.10, and 1.11, and they are not compiled for musl libc.  
-To use this package, type 
+To add this package, use
 ```jl
-using Pkg; Pkg.add(url="https://github.com/TimSiebert1/ADOLC.jl")
+using Pkg; Pkg.add("ADOLC")
 using ADOLC
 ```
   

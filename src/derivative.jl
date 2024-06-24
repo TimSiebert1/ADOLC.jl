@@ -213,7 +213,7 @@ res = derivative(f, x, partials, seed)
 
 # output
 
-2×3 Matrix{Float64}:
+2×3 CxxMatrix:
   4.0  12.0  24.0
  20.0  36.0  42.0
 ```
@@ -235,7 +235,7 @@ function derivative(
         n = TbadoubleModule.num_independents(tape_id)
     end
 
-    res = Matrix{Float64}(undef, m, length(partials))
+    res = CxxMatrix(m, length(partials))
     derivative!(
         res,
         f,
@@ -377,13 +377,13 @@ x = [3.0, -1.5, 1.5, -2.0]
 partials = [[4, 0, 0, 0], [3, 0, 1, 2]]
 m = 1
 n = 4
-res = Matrix{Float64}(undef, m, length(partials))
+res = CxxMatrix(m, length(partials))
 derivative!(res, f, m, n, x, partials)
 res
 
 # output
 
-1×2 Matrix{Float64}:
+1×2 CxxMatrix:
  -216.0  -216.0
 ```
 """
@@ -446,13 +446,13 @@ partials = [[1], [2], [3]]
 seed = CxxMatrix([[1.0, 1.0];;])
 m = 2
 n = 2
-res = Matrix{Float64}(undef, m, length(partials))
+res = CxxMatrix(m, length(partials))
 derivative!(res, f, m, n, x, partials, seed)
 res
 
 # output
 
-2×3 Matrix{Float64}:
+2×3 CxxMatrix:
   4.0  12.0  24.0
  20.0  36.0  42.0
 ```

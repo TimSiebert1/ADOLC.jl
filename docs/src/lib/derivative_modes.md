@@ -53,16 +53,16 @@ The theory behind this method can be found in [Gr13](@cite).
 ## Higher-Order 
 The goal of the following explanations is to familiarize the reader with 
 the possibilities for computing higher-order derivatives that are included in `ADOLC.jl`.
-In the context of `ADOLC.jl`, higher-order derivatives are given as a `Vector` of 
+In the context of `ADOLC.jl`, requested higher-order derivatives are collected in a `Vector` of 
 arbitrary-order mixed-partials. For example, let $$f:\mathbb{R}^n \to \mathbb{R}^m$$
-and we want to compute the mixed-partials
+and we want to compute the `partials`
 ```math
 \left[\frac{\partial^3\partial^2 f(x)}{\partial^3 x_2 \partial^2 x_1}, \frac{\partial^4 f(x)}{\partial^4 x_3}, \frac{\partial^2 f(x)}{\partial^2 x_1}\right]
 ``` 
-leveraging the [`derivative`](@ref) ([`derivative!`](@ref)) driver. After defining the function `f` and the point for the derivative evaluation `x`, we have to select the format of the `partials`. There exist two options explained below that use `Vector{Int64}` to define a partial derivative.
+leveraging the [`derivative`](@ref) ([`derivative!`](@ref)) driver. After defining the function `f` and the point for the derivative evaluation `x`, we have to select the format of the `partials`. There are two options that describe a partial derivative as a  `Vector{Int64}`.
 
 ## ADOLC-Format
-The ADOLC-Format repeats the index $$i$$ of a derivative direction $$x_i$$ up to the derivative order of this index: $$\frac{\partial^4 f(x)}{\partial^4 x_3} \to [3, 3, 3, 3]$$. Additionally, the resulting vector is sorted descendent; if the vector's length is less than the total derivative degree, it is filled with zeros. The requested mixed-partials results in:
+The ADOLC-Format repeats the index $$i$$ of a derivative direction $$x_i$$ up to the derivative order of this index: $$\frac{\partial^4 f(x)}{\partial^4 x_3} \to [3, 3, 3, 3]$$. Additionally, the resulting vector is sorted descendent; if the vector's length is less than the total derivative degree, it is filled with zeros. Thus, the requested `partials` are given by
 ```math 
 [
  [2, 2, 2, 1, 1],
@@ -72,7 +72,7 @@ The ADOLC-Format repeats the index $$i$$ of a derivative direction $$x_i$$ up to
 ```
 
 ## Partial-Format
-The Partial-Format mimics the notation of the mixed-partial, as used above. The entry of the vector at index $$i$$ is the derivative degree corresponding to the derivative direction $$x_i$$. Therefore, `partials` is given as
+The Partial-Format leverages a more natural scheme to define the mixed-partial. The entry of a partial at index $$i$$ is the derivative degree corresponding to the derivative direction $$x_i$$. Therefore, `partials` is given as
 ```math 
 [
  [2, 3, 0, 0],

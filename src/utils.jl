@@ -107,18 +107,14 @@ Creates a identity matrix of shape (`n`, `m`) of type CxxPtr{CxxPtr{Float64}} (w
 
 # Example
 ```jldoctest
-id = create_cxx_identity(2, 4)
-for i in 1:2
-    for j in 1:4
-        print(id[i, j], " ")
-    end
-    println("")
-end
+id = CxxMatrix(create_cxx_identity(2, 4), 2, 4)
+
 
 # output
 
-1.0 0.0 0.0 0.0 
-0.0 1.0 0.0 0.0
+2×4 CxxMatrix:
+ 1.0  0.0  0.0  0.0
+ 0.0  1.0  0.0  0.0
 ```
 """
 function create_cxx_identity(n::I_1, m::I_2) where {I_1<:Integer,I_2<:Integer}
@@ -151,38 +147,28 @@ is defined by the order of the indices in `idxs`. Details about the application 
 ```jldoctest
 n = 4
 idxs = [1, 3]
-id = create_partial_cxx_identity(n, idxs)
-for i in 1:4
-    for j in 1:length(idxs)
-        print(id[i, j], " ")
-    end
-    println("")
-end
-
+id = CxxMatrix(create_partial_cxx_identity(n, idxs), n, length(idxs))
 # output
 
-1.0 0.0 
-0.0 0.0
-0.0 1.0
-0.0 0.0
+4×2 CxxMatrix:
+ 1.0  0.0
+ 0.0  0.0
+ 0.0  1.0
+ 0.0  0.0
 ```
 The order in `idxs` defines the order of the basis vectors.
 ```jldoctest
 n = 3
 idxs = [3, 0, 1]
-id = create_partial_cxx_identity(n, idxs)
-for i in 1:3
-    for j in 1:length(idxs)
-        print(id[i, j], " ")
-    end
-    println("")
-end
+id = CxxMatrix(create_partial_cxx_identity(n, idxs), n, length(idxs))
+
 
 # output
 
-0.0 0.0 1.0
-0.0 0.0 0.0
-1.0 0.0 0.0
+3×3 CxxMatrix:
+ 0.0  0.0  1.0
+ 0.0  0.0  0.0
+ 1.0  0.0  0.0
 ```
 """
 function create_partial_cxx_identity(
