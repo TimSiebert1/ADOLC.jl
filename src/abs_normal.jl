@@ -14,18 +14,14 @@ function abs_normal_finalizer(problem)
 end
 mutable struct AbsNormalForm
     tape_id::Int64
-
     m::Int64
     n::Int64
     num_switches::Int32
-
     x::CxxVector
     y::CxxVector
     z::CxxVector
-
     cz::CxxVector
     cy::CxxVector
-
     Y::CxxMatrix
     J::CxxMatrix
     Z::CxxMatrix
@@ -85,14 +81,12 @@ function _abs_normal!(
     y_cxx::CxxVector,
 )
 
-    # use c++ double*
     cz = cz_cxx.data
     cy = cy_cxx.data
     x = x_cxx.data
     y = y_cxx.data
     z = z_cxx.data
 
-    # use the c++ double**
     Y = Y_cxx.data
     J = J_cxx.data
     Z = Z_cxx.data
@@ -100,32 +94,5 @@ function _abs_normal!(
 
     return TbadoubleModule.abs_normal(
         tape_id, m, n, num_switches, x, y, z, cz, cy, Y, J, Z, L
-    )
-end
-
-function abs_normal!(
-    tape_id::Int64,
-    cz::Vector{Float64},
-    cy::Vector{Float64},
-    Y::Matrix{Float64},
-    J::Matrix{Float64},
-    Z::Matrix{Float64},
-    L::Matrix{Float64},
-    m::Int64,
-    n::Int64,
-    num_switches::Int64,
-    x::Vector{Float64},
-    y::Vector{Float64},
-    z::Vector{Float64},
-)
-
-    # jl matrix to c++ matrix
-    Y_cxx = CxxMatrix(Y)
-    J_cxx = CxxMatrix(J)
-    Z_cxx = CxxMatrix(Z)
-    L_cxx = CxxMatrix(L)
-
-    return abs_normal!(
-        tape_id, cz, cy, Y_cxx, J_cxx, Z_cxx, L_cxx, m, n, num_switches, x, y, z
     )
 end
