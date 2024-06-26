@@ -11,8 +11,16 @@ end
 function Base.getindex(cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim)
     return getindex_tens(cxx_ptr_ptr_ptr, dim)
 end
+function Base.getindex(cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64)
+    return getindex_tens(cxx_ptr_ptr_ptr, dim)
+end
 function Base.getindex(
     cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim, row, col
+)
+    return getindex_tens(cxx_ptr_ptr_ptr, dim, row, col)
+end
+function Base.getindex(
+    cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64, row::Int64, col::Int64
 )
     return getindex_tens(cxx_ptr_ptr_ptr, dim, row, col)
 end
@@ -25,15 +33,6 @@ function Base.setindex!(
 )
     return setindex_tens(cxx_ptr_ptr_ptr, Cdouble(val), dim, row, col)
 end
-
-function Base.getindex(cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64)
-    return getindex_tens(cxx_ptr_ptr_ptr, dim)
-end
-function Base.getindex(
-    cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64, row::Int64, col::Int64
-)
-    return getindex_tens(cxx_ptr_ptr_ptr, dim, row, col)
-end
 function Base.setindex!(
     cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}},
     val::Cdouble,
@@ -43,8 +42,10 @@ function Base.setindex!(
 )
     return setindex_tens(cxx_ptr_ptr_ptr, val, dim, row, col)
 end
-
 function Base.getindex(cxx_ptr_ptr::CxxPtr{CxxPtr{Cdouble}}, row, col)
+    return getindex_mat(cxx_ptr_ptr, row, col)
+end
+function Base.getindex(cxx_ptr_ptr::CxxPtr{CxxPtr{Cdouble}}, row::Int64, col::Int64)
     return getindex_mat(cxx_ptr_ptr, row, col)
 end
 function Base.setindex!(
@@ -52,41 +53,32 @@ function Base.setindex!(
 )
     return setindex_mat(cxx_ptr_ptr, Cdouble(val), row, col)
 end
-
-
-function Base.getindex(cxx_ptr_ptr::CxxPtr{CxxPtr{Cdouble}}, row::Int64, col::Int64)
-    return getindex_mat(cxx_ptr_ptr, row, col)
-end
 function Base.setindex!(
     cxx_ptr_ptr::CxxPtr{CxxPtr{Cdouble}}, val::Cdouble, row::Int64, col::Int64
 )
     return setindex_mat(cxx_ptr_ptr, val, row, col)
 end
-
-
-
 Base.getindex(cxx_ptr::CxxPtr{Cdouble}, row::Int64) = getindex_vec(cxx_ptr, row)
+Base.getindex(cxx_ptr::CxxPtr{Cdouble}, row) = getindex_vec(cxx_ptr, row)
 function Base.setindex!(cxx_ptr::CxxPtr{Cdouble}, val::Cdouble, row::Int64)
     return setindex_vec(cxx_ptr, val, row)
 end
-Base.getindex(cxx_ptr::CxxPtr{Cdouble}, row) = getindex_vec(cxx_ptr, row)
 function Base.setindex!(cxx_ptr::CxxPtr{Cdouble}, val, row)
     return setindex_vec(cxx_ptr, Cdouble(val), row)
 end
 Base.getindex(cxx_ptr::CxxPtr{Cshort}, row::Int64) = getindex_vec(cxx_ptr, row)
+Base.getindex(cxx_ptr::CxxPtr{Cshort}, row) = getindex_vec(cxx_ptr, row)
 function Base.setindex!(cxx_ptr::CxxPtr{Cshort}, val::Cshort, row::Int64)
     return setindex_vec(cxx_ptr, val, row)
 end
-
-Base.getindex(cxx_ptr::CxxPtr{Cshort}, row) = getindex_vec(cxx_ptr, row)
 function Base.setindex!(cxx_ptr::CxxPtr{Cshort}, val, row)
     return setindex_vec(cxx_ptr, Cshort(val), row)
 end
 
+
 function cxx_tensor_finalizer(cxx_tensor)
     return myfree3(cxx_tensor.data)
 end
-
 """
     mutable struct CxxTensor <: AbstractArray{Cdouble, 3}
 
@@ -114,7 +106,7 @@ mutable struct CxxTensor <: AbstractArray{Cdouble,3}
         for k in 1:dim3
             for j in 1:dim2
                 for i in 1:dim1
-                    cxx_tensor[i, j, k] = jl_mat[i, j, k]
+                    cxx_tensor[i, j, k] = jl_tensor[i, j, k]
                 end
             end
         end
