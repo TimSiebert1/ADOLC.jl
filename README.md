@@ -25,7 +25,7 @@ res = derivative(f, x, :vec_hess_vec, dir=dir, weights=weights)
 
 # output
 
-3-element Vector{Float64}:
+3-element CxxVector:
  -2.0
   4.0
   6.0
@@ -40,7 +40,7 @@ res = derivative(f, x, partials)
 
 # output
 
-2×3 Matrix{Float64}:
+2×3 CxxMatrix:
  8.0   0.0  4.0
  0.0  48.0  0.0
 ```
