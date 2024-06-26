@@ -100,4 +100,6 @@ end
     @test abs_normal_form.L[1, 2] == 0.0
     @test abs_normal_form.L[2, 1] == 0.0
     @test abs_normal_form.L[2, 2] == 0.0
+
+    finalize(abs_normal_form)
 end

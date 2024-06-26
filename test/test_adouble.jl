@@ -35,11 +35,11 @@
         @test getValue(a) == 15.3
         @test typeof(a.val) == Float64
 
-        A = [Adouble{t}(i, adouble=true) for i in 1:10]
+        A = Adouble{t}([i for i in 1:10], adouble=true)
         @test [float(i) for i in 1:10] == getValue(A)
         @test typeof(A) == Vector{Adouble{t}}
 
-        A = [Adouble{t}(i, adouble=false) for i in 1:10]
+        A = Adouble{t}([i for i in 1:10])
         @test [float(i) for i in 1:10] == A
         @test typeof(A) == Vector{Adouble{t}}
     end
