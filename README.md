@@ -2,6 +2,7 @@
 
 [![Build Status](https://github.com/TimSiebert1/ADOLC.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/TimSiebert1/ADOLC.jl/actions?query=branch%3Amaster)
 [![Coverage Status](https://codecov.io/github/TimSiebert1/ADOLC.jl/coverage.svg?branch=master)](https://app.codecov.io/gh/timsiebert1/ADOLC.jl)
+[![Stable docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://TimSiebert1.github.io/ADOLC.jl/stable/)
 [![Dev docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://TimSiebert1.github.io/ADOLC.jl/dev/)
 
 *A Julia wrapper of the automatic differentiation package ADOL-C*
