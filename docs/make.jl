@@ -1,17 +1,14 @@
 using Documenter, DocumenterCitations
 using ADOLC
 
-bib = CitationBibliography(
-    joinpath(@__DIR__, "src", "citations.bib");
-    style=:numeric
-)
+bib = CitationBibliography(joinpath(@__DIR__, "src", "citations.bib"); style=:numeric)
 
 DocMeta.setdocmeta!(ADOLC, :DocTestSetup, :(using ADOLC); recursive=true)
 
 makedocs(;
     sitename="ADOLC.jl",
     authors="Tim Siebert",
-    plugins = [bib], 
+    plugins=[bib],
     repo="github.com/TimSiebert1/ADOLC.jl",
     modules=[ADOLC],
     format=Documenter.HTML(),

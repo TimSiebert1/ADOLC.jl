@@ -80,7 +80,6 @@ function _abs_normal!(
     x_cxx::CxxVector,
     y_cxx::CxxVector,
 )
-
     cz = cz_cxx.data
     cy = cy_cxx.data
     x = x_cxx.data
