@@ -35,7 +35,7 @@ end
     function f(x)
         return [x[1]^2 + x[2], x[3]^3]
     end
-    
+
     res = derivative(f, [1.0, 1.0, 2.0], :jac)
 
     @test res[1, 1] == 2.0
@@ -52,7 +52,7 @@ end
     function f(x)
         return [x[1]^2 + x[2], x[3]^3]
     end
-    
+
     res = derivative(f, [1.0, 1.0, 2.0], :jac)
 
     @test res[1, 1] == 2.0
@@ -63,7 +63,7 @@ end
     @test res[2, 2] == 0.0
     @test res[2, 3] == 12.0
 
-    res = derivative(f, [1.0, 1.0, 2.0], :jac, reuse_tape=true)
+    res = derivative(f, [1.0, 1.0, 2.0], :jac; reuse_tape=true)
 
     @test res[1, 1] == 2.0
     @test res[1, 2] == 1.0
@@ -142,16 +142,12 @@ end
     @test res[1] == -1.0
     @test res[2] == 0.0
 
-    res = derivative(
-        f, [2.0, 1.0, 2.0], :jac_vec; dir=[-1.0, 1.0, 0.0], reuse_tape=true
-    )
+    res = derivative(f, [2.0, 1.0, 2.0], :jac_vec; dir=[-1.0, 1.0, 0.0], reuse_tape=true)
 
     @test res[1] == -3.0
     @test res[2] == 0.0
 
-    res = derivative(
-        f, [2.0, 1.0, 2.0], :jac_vec; dir=[0.0, 1.0, 0.0], reuse_tape=true
-    )
+    res = derivative(f, [2.0, 1.0, 2.0], :jac_vec; dir=[0.0, 1.0, 0.0], reuse_tape=true)
 
     @test res[1] == 1.0
     @test res[2] == 0.0
@@ -161,7 +157,7 @@ end
     function f(x)
         return [x[1]^2 + x[2], x[3]^3]
     end
-    dir = [[1.0, 0.0, 0.0] [-1.0, 1.0, 0.0] [0.0, 0.0, 1.0]] 
+    dir = [[1.0, 0.0, 0.0] [-1.0, 1.0, 0.0] [0.0, 0.0, 1.0]]
 
     res = derivative(f, [1.0, 1.0, 2.0], :jac_mat; dir=dir)
 
@@ -178,7 +174,7 @@ end
     function f(x)
         return [x[1]^2 + x[2], x[3]^3]
     end
-    dir = [[1.0, 0.0, 0.0] [-1.0, 1.0, 0.0] [0.0, 0.0, 1.0]] 
+    dir = [[1.0, 0.0, 0.0] [-1.0, 1.0, 0.0] [0.0, 0.0, 1.0]]
 
     res = derivative(f, [1.0, 1.0, 2.0], :jac_mat; dir=dir)
 
@@ -233,17 +229,13 @@ end
     @test res[2] == -1
     @test res[3] == 12
 
-    res = derivative(
-        f, [2.0, 1.0, 2.0], :vec_jac; weights=[-1.0, 1.0], reuse_tape=true
-    )
+    res = derivative(f, [2.0, 1.0, 2.0], :vec_jac; weights=[-1.0, 1.0], reuse_tape=true)
 
     @test res[1] == -4
     @test res[2] == -1
     @test res[3] == 12
 
-    res = derivative(
-        f, [2.0, 1.0, 2.0], :vec_jac; weights=[0.0, 1.0], reuse_tape=true
-    )
+    res = derivative(f, [2.0, 1.0, 2.0], :vec_jac; weights=[0.0, 1.0], reuse_tape=true)
 
     @test res[1] == 0.0
     @test res[2] == 0.0
