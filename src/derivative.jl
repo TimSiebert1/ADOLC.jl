@@ -509,8 +509,6 @@ function gradient!(
     return TbadoubleModule.gradient(tape_id, n, x, res.data)
 end
 
-
-
 function gradient!(res, n::Integer, a::Adouble{TlAlloc})
     for i in 1:n
         res[i] = getADValue(a, i)
@@ -538,7 +536,7 @@ end
 
 function tape_less_forward!(res, f, n::Integer, x::Union{Float64,Vector{Float64}})
     TladoubleModule.set_num_dir(n)
-    a = Adouble{TlAlloc}(x, adouble=true)
+    a = Adouble{TlAlloc}(x; adouble=true)
     init_tl_gradient(a)
     b = f(a)
     return gradient!(res, n, b)
@@ -574,7 +572,7 @@ function fov_reverse!(
 )
     num_dir = size(weights, 2)
     cxx_weights = CxxMatrix(weights)
-    fov_reverse!(res, f, m, n, num_dir, x, cxx_weights, tape_id, reuse_tape)
+    return fov_reverse!(res, f, m, n, num_dir, x, cxx_weights, tape_id, reuse_tape)
 end
 
 function fov_reverse!(
@@ -627,7 +625,7 @@ function fov_forward!(
 )
     num_dir = size(dir, 2)
     cxx_dir = CxxMatrix(dir)
-    fov_forward!(res, f, m, n, x, cxx_dir, num_dir, tape_id, reuse_tape)
+    return fov_forward!(res, f, m, n, x, cxx_dir, num_dir, tape_id, reuse_tape)
 end
 
 function fov_forward!(
@@ -687,7 +685,7 @@ function abs_normal!(
         create_tape(f, x, tape_id; enableMinMaxUsingAbs=true)
     else
         check_resue_abs_normal_problem(tape_id, m, n, abs_normal_problem)
-        copy!(abs_normal_problem.x, x)
+        ADOLC.jl_res_to_cxx_res!(abs_normal_problem.x, x)
     end
     return abs_normal!(abs_normal_problem)
 end
