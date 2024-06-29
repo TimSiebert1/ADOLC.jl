@@ -284,7 +284,7 @@ end
     jl_res_to_cxx_res(jl_res::AbstractMatrix{Cdouble})
     jl_res_to_cxx_res(jl_res::AbstractArray{Cdouble, 3})
 
-Creates a `CxxVector`, `CxxMatrix` or `CxxTensor` and copies the values from the corresponding input
+Creates a `CxxVector`, `CxxMatrix` or `CxxTensor` and copies the values from the given input
 `AbstractVector{Cdouble}`, `AbstractMatrix{Cdouble}` or `AbstractArray{Cdouble, 3}` to it.
 """
 function jl_res_to_cxx_res(jl_res::AbstractVector{Cdouble})
@@ -356,12 +356,12 @@ function cxx_res_to_jl_res!(jl_res::AbstractArray{Float64,3}, cxx_res::CxxTensor
 end
 
 """
-    jl_res_to_cxx_res(cxx_res::CxxVector) 
-    jl_res_to_cxx_res(cxx_res::CxxMatrix)
-    jl_res_to_cxx_res(cxx_res::CxxTensor)
+    cxx_res_to_jl_res(cxx_res::CxxVector) 
+    cxx_res_to_jl_res(cxx_res::CxxMatrix)
+    cxx_res_to_jl_res(cxx_res::CxxTensor)
 
 Creates a `Vector{Cdouble}`, `Matrix{Cdouble}` or `Array{Cdouble, 3}`
-and copies the values from the corresponding input `CxxVector`, `CxxMatrix` or `CxxTensor` to it.
+and copies the values from the given input `CxxVector`, `CxxMatrix` or `CxxTensor` to it.
 """
 function cxx_res_to_jl_res(cxx_res::CxxVector)
     jl_res = Vector{Cdouble}(undef, size(cxx_res)...)
@@ -384,16 +384,20 @@ end
 export CxxMatrix,
     CxxVector,
     CxxTensor,
-    myalloc3,
-    myalloc2,
-    alloc_vec_double,
-    alloc_vec_short,
-    alloc_vec,
-    alloc_mat_short,
     cxx_res_to_jl_res,
     cxx_res_to_jl_res!,
     jl_res_to_cxx_res!,
     jl_res_to_cxx_res
 
-export myfree3, myfree2, free_vec_double, free_vec_short, free_mat_short
+export myalloc3,
+    myalloc2,
+    alloc_vec_double,
+    alloc_vec_short,
+    alloc_vec,
+    alloc_mat_short,
+    myfree3,
+    myfree2,
+    free_vec_double,
+    free_vec_short,
+    free_mat_short
 end # module arry_types
