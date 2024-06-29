@@ -176,3 +176,45 @@ end
     b = jl_res_to_cxx_res(a)
     @test all(a .== b)
 end
+
+@testset "cxx_to_jl" begin
+    ()
+    a = [[1.0, 2.0, 3.0] [4.0, 5.5, 7.7]]
+    b = CxxMatrix(a)
+    c = Matrix{Cdouble}(undef, size(a)...)
+
+    cxx_res_to_jl_res!(c, b)
+    @test all(c .== b)
+    @test_throws DimensionMismatch cxx_res_to_jl_res!(Matrix{Cdouble}(undef, 1, 1), b)
+
+    a = [1.0, 2.0, 3.0]
+    b = CxxVector(a)
+    c = Vector{Cdouble}(undef, size(a)...)
+    cxx_res_to_jl_res!(c, b)
+    @test all(c .== b)
+    @test_throws DimensionMismatch cxx_res_to_jl_res!(Vector{Cdouble}(undef, 1), b)
+
+    a = ones(Cdouble, 3, 3, 4)
+    b = CxxTensor(a)
+    c = Array{Cdouble, 3}(undef, size(a)...)
+    cxx_res_to_jl_res!(c, b)
+    @test all(c .== b)
+    @test_throws DimensionMismatch cxx_res_to_jl_res!(Array{Cdouble}(undef, 2, 6, 4), b)
+
+    a = [[1.0, 2.0, 3.0] [4.0, 5.5, 7.7]]
+    b = CxxMatrix(a)
+    c = cxx_res_to_jl_res(b)
+    @test all(c .== b)
+
+    a = [1.0, 2.0, 3.0]
+    b = CxxVector(a)
+    c = cxx_res_to_jl_res(b)
+    @test all(c .== b)
+
+    a = ones(Cdouble, 3, 3, 4)
+    b = CxxTensor(a)
+    c = cxx_res_to_jl_res(b)
+    @test all(c .== b)
+end
+
+
