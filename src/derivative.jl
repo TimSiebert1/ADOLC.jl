@@ -343,7 +343,7 @@ function derivative!(
         abs_normal!(res, f, m, n, x, tape_id, reuse_tape)
 
     else
-        throw("mode $mode not implemented!")
+        throw(ArgumentError("mode $mode not implemented!"))
     end
 end
 
