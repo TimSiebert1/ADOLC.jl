@@ -38,7 +38,7 @@ res = CxxMatrix(m, length(partials))
 derivative!(res, f, m, n, x, partials, seed)
 res
 ```
-If you really need the Julia types `Vector{Cdouble}`, `Matrix{Cdouble}` or `AbstractArray{Cdouble, 3}` feel free to use [`jl_allocator`](@ref) and [`cxx_res_to_jl_res!`](@ref):
+If you really need the Julia types `Vector{Cdouble}`, `Matrix{Cdouble}` or `AbstractArray{Cdouble, 3}` feel free to use [`jl_allocator`](@ref) and [`cxx_res_to_jl_res!`](@ref)( or [`cxx_res_to_jl_res`](@ref)):
 ```@example
 using ADOLC
 f(x) = (x[1] - x[2])^2
