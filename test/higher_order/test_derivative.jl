@@ -31,23 +31,17 @@ end
         return x[1] * x[2] * x[3] * x[4]
     end
     x = [1.0, 2.0, 3.0, 4.0]
-    partials = [
-        [0, 1, 1, 1],
-        [1, 1, 1, 0],
-    ]
+    partials = [[0, 1, 1, 1], [1, 1, 1, 0]]
     res = derivative(f, x, partials)
 
-    @test res[1] ≈ 1.0 
+    @test res[1] ≈ 1.0
     @test res[2] ≈ 4.0
 
     x = [10.0, 2.0, 3.0, 4.4]
-    partials = [
-        [0, 1, 1, 1],
-        [1, 1, 1, 0],
-    ]
-    res = derivative(f, x, partials, tape_id=0, reuse_tape=true)
+    partials = [[0, 1, 1, 1], [1, 1, 1, 0]]
+    res = derivative(f, x, partials; tape_id=0, reuse_tape=true)
 
-    @test res[1] ≈ 10.0 
+    @test res[1] ≈ 10.0
     @test res[2] ≈ 4.4
 end
 
@@ -66,7 +60,7 @@ end
         [0, 0, 2, 1],
         [2, 0, 0, 0],
     ]
-    res = derivative(f, x, partials, id_seed=true)
+    res = derivative(f, x, partials; id_seed=true)
 
     @test res[1, 1] ≈ 8.0
     @test res[2, 1] ≈ 0.0
@@ -237,7 +231,6 @@ end
     @test res[7] ≈ 32.0
     @test res[8] ≈ 0.0
     @test res[9] ≈ 24.0
-
 end
 @testset "higher_order_seed_reuse" begin
     ()
@@ -247,10 +240,7 @@ end
 
     x = [1.0, 2.0]
 
-    partials = [
-        [1],
-        [2]
-    ]
+    partials = [[1], [2]]
 
     seed = CxxMatrix([[1.0, 1.0];;])
     res = derivative(f, x, partials, seed)
@@ -258,7 +248,7 @@ end
     @test res[2] ≈ 26.0
 
     seed = CxxMatrix([[1.0, 2.0];;])
-    res = derivative(f, x, partials, seed, reuse_tape=true, tape_id=0)
+    res = derivative(f, x, partials, seed; reuse_tape=true, tape_id=0)
 
     @test res[1] ≈ 16.0
     @test res[2] ≈ 48.0

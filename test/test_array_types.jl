@@ -196,7 +196,7 @@ end
 
     a = ones(Cdouble, 3, 3, 4)
     b = CxxTensor(a)
-    c = Array{Cdouble, 3}(undef, size(a)...)
+    c = Array{Cdouble,3}(undef, size(a)...)
     cxx_res_to_jl_res!(c, b)
     @test all(c .== b)
     @test_throws DimensionMismatch cxx_res_to_jl_res!(Array{Cdouble}(undef, 2, 6, 4), b)
@@ -216,5 +216,3 @@ end
     c = cxx_res_to_jl_res(b)
     @test all(c .== b)
 end
-
-

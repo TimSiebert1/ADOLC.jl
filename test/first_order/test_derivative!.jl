@@ -1,11 +1,11 @@
-@testset "not_implemented" begin()
+@testset "not_implemented" begin
+    ()
     # m = 1
     function f(x)
         return x[1]^2 + x[2] * x[3]
     end
     res = CxxVector(3)
     @test_throws ArgumentError derivative!(res, f, 1, 3, [1.0, 1.0, 2.0], :ja)
-
 end
 @testset "jac" begin
     # m = 1
