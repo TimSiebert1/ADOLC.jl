@@ -131,6 +131,7 @@ end
 
     @test res[1] == -1.0
     @test res[2] == 0.0
+    
 end
 
 @testset "reuse_jac_vec" begin
@@ -148,6 +149,11 @@ end
     @test res[2] == 0.0
 
     res = derivative(f, [2.0, 1.0, 2.0], :jac_vec; dir=[0.0, 1.0, 0.0], reuse_tape=true)
+
+    @test res[1] == 1.0
+    @test res[2] == 0.0
+
+    res = derivative(f, [2.0, 1.0, 2.0], :jac_vec; dir=CxxVector([0.0, 1.0, 0.0]), reuse_tape=true)
 
     @test res[1] == 1.0
     @test res[2] == 0.0
@@ -206,6 +212,17 @@ end
     @test res[2, 1] == 0.0
     @test res[2, 2] == 0.0
     @test res[2, 3] == 12.0
+
+
+    res = derivative(f, [2.0, 1.0, 2.0], :jac_mat; dir=CxxMatrix(dir), reuse_tape=true)
+
+    @test res[1, 1] == 0.0
+    @test res[1, 2] == -3.0
+    @test res[1, 3] == 0.0
+
+    @test res[2, 1] == 0.0
+    @test res[2, 2] == 0.0
+    @test res[2, 3] == 12.0
 end
 
 @testset "vec_jac" begin
@@ -236,6 +253,12 @@ end
     @test res[3] == 12
 
     res = derivative(f, [2.0, 1.0, 2.0], :vec_jac; weights=[0.0, 1.0], reuse_tape=true)
+
+    @test res[1] == 0.0
+    @test res[2] == 0.0
+    @test res[3] == 12
+
+    res = derivative(f, [2.0, 1.0, 2.0], :vec_jac; weights=CxxVector([0.0, 1.0]), reuse_tape=true)
 
     @test res[1] == 0.0
     @test res[2] == 0.0
@@ -319,6 +342,20 @@ end
     weights[1, 1] = 0.0
 
     res = derivative(f, [2.0, 1.0, 2.0], :mat_jac; weights=weights, reuse_tape=true)
+    @test res[1, 1] == 0.0
+    @test res[1, 2] == 0.0
+    @test res[1, 3] == -12.0
+
+    @test res[2, 1] == 0.0
+    @test res[2, 2] == 0.0
+    @test res[2, 3] == 12.0
+
+    @test res[3, 1] == 0.0
+    @test res[3, 2] == 0.0
+    @test res[3, 3] == 0.0
+
+
+    res = derivative(f, [2.0, 1.0, 2.0], :mat_jac; weights=CxxMatrix(weights), reuse_tape=true)
     @test res[1, 1] == 0.0
     @test res[1, 2] == 0.0
     @test res[1, 3] == -12.0

@@ -16,9 +16,7 @@
         1,
         3,
         x,
-        :abs_normal;
-        tape_id=abs_normal_form.tape_id,
-        reuse_tape=true,
+        :abs_normal
     )
 
     @test abs_normal_form.Y[1, 1] == -1.5

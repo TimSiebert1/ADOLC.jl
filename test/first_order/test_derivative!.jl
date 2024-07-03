@@ -351,3 +351,11 @@ end
     @test res[3, 2] == 0.0
     @test res[3, 3] == 0.0
 end
+
+@testset "tape_less_forward!" begin()
+    f(x) = x[1]^2
+    x = 2.0
+    res = allocator(1, 1, :jac, 0, 0)
+    ADOLC.tape_less_forward!(res, f, 1, x)
+    @test res[1] == 4.0
+end
