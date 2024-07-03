@@ -95,3 +95,16 @@ function _abs_normal!(
         tape_id, m, n, num_switches, x, y, z, cz, cy, Y, J, Z, L
     )
 end
+
+function init_abs_normal_form(
+    f, x::Union{Cdouble,Vector{Cdouble}}; tape_id::Integer=0, reuse_tape=false
+)
+    if !reuse_tape
+        m, n = create_tape(f, x, tape_id; enableMinMaxUsingAbs=true)
+        reuse_tape = true
+    else
+        m = TbadoubleModule.num_dependents(tape_id)
+        n = TbadoubleModule.num_independents(tape_id)
+    end
+    return AbsNormalForm(tape_id, m, n, x, Vector{Cdouble}(undef, m))
+end
