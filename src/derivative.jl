@@ -63,8 +63,8 @@ function derivative(
     f::Function,
     x::Union{Cdouble,Vector{Cdouble}},
     mode::Symbol;
-    dir::Union{Vector{Cdouble},Matrix{Cdouble}}=Vector{Cdouble}(),
-    weights::Union{Vector{Cdouble},Matrix{Cdouble}}=Vector{Cdouble}(),
+    dir=Vector{Cdouble}(),
+    weights=Vector{Cdouble}(),
     tape_id::Integer=0,
     reuse_tape::Bool=false,
 )
@@ -302,8 +302,8 @@ function derivative!(
     n::Integer,
     x::Union{Cdouble,Vector{Cdouble}},
     mode::Symbol;
-    dir::Union{Vector{Cdouble},Matrix{Cdouble}}=Vector{Cdouble}(),
-    weights::Union{Vector{Cdouble},Matrix{Cdouble}}=Vector{Cdouble}(),
+    dir=Vector{Cdouble}(),
+    weights=Vector{Cdouble}(),
     tape_id::Integer=0,
     reuse_tape::Bool=false,
 )
@@ -427,7 +427,7 @@ end
         n::Integer,
         x::Union{Cdouble,Vector{Cdouble}},
         partials::Vector{Vector{Int64}},
-        seed::Matrix{Cdouble};
+        seed::CxxMatrix;
         tape_id::Integer=0,
         reuse_tape::Bool=false,
         adolc_format::Bool=false,
@@ -464,7 +464,7 @@ function derivative!(
     n::Integer,
     x::Union{Cdouble,Vector{Cdouble}},
     partials::Vector{Vector{Int64}},
-    seed;
+    seed::CxxMatrix;
     tape_id::Integer=0,
     reuse_tape::Bool=false,
     adolc_format::Bool=false,
@@ -472,6 +472,34 @@ function derivative!(
     return higher_order!(
         res, f, m, n, x, partials, seed, size(seed, 2), tape_id, reuse_tape, adolc_format
     )
+end
+
+
+function derivative!(
+        res::CxxMatrix,
+        f,
+        m::Integer,
+        n::Integer,
+        x::Union{Cdouble, Vector{Cdouble}},
+        degree::Integer,
+        seed::CxxMatrix;
+        tape_id::Integer=0,
+        reuse_tape::Bool=false
+    )
+    higher_order!(res, f, m, n, x, degree, seed, tape_id, reuse_tape)
+end
+
+function derivative!(
+    res::CxxMatrix,
+    f,
+    m::Integer,
+    n::Integer,
+    x::Union{Cdouble, Vector{Cdouble}},
+    degree::Integer;
+    tape_id::Integer=0,
+    reuse_tape::Bool=false
+)
+    higher_order!(res, f, m, n, x, degree, CxxMatrix(create_cxx_identity(n, n), n, n), tape_id, reuse_tape)
 end
 
 function jac!(
@@ -521,6 +549,10 @@ function gradient!(res, n::Integer, a::Vector{Adouble{TlAlloc}})
             res[i, j] = getADValue(a[i], j)
         end
     end
+end
+
+function init_tl_gradient(a::Adouble{TlAlloc})
+    TladoubleModule.setADValue(a.val, 1.0)
 end
 
 function init_tl_gradient(a::Vector{Adouble{TlAlloc}})
@@ -1286,7 +1318,7 @@ function higher_order!(
     n::Integer,
     x::Vector{Cdouble},
     partials::Vector{Vector{Int64}},
-    seed,
+    seed::CxxMatrix,
     num_seeds::Integer,
     tape_id::Integer,
     reuse_tape::Bool,
