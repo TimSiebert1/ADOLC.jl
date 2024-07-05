@@ -3,9 +3,11 @@ using ADOLC.TbadoubleModule
 using ADOLC.array_types
 using Test
 using CxxWrap
+using SpecialFunctions: SpecialFunctions
 
 include("test_adouble.jl")
 include("test_array_types.jl")
+include("arithmetics.jl")
 include("first_order/test_derivative.jl")
 include("first_order/test_derivative!.jl")
 include("second_order/test_derivative.jl")
