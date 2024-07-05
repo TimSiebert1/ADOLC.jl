@@ -475,6 +475,20 @@ function derivative!(
 end
 
 
+"""
+    derivative!(
+            res::CxxMatrix,
+            f,
+            m::Integer,
+            n::Integer,
+            x::Union{Cdouble, Vector{Cdouble}},
+            degree::Integer,
+            seed::CxxMatrix;
+            tape_id::Integer=0,
+            reuse_tape::Bool=false
+    )
+"""
+
 function derivative!(
         res::CxxMatrix,
         f,
@@ -488,6 +502,19 @@ function derivative!(
     )
     higher_order!(res, f, m, n, x, degree, seed, tape_id, reuse_tape)
 end
+
+"""
+    derivative!(
+    res::CxxMatrix,
+    f,
+    m::Integer,
+    n::Integer,
+    x::Union{Cdouble, Vector{Cdouble}},
+    degree::Integer;
+    tape_id::Integer=0,
+    reuse_tape::Bool=false
+)
+"""
 
 function derivative!(
     res::CxxMatrix,
@@ -1402,6 +1429,6 @@ end
 
 function dependent(b)
     m = length(b)
-    y = m == 1 ? 0.0 : [0.0 for _ in 1:m]
+    y = m == 1 ? Cdouble(0.0) : Vector{Cdouble}(undef, m) 
     return b >> y
 end
