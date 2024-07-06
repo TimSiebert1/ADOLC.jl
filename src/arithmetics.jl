@@ -169,36 +169,3 @@ Base.eps(::Type{Adouble{T}}) where {T<:Union{TbAlloc,TlAlloc}} = eps(Cdouble)
 
 SpecialFunctions.erf(a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = erf(a)
 SpecialFunctions.erfc(a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = 1.0 - erf(a)
-
-
-#-------- utilities for type handling ----------
-function Base.promote(x::V, y::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
-    return Adouble{T}(Cdouble(x), false)
-end
-Base.promote(x::Adouble{T}, y::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = x
-
-function Base.promote_rule(
-    ::Type{Adouble{T}}, ::Type{V}
-) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
-    return Adouble{T}
-end
-
-function Base.promote_op(
-    f, ::Type{Adouble{T}}, ::Type{Adouble{T}}
-) where {T<:Union{TbAlloc,TlAlloc}}
-    return Adouble{T}
-end
-function Base.promote_op(
-    f, ::Type{V}, ::Type{Adouble{T}}
-) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
-    return Adouble{T}
-end
-function Base.promote_op(
-    f, ::Type{Adouble{T}}, ::Type{V}
-) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
-    return Adouble{T}
-end
-function Base.convert(::Type{Adouble{T}}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
-    return Adouble{T}(Cdouble(x), adouble=false)
-end
-Base.convert(::Type{Adouble{T}}, x::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = x
