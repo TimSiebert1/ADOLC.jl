@@ -18,8 +18,6 @@ function Base.:>>(b::Adouble{TbAlloc}, y::Cdouble)
     return b.val >> y
 end
 
-
-
 #--------------- Operation: * -------------------
 
 function Base.:*(
@@ -159,8 +157,12 @@ Base.atanh(a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = Adouble{T}(atanh(a
 Base.ceil(a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = Adouble{T}(ceil(a.val))
 Base.floor(a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = Adouble{T}(floor(a.val))
 
-Base.ldexp(a::Adouble{T}, n::Integer) where {T<:Union{TbAlloc,TlAlloc}} = Adouble{T}(ldexp(a.val, n))
-Base.frexp(a::Adouble{T}, n::Base.RefValue{Cint}) where {T<:Union{TbAlloc,TlAlloc}} = Adouble{T}(frexp(a.val, n))
+function Base.ldexp(a::Adouble{T}, n::Integer) where {T<:Union{TbAlloc,TlAlloc}}
+    return Adouble{T}(ldexp(a.val, n))
+end
+function Base.frexp(a::Adouble{T}, n::Base.RefValue{Cint}) where {T<:Union{TbAlloc,TlAlloc}}
+    return Adouble{T}(frexp(a.val, n))
+end
 
 erf(a::Adouble{TbAlloc}) = Adouble{TbAlloc}(TbadoubleModule.erf(a.val))
 erf(a::Adouble{TlAlloc}) = Adouble{TlAlloc}(TladoubleModule.erf(a.val))

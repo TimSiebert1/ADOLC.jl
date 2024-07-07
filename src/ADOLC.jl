@@ -13,6 +13,7 @@ include("Adouble.jl")
 include("arithmetics.jl")
 include("utils.jl")
 include("derivative.jl")
+include("univariate_tpp.jl")
 
 using .array_types
 using .TbadoubleModule
@@ -37,6 +38,8 @@ export abs_normal!, AbsNormalForm
 
 export derivative,
     derivative!,
+    univariate_tpp!,
+    univariate_tpp,
     allocator,
     jl_allocator,
     create_independent,

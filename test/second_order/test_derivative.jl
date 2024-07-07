@@ -347,7 +347,6 @@ end
     @test res[3, 3, 2] == 0.0
     @test res[3, 3, 3] == -12.0
 
-
     res = derivative(f, x, :mat_hess; weights=CxxMatrix(weights))
 
     @test res[1, 1, 1] == 4.0
@@ -457,5 +456,3 @@ end
     @test res[3, 2] == 0.0
     @test res[3, 3] == -24.0
 end
-
-

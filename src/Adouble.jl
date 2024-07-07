@@ -58,10 +58,9 @@ function getADValue(a::Adouble{TlAlloc}, i::Integer)
     return TladoubleModule.getADValue(a.val, i)
 end
 
-
 #-------- utilities for type handling ----------
 function Base.promote(x::V, y::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
-    return Adouble{T}(Cdouble(x), adouble=false)
+    return Adouble{T}(Cdouble(x); adouble=false)
 end
 Base.promote(x::Adouble{T}, y::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = x
 
@@ -87,6 +86,6 @@ function Base.promote_op(
     return Adouble{T}
 end
 function Base.convert(::Type{Adouble{T}}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real}
-    return Adouble{T}(Cdouble(x), adouble=false)
+    return Adouble{T}(Cdouble(x); adouble=false)
 end
 Base.convert(::Type{Adouble{T}}, x::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = x

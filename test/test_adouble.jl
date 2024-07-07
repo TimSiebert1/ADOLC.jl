@@ -43,15 +43,15 @@
     end
 end
 
-
-@testset "type handling" begin()
+@testset "type handling" begin
+    ()
 
     for t in [Adouble{TlAlloc}, Adouble{TbAlloc}]
-        a = t(3.0, adouble=true)
+        a = t(3.0; adouble=true)
         @test typeof(promote(1, a).val) == Cdouble
         @test typeof(promote(1, a)) == t
 
-        b = t(3.0, adouble=false)
+        b = t(3.0; adouble=false)
         @test typeof(promote(1, b).val) == Cdouble
         @test typeof(promote(1, b)) == t
 

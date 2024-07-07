@@ -10,14 +10,7 @@
     x = [-0.5, -0.5, -0.5]
 
     abs_normal_form = ADOLC.init_abs_normal_form(f, x)
-    derivative!(
-        abs_normal_form,
-        f,
-        1,
-        3,
-        x,
-        :abs_normal
-    )
+    derivative!(abs_normal_form, f, 1, 3, x, :abs_normal)
 
     @test abs_normal_form.Y[1, 1] == -1.5
     @test abs_normal_form.Y[1, 2] == -3.0

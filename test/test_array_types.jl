@@ -39,7 +39,7 @@ end
     @test typeof(a) == CxxPtr{Cshort}
     @test (a[1] = Cshort(1)) == 1.0
     @test typeof(a[1]) == Cshort
-    @test (a[Cshort(1)]= Cdouble(1)) == 1.0
+    @test (a[Cshort(1)] = Cdouble(1)) == 1.0
     @test a[1] == 1.0
     @test a[Int32(1)] == 1.0
     free_vec_short(a)

@@ -7,7 +7,8 @@ using SpecialFunctions: SpecialFunctions
 
 include("test_adouble.jl")
 include("test_array_types.jl")
-include("arithmetics.jl")
+include("test_arithmetics.jl")
+include("test_univariate_tpp.jl")
 include("first_order/test_derivative.jl")
 include("first_order/test_derivative!.jl")
 include("second_order/test_derivative.jl")

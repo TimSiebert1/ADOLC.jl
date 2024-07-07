@@ -487,7 +487,6 @@ function derivative!(
     )
 end
 
-
 """
     derivative!(
             res::CxxMatrix,
@@ -503,17 +502,17 @@ end
 """
 
 function derivative!(
-        res::CxxMatrix,
-        f,
-        m::Integer,
-        n::Integer,
-        x::Union{Cdouble, Vector{Cdouble}},
-        degree::Integer,
-        seed::CxxMatrix;
-        tape_id::Integer=0,
-        reuse_tape::Bool=false
-    )
-    higher_order!(res, f, m, n, x, degree, seed, tape_id, reuse_tape)
+    res::CxxMatrix,
+    f,
+    m::Integer,
+    n::Integer,
+    x::Union{Cdouble,Vector{Cdouble}},
+    degree::Integer,
+    seed::CxxMatrix;
+    tape_id::Integer=0,
+    reuse_tape::Bool=false,
+)
+    return higher_order!(res, f, m, n, x, degree, seed, tape_id, reuse_tape)
 end
 
 """
@@ -534,12 +533,22 @@ function derivative!(
     f,
     m::Integer,
     n::Integer,
-    x::Union{Cdouble, Vector{Cdouble}},
+    x::Union{Cdouble,Vector{Cdouble}},
     degree::Integer;
     tape_id::Integer=0,
-    reuse_tape::Bool=false
+    reuse_tape::Bool=false,
 )
-    higher_order!(res, f, m, n, x, degree, CxxMatrix(create_cxx_identity(n, n), n, n), tape_id, reuse_tape)
+    return higher_order!(
+        res,
+        f,
+        m,
+        n,
+        x,
+        degree,
+        CxxMatrix(create_cxx_identity(n, n), n, n),
+        tape_id,
+        reuse_tape,
+    )
 end
 
 function jac!(
@@ -592,7 +601,7 @@ function gradient!(res, n::Integer, a::Vector{Adouble{TlAlloc}})
 end
 
 function init_tl_gradient(a::Adouble{TlAlloc})
-    TladoubleModule.setADValue(a.val, 1.0)
+    return TladoubleModule.setADValue(a.val, 1.0)
 end
 
 function init_tl_gradient(a::Vector{Adouble{TlAlloc}})
@@ -757,9 +766,7 @@ function fov_forward!(
     )
 end
 
-function check_resue_abs_normal_problem(
-    tape_id::Integer, abs_normal_problem::AbsNormalForm
-)
+function check_resue_abs_normal_problem(tape_id::Integer, abs_normal_problem::AbsNormalForm)
     m = TbadoubleModule.num_dependents(tape_id)
     n = TbadoubleModule.num_independents(tape_id)
     if abs_normal_problem.tape_id != tape_id
@@ -1015,22 +1022,10 @@ function mat_hess_vec!(
     nz_tmp = alloc_mat_short(num_weights, n)
     res_hov_tmp = CxxTensor(num_weights, n, 2)
     mat_hess_vec!(
-        res,
-        f,
-        m,
-        n,
-        x,
-        dir,
-        weights,
-        tape_id,
-        reuse_tape,
-        res_fos_tmp,
-        nz_tmp,
-        res_hov_tmp,
+        res, f, m, n, x, dir, weights, tape_id, reuse_tape, res_fos_tmp, nz_tmp, res_hov_tmp
     )
-    return free_mat_short(nz_tmp, num_weights) 
+    return free_mat_short(nz_tmp, num_weights)
 end
-
 
 function mat_hess_vec!(
     res,
@@ -1086,7 +1081,6 @@ function mat_hess_vec!(
     )
     return free_mat_short(nz_tmp, num_weights)
 end
-
 
 function mat_hess_vec!(
     res,
@@ -1240,7 +1234,7 @@ function mat_hess_mat!(
                 end
             end
         else
-            for j in 1:weights.dim1
+            for j in 1:(weights.dim1)
                 for k in 1:n
                     res[j, k, i] = res_tmp[j, k]
                     res_tmp[j, k] = 0.0
@@ -1442,6 +1436,6 @@ end
 
 function dependent(b)
     m = length(b)
-    y = m == 1 ? Cdouble(0.0) : Vector{Cdouble}(undef, m) 
+    y = m == 1 ? Cdouble(0.0) : Vector{Cdouble}(undef, m)
     return b >> y
 end

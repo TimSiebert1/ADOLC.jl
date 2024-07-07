@@ -27,4 +27,6 @@ ADOLC.array_types.CxxTensor
 ADOLC.array_types.CxxVector
 ADOLC.array_types.CxxMatrix
 ADOLC.init_abs_normal_form
+ADOLC.univariate_tpp
+ADOLC.univariate_tpp!
 ```
