@@ -95,7 +95,11 @@ function _abs_normal!(
         tape_id, m, n, num_switches, x, y, z, cz, cy, Y, J, Z, L
     )
 end
-
+"""
+    init_abs_normal_form(
+        f, x::Union{Cdouble,Vector{Cdouble}}; tape_id::Integer=0, reuse_tape=false
+    )
+"""
 function init_abs_normal_form(
     f, x::Union{Cdouble,Vector{Cdouble}}; tape_id::Integer=0, reuse_tape=false
 )

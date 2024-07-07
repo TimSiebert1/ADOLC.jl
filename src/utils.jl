@@ -379,7 +379,7 @@ function adolc_format_to_seed_space(partials::Vector{Vector{I}}) where {I<:Integ
 end
 
 """
-    allocator(m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights::Int64)
+    allocator(m::Integer, n::Integer, mode::Symbol, num_dir::Integer, num_weights::Integer)
 
 """
 function allocator(m, n, mode, num_dir, num_weights)
@@ -416,6 +416,8 @@ function allocator(m, n, mode, num_dir, num_weights)
         return CxxMatrix(n, num_dir)
     elseif mode === :mat_hess_mat
         return CxxTensor(num_weights, n, num_dir)
+    elseif mode === :abs_normal
+        throw("NotImplementedError: Use `init_abs_normal_form` instead")
     end
 end
 

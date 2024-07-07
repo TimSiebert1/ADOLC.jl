@@ -266,7 +266,8 @@ end
     )
 A variant of the [`derivative`](@ref) driver for [first-](@ref "First-Order"),
 [second-order](@ref "Second-Order") and [abs-normal-form](@ref "Abs-Normal-Form") 
-computations that allows the user to provide a pre-allocated container for the result `res`. 
+computations that allows the user to provide a pre-allocated container for the result `res`.
+The container can be allocated by leveraging the methods [`allocator`](@ref) or [`init_abs_normal_form`](@ref).
 In addition to the arguments of [`derivative`](@ref), the output dimension `m` and 
 input dimension `n` of the function `f` is required. If there is already a valid 
 tape for the function `f` at the selected point `x` use `reuse_tape=true` and set the `tape_id`
@@ -297,9 +298,11 @@ res
 ```jldoctest
 f(x) = max(x[1]*x[2], x[1]^2)
 x = [1.0, 1.0]
+m = 1
+n = 2
 abs_normal_form = init_abs_normal_form(f, x)
-derivative(f, x, :abs_normal, tape_id=abs_normal_form.tape_id, reuse_tape=true)
-res
+derivative!(abs_normal_form, f, m, n, x, :abs_normal, tape_id=abs_normal_form.tape_id, reuse_tape=true)
+abs_normal_form
 # output
 
 AbsNormalForm(0, 1, 2, 1, [1.0, 1.0], [1.0], [0.0], [0.0], [1.0], [1.5 0.5], [0.5;;], [1.0 -1.0], [0.0;;])
