@@ -26,4 +26,5 @@ ADOLC.jl_res_to_cxx_res
 ADOLC.array_types.CxxTensor
 ADOLC.array_types.CxxVector
 ADOLC.array_types.CxxMatrix
+ADOLC.init_abs_normal_form
 ```
