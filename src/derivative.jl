@@ -294,6 +294,16 @@ res
  -0.5  0.0   0.0
   0.0  1.0  -0.5
 ```
+```jldoctest
+f(x) = max(x[1]*x[2], x[1]^2)
+x = [1.0, 1.0]
+abs_normal_form = init_abs_normal_form(f, x)
+derivative(f, x, :abs_normal, tape_id=abs_normal_form.tape_id, reuse_tape=true)
+res
+# output
+
+AbsNormalForm(0, 1, 2, 1, [1.0, 1.0], [1.0], [0.0], [0.0], [1.0], [1.5 0.5], [0.5;;], [1.0 -1.0], [0.0;;])
+```
 """
 function derivative!(
     res,
