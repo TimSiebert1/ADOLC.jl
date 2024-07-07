@@ -11,6 +11,7 @@ SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 
 [compat]
 CxxWrap = "0.16"
+ADOLC_jll = "1.1.2"
 LinearAlgebra = "1.9"
 SpecialFunctions = "2.4"
 julia = "1.9"
