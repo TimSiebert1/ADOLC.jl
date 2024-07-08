@@ -5,7 +5,7 @@
         f,
         degree::Integer,
         x::Union{Cdouble,Vector{Cdouble}},
-        init_tp::CxxMatrix,
+        init_tp::CxxMatrix;
         keep::Bool=false,
         tape_id::Integer=0,
         reuse_tape::Bool=false,
