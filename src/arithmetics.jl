@@ -80,6 +80,12 @@ function Base.:/(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}}
     return Adouble{T}(a.val / b.val)
 end
 
+#--------------- Operation: ^ -------------------
+
+function Base.:^(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}}
+    return Adouble{T}(a.val ^ b.val)
+end
+
 #--------------- Operation: >= -------------------
 Base.:>=(x::V, a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc},V<:Real} = x >= a.val
 Base.:>=(a::Adouble{T}, x::V) where {T<:Union{TbAlloc,TlAlloc},V<:Real} = a.val >= x
