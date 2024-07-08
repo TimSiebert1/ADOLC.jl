@@ -9,7 +9,7 @@ un_ops = [
     cos,
     exp,
     tan,
-    #asin,
+    asin,
     acos,
     atan,
     sinh,
@@ -43,12 +43,14 @@ comps = [>=, >, <=, <, ==]
         @test getValue(op(a, 3)) == op(2.0, 3)
         a = t(2.0; adouble=false)
         @test getValue(op(a, 3)) == op(2.0, 3)
+        a = t(2.0; adouble=true)
 
         op = ^
-        a = t(2.0; adouble=true)
-        @test getValue(op(a, 3)) == op(2.0, 3)
+        @test getValue(op(a,-2.0)) == op(2.0, -2.0)
+        @test getValue(op(a, a)) == op(getValue(a), getValue(a))
         a = t(2.0; adouble=false)
-        @test getValue(op(a, 3)) == op(2.0, 3)
+        @test getValue(op(a, -2.0)) == op(2.0, -2.0)
+        @test getValue(op(a, a)) == op(getValue(a), getValue(a))
     end
 end
 
