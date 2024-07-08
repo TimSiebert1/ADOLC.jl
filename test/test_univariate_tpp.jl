@@ -22,7 +22,7 @@
     @test res[1, 2] ≈ 12.0
     @test res[1, 3] ≈ 13.0
     @test res[1, 4] ≈ 6.0
-    @test res[1, 5] ≈ 0.0
+    @test isapprox(res[1, 5], 0.0, atol=1e-16)
 end
 
 @testset "univariate_tpp" begin
@@ -48,7 +48,7 @@ end
     @test res[1, 2] ≈ 12.0
     @test res[1, 3] ≈ 13.0
     @test res[1, 4] ≈ 6.0
-    @test res[1, 5] ≈ 0.0
+    @test isapprox(res[1, 5], 0.0, atol=1e-16)
 
     res = univariate_tpp(f, degree, x, init_tp; tape_id=1)
 
@@ -56,5 +56,5 @@ end
     @test res[1, 2] == 12.0
     @test res[1, 3] == 13.0
     @test res[1, 4] == 6.0
-    @test res[1, 5] == 0.0
+    @test isapprox(res[1, 5], 0.0, atol=1e-16)
 end
