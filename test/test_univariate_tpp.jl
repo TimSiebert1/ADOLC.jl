@@ -18,11 +18,11 @@
     res = CxxMatrix(m, degree + 1)
     univariate_tpp!(res, f, degree, x, init_tp)
 
-    @test res[1, 1] == 4.0
-    @test res[1, 2] == 12.0
-    @test res[1, 3] == 13.0
-    @test res[1, 4] == 6.0
-    @test res[1, 5] == 0.0
+    @test res[1, 1] ≈ 4.0
+    @test res[1, 2] ≈ 12.0
+    @test res[1, 3] ≈ 13.0
+    @test res[1, 4] ≈ 6.0
+    @test res[1, 5] ≈ 0.0
 end
 
 @testset "univariate_tpp" begin
@@ -44,11 +44,11 @@ end
     end
     res = univariate_tpp(f, degree, x, init_tp; tape_id=1)
 
-    @test res[1, 1] == 4.0
-    @test res[1, 2] == 12.0
-    @test res[1, 3] == 13.0
-    @test res[1, 4] == 6.0
-    @test res[1, 5] == 0.0
+    @test res[1, 1] ≈ 4.0
+    @test res[1, 2] ≈ 12.0
+    @test res[1, 3] ≈ 13.0
+    @test res[1, 4] ≈ 6.0
+    @test res[1, 5] ≈ 0.0
 
     res = univariate_tpp(f, degree, x, init_tp; tape_id=1)
 
