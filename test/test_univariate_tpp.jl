@@ -1,3 +1,18 @@
+@testset "univariate_tpp_wo_seed" begin
+    ()
+    f(x) = x[1]^2 * x[2]^2
+    x = [1.0, 2.0]
+    m = 1
+    n = 2
+    degree = 3
+    res = univariate_tpp(f, degree, x)
+
+    @test res[1, 1] ≈ 4.0
+    @test res[1, 2] ≈ 12.0
+    @test res[1, 3] ≈ 13.0
+    @test res[1, 4] ≈ 6.0
+    @test isapprox(res[1, 5], 0.0, atol=1e-16)
+end
 @testset "univariate_tpp" begin
     ()
     f(x) = x[1]^2 * x[2]^2

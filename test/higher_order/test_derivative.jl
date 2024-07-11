@@ -253,3 +253,85 @@ end
     @test res[1] ≈ 16.0
     @test res[2] ≈ 48.0
 end
+
+@testset "higher_order_full_tensor" begin
+    ()
+
+    function f(x)
+        return [x[1]^2 * x[2]^2, x[3]^2 * x[4]^2]
+    end
+
+    x = [1.0, 2.0, 3.0, 4.0]
+    m = 2
+    n = 4
+    degree = 2
+    res = derivative(f, x, degree, CxxMatrix(create_cxx_identity(n, n), n, n))
+
+    @test res[1, ADOLC.tensor_address(degree, [1, 0])] == 8.0
+    @test res[1, ADOLC.tensor_address(degree, [2, 0])] == 4.0
+    @test res[1, ADOLC.tensor_address(degree, [3, 0])] == 0.0
+    @test res[1, ADOLC.tensor_address(degree, [4, 0])] == 0.0
+
+    @test res[2, ADOLC.tensor_address(degree, [1, 0])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [2, 0])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [3, 0])] == 96.0
+    @test res[2, ADOLC.tensor_address(degree, [4, 0])] == 72.0
+
+    @test res[1, ADOLC.tensor_address(degree, [1, 1])] == 8.0
+    @test res[1, ADOLC.tensor_address(degree, [2, 1])] == 8.0
+    @test res[1, ADOLC.tensor_address(degree, [3, 1])] == 0.0
+    @test res[1, ADOLC.tensor_address(degree, [4, 1])] == 0.0
+    @test res[1, ADOLC.tensor_address(degree, [2, 2])] == 2.0
+    @test res[1, ADOLC.tensor_address(degree, [3, 2])] == 0.0
+    @test res[1, ADOLC.tensor_address(degree, [4, 3])] == 0.0
+    @test res[1, ADOLC.tensor_address(degree, [3, 3])] == 0.0
+    @test res[1, ADOLC.tensor_address(degree, [4, 3])] == 0.0
+    @test res[1, ADOLC.tensor_address(degree, [4, 4])] == 0.0
+    @test res[1, ADOLC.tensor_address(degree, [4, 2])] == 0.0
+
+    @test res[2, ADOLC.tensor_address(degree, [1, 1])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [2, 1])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [3, 1])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [4, 1])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [2, 2])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [3, 2])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [4, 2])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [4, 3])] == 48.0
+    @test res[2, ADOLC.tensor_address(degree, [3, 3])] == 32.0
+    @test res[2, ADOLC.tensor_address(degree, [4, 4])] == 18.0
+
+    res = derivative(f, x, degree)
+
+    @test res[1, ADOLC.tensor_address(degree, [1, 0])] == 8.0
+    @test res[1, ADOLC.tensor_address(degree, [2, 0])] == 4.0
+    @test res[1, ADOLC.tensor_address(degree, [3, 0])] == 0.0
+    @test res[1, ADOLC.tensor_address(degree, [4, 0])] == 0.0
+
+    @test res[2, ADOLC.tensor_address(degree, [1, 0])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [2, 0])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [3, 0])] == 96.0
+    @test res[2, ADOLC.tensor_address(degree, [4, 0])] == 72.0
+
+    @test res[1, ADOLC.tensor_address(degree, [1, 1])] == 8.0
+    @test res[1, ADOLC.tensor_address(degree, [2, 1])] == 8.0
+    @test res[1, ADOLC.tensor_address(degree, [3, 1])] == 0.0
+    @test res[1, ADOLC.tensor_address(degree, [4, 1])] == 0.0
+    @test res[1, ADOLC.tensor_address(degree, [2, 2])] == 2.0
+    @test res[1, ADOLC.tensor_address(degree, [3, 2])] == 0.0
+    @test res[1, ADOLC.tensor_address(degree, [4, 3])] == 0.0
+    @test res[1, ADOLC.tensor_address(degree, [3, 3])] == 0.0
+    @test res[1, ADOLC.tensor_address(degree, [4, 3])] == 0.0
+    @test res[1, ADOLC.tensor_address(degree, [4, 4])] == 0.0
+    @test res[1, ADOLC.tensor_address(degree, [4, 2])] == 0.0
+
+    @test res[2, ADOLC.tensor_address(degree, [1, 1])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [2, 1])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [3, 1])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [4, 1])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [2, 2])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [3, 2])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [4, 2])] == 0.0
+    @test res[2, ADOLC.tensor_address(degree, [4, 3])] == 48.0
+    @test res[2, ADOLC.tensor_address(degree, [3, 3])] == 32.0
+    @test res[2, ADOLC.tensor_address(degree, [4, 4])] == 18.0
+end
