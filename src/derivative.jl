@@ -252,6 +252,66 @@ function derivative(
 end
 
 """
+    derivative(
+    f,
+    x::Union{Cdouble, Vector{Cdouble}},
+    degree::Integer;
+    tape_id::Integer=0,
+    reuse_tape::Bool=false
+)
+"""
+function derivative(
+    f,
+    x::Union{Cdouble,Vector{Cdouble}},
+    degree::Integer;
+    tape_id::Integer=0,
+    reuse_tape::Bool=false,
+)
+    if !reuse_tape
+        m, n = create_tape(f, x, tape_id)
+        reuse_tape = true
+    else
+        m = TbadoubleModule.num_dependents(tape_id)
+        n = TbadoubleModule.num_independents(tape_id)
+    end
+    res = CxxMatrix(m, binomial(n + degree, degree))
+    derivative!(res, f, m, n, x, degree, CxxMatrix(create_cxx_identity(n, n), n, n), tape_id=tape_id, reuse_tape=reuse_tape)
+    return res
+end
+
+"""
+    derivative(
+    f,
+    x::Union{Cdouble, Vector{Cdouble}},
+    degree::Integer,
+    seed::CxxMatrix;
+    tape_id::Integer=0,
+    reuse_tape::Bool=false
+)
+"""
+function derivative(
+    f,
+    x::Union{Cdouble,Vector{Cdouble}},
+    degree::Integer,
+    seed::CxxMatrix,
+    tape_id::Integer=0,
+    reuse_tape::Bool=false,
+)
+    if !reuse_tape
+        m, n = create_tape(f, x, tape_id)
+        reuse_tape = true
+    else
+        m = TbadoubleModule.num_dependents(tape_id)
+        n = TbadoubleModule.num_independents(tape_id)
+    end
+    num_seeds = size(seed, 2)
+    res = CxxMatrix(m, binomial(num_seeds + degree, degree))
+    derivative!(res, f, m, n, x, degree, seed, tape_id=tape_id, reuse_tape=reuse_tape)
+    return res
+end
+
+
+"""
     derivative!(
         res,
         f::Function,
