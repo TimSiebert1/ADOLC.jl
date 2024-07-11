@@ -114,7 +114,7 @@ tape_id = 0
 num_iters = 99
 res0 = derivative(f, x, mode, dir=dir, tape_id=tape_id)
 # update x ....
-for i in 0:num_iters
+for i in 1:num_iters
     res = derivative(f, x, mode, dir=dir, tape_id=tape_id, reuse_tape=true)
     # do computations ....
 end
