@@ -292,15 +292,15 @@ jl_res_to_cxx_res(jl_res::AbstractArray{Cdouble, 3})</code></pre><p>Creates a <c
     f, x::Union{Cdouble,Vector{Cdouble}}; tape_id::Integer=0, reuse_tape=false
 )</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.univariate_tpp" href="#ADOLC.univariate_tpp"><code>ADOLC.univariate_tpp</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">univariate_tpp(
     f,
-    degree::Integer,
-    x::Union{Cdouble,Vector{Cdouble}};
+    x::Union{Cdouble,Vector{Cdouble}},
+    degree::Integer;
     keep::Bool=false,
     tape_id::Integer=0,
     reuse_tape::Bool=false,
 )</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section><section><div><pre><code class="language-julia hljs">univariate_tpp(
     f,
-    degree::Integer,
     x::Union{Cdouble,Vector{Cdouble}},
+    degree::Integer,
     init_tp::CxxMatrix;
     keep::Bool=false,
     tape_id::Integer=0,
@@ -308,10 +308,10 @@ jl_res_to_cxx_res(jl_res::AbstractArray{Cdouble, 3})</code></pre><p>Creates a <c
 )</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.univariate_tpp!" href="#ADOLC.univariate_tpp!"><code>ADOLC.univariate_tpp!</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">univariate_tpp!(
     res::CxxMatrix,
     f,
-    degree::Integer,
     x::Union{Cdouble,Vector{Cdouble}},
+    degree::Integer,
     init_tp::CxxMatrix;
     keep::Bool=false,
     tape_id::Integer=0,
     reuse_tape::Bool=false,
-)</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../derivative_modes/">« Derivative Modes</a><a class="docs-footer-nextpage" href="../wrapped_fcts/">Wrapped Functions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.5.0 on <span class="colophon-date" title="Thursday 11 July 2024 17:23">Thursday 11 July 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body><div data-docstringscollapsed="true"></div></html>
+)</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../derivative_modes/">« Derivative Modes</a><a class="docs-footer-nextpage" href="../wrapped_fcts/">Wrapped Functions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.5.0 on <span class="colophon-date" title="Friday 12 July 2024 05:23">Friday 12 July 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body><div data-docstringscollapsed="true"></div></html>
