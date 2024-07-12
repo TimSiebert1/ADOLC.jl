@@ -2,8 +2,8 @@
 """
     univariate_tpp(
         f,
-        degree::Integer,
-        x::Union{Cdouble,Vector{Cdouble}};
+        x::Union{Cdouble,Vector{Cdouble}},
+        degree::Integer;
         keep::Bool=false,
         tape_id::Integer=0,
         reuse_tape::Bool=false,
@@ -11,8 +11,8 @@
 """
 function univariate_tpp(
     f,
-    degree::Integer,
-    x::Union{Cdouble,Vector{Cdouble}};
+    x::Union{Cdouble,Vector{Cdouble}},
+    degree::Integer;
     keep::Bool=false,
     tape_id::Integer=0,
     reuse_tape::Bool=false,
@@ -34,7 +34,7 @@ function univariate_tpp(
         end
     end
     res = CxxMatrix(m, degree + 1)
-    univariate_tpp!(res, f, degree, x, init_tp; keep=keep, tape_id=tape_id, reuse_tape=true)
+    univariate_tpp!(res, f, x, degree, init_tp; keep=keep, tape_id=tape_id, reuse_tape=true)
     return res
 end
 
@@ -42,8 +42,8 @@ end
 """
     univariate_tpp(
         f,
-        degree::Integer,
         x::Union{Cdouble,Vector{Cdouble}},
+        degree::Integer,
         init_tp::CxxMatrix;
         keep::Bool=false,
         tape_id::Integer=0,
@@ -52,8 +52,8 @@ end
 """
 function univariate_tpp(
     f,
-    degree::Integer,
     x::Union{Cdouble,Vector{Cdouble}},
+    degree::Integer,
     init_tp::CxxMatrix;
     keep::Bool=false,
     tape_id::Integer=0,
@@ -66,7 +66,7 @@ function univariate_tpp(
         n = TbadoubleModule.num_independents(tape_id)
     end
     res = CxxMatrix(m, degree + 1)
-    univariate_tpp!(res, f, degree, x, init_tp; keep=keep, tape_id=tape_id, reuse_tape=true)
+    univariate_tpp!(res, f, x, degree, init_tp; keep=keep, tape_id=tape_id, reuse_tape=true)
     return res
 end
 
@@ -74,8 +74,8 @@ end
     univariate_tpp!(
         res::CxxMatrix,
         f,
-        degree::Integer,
         x::Union{Cdouble,Vector{Cdouble}},
+        degree::Integer,
         init_tp::CxxMatrix;
         keep::Bool=false,
         tape_id::Integer=0,
@@ -85,8 +85,8 @@ end
 function univariate_tpp!(
     res::CxxMatrix,
     f,
-    degree::Integer,
     x::Union{Cdouble,Vector{Cdouble}},
+    degree::Integer,
     init_tp::CxxMatrix;
     keep::Bool=false,
     tape_id::Integer=0,

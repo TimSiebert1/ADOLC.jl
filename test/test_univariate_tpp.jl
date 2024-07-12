@@ -5,7 +5,7 @@
     m = 1
     n = 2
     degree = 3
-    res = univariate_tpp(f, degree, x)
+    res = univariate_tpp(f, x, degree)
 
     @test res[1, 1] ≈ 4.0
     @test res[1, 2] ≈ 12.0
@@ -31,7 +31,7 @@ end
         end
     end
     res = CxxMatrix(m, degree + 1)
-    univariate_tpp!(res, f, degree, x, init_tp)
+    univariate_tpp!(res, f, x, degree, init_tp)
 
     @test res[1, 1] ≈ 4.0
     @test res[1, 2] ≈ 12.0
@@ -57,7 +57,7 @@ end
             end
         end
     end
-    res = univariate_tpp(f, degree, x, init_tp; tape_id=1)
+    res = univariate_tpp(f, x, degree, init_tp; tape_id=1)
 
     @test res[1, 1] ≈ 4.0
     @test res[1, 2] ≈ 12.0
@@ -65,7 +65,7 @@ end
     @test res[1, 4] ≈ 6.0
     @test isapprox(res[1, 5], 0.0, atol=1e-16)
 
-    res = univariate_tpp(f, degree, x, init_tp; tape_id=1)
+    res = univariate_tpp(f, x, degree, init_tp; tape_id=1)
 
     @test res[1, 1] == 4.0
     @test res[1, 2] == 12.0
