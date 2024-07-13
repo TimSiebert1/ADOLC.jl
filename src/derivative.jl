@@ -85,7 +85,6 @@ function derivative(
     else
         allocator(m, n, mode, size(dir, 2)[1], size(weights, 1)[1])
     end
-    # allocator creates tape in case of :abs_normal
     derivative!(
         res,
         f,
@@ -98,7 +97,51 @@ function derivative(
         tape_id=mode === :abs_normal ? res.tape_id : tape_id,
         reuse_tape=mode === :abs_normal ? true : reuse_tape,
     )
+    return res
+end
 
+
+function derivative(
+    f::Function,
+    x::Union{Cdouble,Vector{Cdouble}},
+    mode::Symbol,
+    active;
+    dir=Vector{Cdouble}(),
+    weights=Vector{Cdouble}(),
+    tape_id::Integer=0,
+    reuse_tape::Bool=false,
+)
+    @assert issorted(active) "The list of active varibles must be sorted ascendend!"
+    if !reuse_tape
+        if mode == :abs_normal
+            m, n, x = create_tape(f, x, active, tape_id; enableMinMaxUsingAbs=true)
+        else
+            m, n, x = create_tape(f, x, active, tape_id)
+        end
+        reuse_tape = true
+    else
+        @assert length(x) == length(active) "x must correspond to the selected active variables when reusing the tape!"
+        m = TbadoubleModule.num_dependents(tape_id)
+        n = TbadoubleModule.num_independents(tape_id)
+    end
+
+    res = if mode === :abs_normal
+        init_abs_normal_form(f, x; tape_id=tape_id, reuse_tape=reuse_tape)
+    else
+        allocator(m, n, mode, size(dir, 2)[1], size(weights, 1)[1])
+    end
+    derivative!(
+        res,
+        f,
+        m,
+        n,
+        x,
+        mode;
+        dir=dir,
+        weights=weights,
+        tape_id=mode === :abs_normal ? res.tape_id : tape_id,
+        reuse_tape=mode === :abs_normal ? true : reuse_tape,
+    )
     return res
 end
 
@@ -1483,6 +1526,46 @@ function create_tape(
     return length(b), length(x)
 end
 
+function create_tape(
+    f,
+    x::Union{Cdouble,Vector{Cdouble}},
+    active,
+    tape_id::Integer;
+    keep::Integer=0,
+    enableMinMaxUsingAbs=false,
+)
+    if enableMinMaxUsingAbs
+        TbadoubleModule.enableMinMaxUsingAbs()
+    end
+
+    trace_on(tape_id, keep)
+    a = create_independent(x, active)
+    b = f(a)
+    dependent(b)
+    trace_off()
+    return length(b), length(active), [x[i] for i in active]
+end
+
+function _create_tape(
+    f,
+    m::Integer,
+    x::Union{Cdouble,Vector{Cdouble}},
+    tape_id::Integer;
+    keep::Integer=0,
+    enableMinMaxUsingAbs=false,
+)
+    if enableMinMaxUsingAbs
+        TbadoubleModule.enableMinMaxUsingAbs()
+    end
+
+    trace_on(tape_id, keep)
+    a = create_independent(x)
+    b = m == 1 ? Adouble{TbAlloc}() : [Adouble{TbAlloc}() for _ in 1:m]
+    f(b, a)
+    dependent(b)
+    trace_off()
+    return length(b), length(x)
+end
 """
     create_independent(x::Union{Cdouble, Vector{Cdouble}})
 
@@ -1491,6 +1574,20 @@ function create_independent(x)
     n = length(x)
     a = n == 1 ? Adouble{TbAlloc}() : [Adouble{TbAlloc}() for _ in 1:n]
     a << x
+    return a
+end
+
+"""
+    create_independent(x::Vector{Cdouble}, active) 
+
+The entries in `active` describes the indices of the entries of `x` that are selected as
+the independant variables.  
+"""
+function create_independent(x::Vector{Cdouble}, active)
+    a = Adouble{TbAlloc}(x, adouble=true)
+    for i in active
+        a[i] << x[i]
+    end
     return a
 end
 
