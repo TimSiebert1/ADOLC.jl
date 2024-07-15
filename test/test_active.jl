@@ -1,5 +1,5 @@
 @testset "test_active_variables" begin()
-    f(x) = x[1] * x[2] * x[3] * x[4]
+    f(x) = x[1] * mkparam(x[2]) * x[3] * mkparam(x[4])
     xx = [1.0, 3.0, 4.0, 2.0]
     active = [1, 3]
     mode = :jac
@@ -12,12 +12,19 @@
     @test res[1] == 3.0
     @test res[2] == -18.0
 
-    f1(x) = [x[1]*x[2], x[2]] 
+    f1(x) = [mkparam(x[1])*x[2], x[2]] 
     x = [4.0, 1.0]
     dir = [2.0]
     active = [2]
-    res = derivative(f1, x, :jac_vec, active, dir=dir)
+    tape_id = 1
+    res = derivative(f1, x, :jac_vec, active, dir=dir, tape_id=tape_id)
 
     @test res[1] == 8.0
+    @test res[2] == 2.0
+
+    ADOLC.TbadoubleModule.set_param_vec(tape_id, length(active), [-4.0])
+    res = derivative(f1, [1.0], :jac_vec, active, dir=dir, tape_id=tape_id, reuse_tape=true)
+
+    @test res[1] == -8.0
     @test res[2] == 2.0
 end
