@@ -1584,9 +1584,14 @@ The entries in `active` describes the indices of the entries of `x` that are sel
 the independant variables.  
 """
 function create_independent(x::Vector{Cdouble}, active)
-    a = Adouble{TbAlloc}(x, adouble=true)
-    for i in active
-        a[i] << x[i]
+    a = Vector{Adouble{TbAlloc}}(undef, length(x))
+    for i in eachindex(x)
+        if i in active
+            a[i] = Adouble{TbAlloc}(x[i], adouble=true)
+            a[i] << x[i]
+        else
+            a[i] = Adouble{TbAlloc}(x[i])
+        end
     end
     return a
 end
