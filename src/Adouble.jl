@@ -89,3 +89,8 @@ function Base.convert(::Type{Adouble{T}}, x::V) where {T<:Union{TbAlloc,TlAlloc}
     return Adouble{T}(Cdouble(x); adouble=false)
 end
 Base.convert(::Type{Adouble{T}}, x::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = x
+
+function mkparam(a::Adouble{TbAlloc})
+    @assert typeof(a.val) == Cdouble "mkparam works only if input a.val is of type Cdouble ($Cdouble)!"
+    return Adouble{TbAlloc}(TbadoubleModule.mkparam(a.val))
+end
