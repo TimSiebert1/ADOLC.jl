@@ -52,5 +52,6 @@ export derivative,
 export erf, eps
 
 export gradient
+export mkparam
 
 end # module ADOLC
