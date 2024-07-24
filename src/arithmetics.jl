@@ -166,8 +166,8 @@ Base.floor(a::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}} = Adouble{T}(floor(a
 function Base.ldexp(a::Adouble{T}, n::Integer) where {T<:Union{TbAlloc,TlAlloc}}
     return Adouble{T}(ldexp(a.val, n))
 end
-function Base.frexp(a::Adouble{T}, n::Base.RefValue{Cint}) where {T<:Union{TbAlloc,TlAlloc}}
-    return Adouble{T}(frexp(a.val, n))
+function Base.frexp(a::Adouble{T}, n::Cint) where {T<:Union{TbAlloc,TlAlloc}}
+    return Adouble{T}(frexp(a.val, n), adouble=true)
 end
 
 erf(a::Adouble{TbAlloc}) = Adouble{TbAlloc}(TbadoubleModule.erf(a.val))
