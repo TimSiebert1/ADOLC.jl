@@ -12,7 +12,11 @@
     @test res[1] == 3.0
     @test res[2] == -18.0
 
-    f1(x) = [mkparam(x[1])*x[2], x[2]] 
+    function f1(x)
+        x2 = mkparam(x[1])
+        x3 = 1.0*x2
+        return [x3*x[2], x[2]] 
+    end
     x = [4.0, 1.0]
     dir = [2.0]
     active = [2]
