@@ -14,7 +14,13 @@ makedocs(;
     format=Documenter.HTML(),
     pages=[
         "Home" => "index.md",
-        "Guides" => "lib/guides.md",
+        "Guides" => [
+            "Seed Matrix" => "lib/guides/seed_matrix.md",
+            "Univariate Taylor Polynomial Propagation" => "lib/guides/utpp.md",
+            "Tape Management" => "lib/guides/tape_management.md",
+            "Working with C++ Memory" => "lib/guides/ww_cxx_mem.md",
+            "Performance Tips" => "lib/guides/performance_tips.md",
+            ],
         "Derivative Modes" => "lib/derivative_modes.md",
         "Reference" => "lib/reference.md",
         "Wrapped Functions" => "lib/wrapped_fcts.md",
