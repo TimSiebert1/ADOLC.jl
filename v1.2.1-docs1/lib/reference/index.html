@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Reference · ADOLC.jl</title><meta name="title" content="Reference · ADOLC.jl"/><meta property="og:title" content="Reference · ADOLC.jl"/><meta property="twitter:title" content="Reference · ADOLC.jl"/><meta name="description" content="Documentation for ADOLC.jl."/><meta property="og:description" content="Documentation for ADOLC.jl."/><meta property="twitter:description" content="Documentation for ADOLC.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">ADOLC.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Guides</span><ul><li><a class="tocitem" href="../guides/seed_matrix/">Seed Matrix</a></li><li><a class="tocitem" href="../guides/utpp/">Univariate Taylor Polynomial Propagation</a></li><li><a class="tocitem" href="../guides/tape_management/">Tape Management</a></li><li><a class="tocitem" href="../guides/ww_cxx_mem/">Working with C++ Memory</a></li><li><a class="tocitem" href="../guides/performance_tips/">Performance Tips</a></li></ul></li><li><a class="tocitem" href="../derivative_modes/">Derivative Modes</a></li><li class="is-active"><a class="tocitem" href>Reference</a></li><li><a class="tocitem" href="../wrapped_fcts/">Wrapped Functions</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Reference</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Reference</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="github.com/TimSiebert1/ADOLC.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="API-reference"><a class="docs-heading-anchor" href="#API-reference">API reference</a><a id="API-reference-1"></a><a class="docs-heading-anchor-permalink" href="#API-reference" title="Permalink"></a></h1><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.derivative" href="#ADOLC.derivative"><code>ADOLC.derivative</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">derivative(
+    f::Function,
+    x::Union{Cdouble,Vector{Cdouble}},
+    mode::Symbol;
+    dir::Union{Vector{Cdouble},Matrix{Cdouble}}=Vector{Cdouble}(),
+    weights::Union{Vector{Cdouble},Matrix{Cdouble}}=Vector{Cdouble}(),
+    tape_id::Integer=0,
+    reuse_tape::Bool=false,
+)</code></pre><p>A variant of the <a href="#ADOLC.derivative"><code>derivative</code></a> driver, which can be used to compute <a href="../derivative_modes/#First-Order">first-order</a> and <a href="../derivative_modes/#Second-Order">second-order</a>  derivatives, as well as the <a href="../derivative_modes/#Abs-Normal-Form">abs-normal-form</a>  of the given function <code>f</code> at the point <code>x</code>. The available modes are listed <a href="../derivative_modes/#Derivative-Modes">here</a>. The formulas in the tables define <code>weights</code> (left multiplier) and <code>dir</code> (right multiplier). Most modes leverage a tape, which has the identifier <code>tape_id</code>. If there is already a valid  tape for the function <code>f</code> at the selected point <code>x</code> use <code>reuse_tape=true</code> and set the <code>tape_id</code> accordingly to avoid the re-creation of the tape.</p><p><strong>Examples:</strong></p><p>First-Order:</p><pre><code class="language-julia hljs">f(x) = sin(x)
+res = derivative(f, float(π), :jac)
+
+# output
+
+1-element CxxVector:
+ -1.0</code></pre><p>Second-Order:</p><pre><code class="language-julia hljs">f(x) = [x[1]*x[2]^2, x[1]^2*x[3]^3]
+x = [1.0, 2.0, -1.0]
+dir = [1.0, 0.0, 0.0]
+weights = [1.0, 1.0]
+res = derivative(f, x, :vec_hess_vec, dir=dir, weights=weights)
+
+# output
+
+3-element CxxVector:
+ -2.0
+  4.0
+  6.0</code></pre><p>Abs-Normal-Form:</p><pre><code class="language-julia hljs">f(x) = max(x[1]*x[2], x[1]^2)
+x = [1.0, 1.0]
+res = derivative(f, x, :abs_normal)
+
+# output
+
+AbsNormalForm(0, 1, 2, 1, [1.0, 1.0], [1.0], [0.0], [0.0], [1.0], [1.5 0.5], [0.5;;], [1.0 -1.0], [0.0;;])</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section><section><div><pre><code class="language-julia hljs">derivative(
+    f::Function,
+    x::Union{Cdouble,Vector{Cdouble}},
+    partials::Vector{Vector{Int64}};
+    tape_id::Integer=0,
+    reuse_tape::Bool=false,
+    id_seed::Bool=false,
+    adolc_format::Bool=false,
+)</code></pre><p>A variant of the <a href="#ADOLC.derivative"><code>derivative</code></a> driver, which can be used to compute <a href="../derivative_modes/#Higher-Order">higher-order</a> derivatives of the function <code>f</code>  at the point <code>x</code>. The derivatives are specified as mixed-partials in the <code>partials</code> vector. To define the partial-derivatives use either the <a href="../derivative_modes/#Partial-Format">Partial-Format</a> or the <a href="../derivative_modes/#ADOLC-Format">ADOLC-Format</a> and set <code>adolc_format</code> accordingly. The flag <code>id_seed</code> is used to specify the method for <a href="../guides/seed_matrix/#Seed-Matrix">seed-matrix generation</a>. The underlying method leverages a tape, which has the identifier <code>tape_id</code>. If there is already a valid  tape for the function <code>f</code> at the selected point <code>x</code> use <code>reuse_tape=true</code> and set the <code>tape_id</code> accordingly to avoid the re-creation of the tape.</p><p><strong>Examples:</strong></p><p>Partial-Format:</p><pre><code class="language-julia hljs">f(x) = [x[1]^2*x[2]^2, x[3]^2*x[4]^2]
+x = [1.0, 2.0, 3.0, 4.0]
+partials = [[1, 1, 0, 0], [0, 0, 1, 1], [2, 2, 0, 0]]
+res = derivative(f, x, partials)
+
+# output
+
+2×3 CxxMatrix:
+ 8.0   0.0  4.0
+ 0.0  48.0  0.0</code></pre><p>ADOLC-Format:</p><pre><code class="language-julia hljs">f(x) = [x[1]^2*x[2]^2, x[3]^2*x[4]^2]
+x = [1.0, 2.0, 3.0, 4.0]
+partials = [[2, 1, 0, 0], [4, 3, 0, 0], [2, 2, 1, 1]]
+res = derivative(f, x, partials, adolc_format=true)
+
+# output
+
+2×3 CxxMatrix:
+ 8.0   0.0  4.0
+ 0.0  48.0  0.0</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section><section><div><pre><code class="language-julia hljs">derivative(
+    f::Function,
+    x::Union{Cdouble,Vector{Cdouble}},
+    partials::Vector{Vector{Int64}},
+    seed::Matrix{Cdouble};
+    tape_id::Integer=0,
+    reuse_tape::Bool=false,
+    adolc_format::Bool=false,
+)</code></pre><p>Variant of the <a href="#ADOLC.derivative"><code>derivative</code></a> driver for the computation of <a href="../derivative_modes/#Higher-Order">higher-order</a> derivatives, that requires a <code>seed</code>. Details on the idea behind <code>seed</code> can be found  <a href="../guides/seed_matrix/#Seed-Matrix">here</a>.</p><p>Example:</p><pre><code class="language-julia hljs">f(x) = [x[1]^4, x[2]^3*x[1]]
+x = [1.0, 2.0]
+partials = [[1], [2], [3]]
+seed = CxxMatrix([[1.0, 1.0];;])
+res = derivative(f, x, partials, seed)
+
+
+# output
+
+2×3 CxxMatrix:
+  4.0  12.0  24.0
+ 20.0  36.0  42.0</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section><section><div><pre><code class="language-julia hljs">derivative(
+f,
+x::Union{Cdouble, Vector{Cdouble}},
+degree::Integer;
+tape_id::Integer=0,
+reuse_tape::Bool=false</code></pre><p>)</p></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section><section><div><pre><code class="language-julia hljs">derivative(
+f,
+x::Union{Cdouble, Vector{Cdouble}},
+degree::Integer,
+seed::CxxMatrix;
+tape_id::Integer=0,
+reuse_tape::Bool=false</code></pre><p>)</p></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.derivative!" href="#ADOLC.derivative!"><code>ADOLC.derivative!</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">derivative!(
+    res,
+    f::Function,
+    m::Integer,
+    n::Integer,
+    x::Union{Cdouble,Vector{Cdouble}},
+    mode::Symbol;
+    dir::Union{Vector{Cdouble},Matrix{Cdouble}}=Vector{Cdouble}(),
+    weights::Union{Vector{Cdouble},Matrix{Cdouble}}=Vector{Cdouble}(),
+    tape_id::Integer=0,
+    reuse_tape::Bool=false,
+)</code></pre><p>A variant of the <a href="#ADOLC.derivative"><code>derivative</code></a> driver for <a href="../derivative_modes/#First-Order">first-</a>, <a href="../derivative_modes/#Second-Order">second-order</a> and <a href="../derivative_modes/#Abs-Normal-Form">abs-normal-form</a>  computations that allows the user to provide a pre-allocated container for the result <code>res</code>. The container can be allocated by leveraging the methods <a href="#ADOLC.allocator"><code>allocator</code></a> or <a href="#ADOLC.init_abs_normal_form"><code>init_abs_normal_form</code></a>. In addition to the arguments of <a href="#ADOLC.derivative"><code>derivative</code></a>, the output dimension <code>m</code> and  input dimension <code>n</code> of the function <code>f</code> is required. If there is already a valid  tape for the function <code>f</code> at the selected point <code>x</code> use <code>reuse_tape=true</code> and set the <code>tape_id</code> accordingly to avoid the re-creation of the tape.</p><p>Example:</p><pre><code class="language-julia hljs">f(x) = [cos(x[1]), x[2]*x[3]]
+x = [0.0, 1.5, -1.0]
+mode = :hess_mat
+dir = [[1.0, -1.0, 1.0] [0.5, -0.5, 1.0]]
+m = 2
+n = 3
+res =  allocator(m, n, mode, size(dir, 2)[1], 0)
+derivative!(res, f, m, n, x, mode, dir=dir)
+res
+# output
+
+2×3×2 CxxTensor:
+[:, :, 1] =
+ -1.0  0.0   0.0
+  0.0  1.0  -1.0
+
+[:, :, 2] =
+ -0.5  0.0   0.0
+  0.0  1.0  -0.5</code></pre><pre><code class="language-julia hljs">f(x) = max(x[1]*x[2], x[1]^2)
+x = [1.0, 1.0]
+m = 1
+n = 2
+abs_normal_form = init_abs_normal_form(f, x)
+derivative!(abs_normal_form, f, m, n, x, :abs_normal, tape_id=abs_normal_form.tape_id, reuse_tape=true)
+abs_normal_form
+# output
+
+AbsNormalForm(0, 1, 2, 1, [1.0, 1.0], [1.0], [0.0], [0.0], [1.0], [1.5 0.5], [0.5;;], [1.0 -1.0], [0.0;;])</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section><section><div><pre><code class="language-julia hljs">derivative!(
+    res,
+    f,
+    m::Integer,
+    n::Integer,
+    x::Union{Cdouble,Vector{Cdouble}},
+    partials::Vector{Vector{Int64}};
+    tape_id::Integer=0,
+    reuse_tape::Bool=false,
+    id_seed::Bool=false,
+    adolc_format::Bool=false,
+)</code></pre><p>A variant of the <a href="#ADOLC.derivative"><code>derivative</code></a> driver for the computation of  <a href="../derivative_modes/#Higher-Order">higher-order</a> derivatives that allows the user to provide  a pre-allocated container for the result <code>res</code>. In addition to the arguments of  <a href="#ADOLC.derivative"><code>derivative</code></a>, the output dimension <code>m</code> and input dimension <code>n</code> of the function <code>f</code> is required. If there is already a valid tape for the function <code>f</code> at the  selected point <code>x</code> use <code>reuse_tape=true</code> and set the <code>tape_id</code> accordingly to  avoid the re-creation of the tape.</p><p>Example: </p><pre><code class="language-julia hljs">f(x) = x[1]^4*x[2]*x[3]*x[4]^2
+x = [3.0, -1.5, 1.5, -2.0]
+partials = [[4, 0, 0, 0], [3, 0, 1, 2]]
+m = 1
+n = 4
+res = CxxMatrix(m, length(partials))
+derivative!(res, f, m, n, x, partials)
+res
+
+# output
+
+1×2 CxxMatrix:
+ -216.0  -216.0</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section><section><div><pre><code class="language-julia hljs">derivative!(
+    res,
+    f,
+    m::Integer,
+    n::Integer,
+    x::Union{Cdouble,Vector{Cdouble}},
+    partials::Vector{Vector{Int64}},
+    seed::CxxMatrix;
+    tape_id::Integer=0,
+    reuse_tape::Bool=false,
+    adolc_format::Bool=false,
+)</code></pre><p>Variant of the <a href="#ADOLC.derivative!"><code>derivative!</code></a> driver for the computation of <a href="../derivative_modes/#Higher-Order">higher-order</a> derivatives, that requires a <code>seed</code>. Details on the idea behind <code>seed</code> can be found  <a href="../guides/seed_matrix/#Seed-Matrix">here</a>.</p><p>Example:</p><pre><code class="language-julia hljs">f(x) = [x[1]^4, x[2]^3*x[1]]
+x = [1.0, 2.0]
+partials = [[1], [2], [3]]
+seed = CxxMatrix([[1.0, 1.0];;])
+m = 2
+n = 2
+res = CxxMatrix(m, length(partials))
+derivative!(res, f, m, n, x, partials, seed)
+res
+
+# output
+
+2×3 CxxMatrix:
+  4.0  12.0  24.0
+ 20.0  36.0  42.0</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.tensor_address" href="#ADOLC.tensor_address"><code>ADOLC.tensor_address</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">tensor_address(degree::Integer, adolc_partial::Vector{Integer})
+tensor_address(degree::Integer, adolc_partial::Vector{Cint})</code></pre><p>Generates the index (address) of the mixed-partial specified by <code>adolc_partial</code> in an higher-order derivative tensor of derivative order <code>degree</code>.</p><div class="admonition is-info"><header class="admonition-header">Note</header><div class="admonition-body"><p>The partial has to be in <a href="../derivative_modes/#ADOLC-Format">ADOLC-Format</a>.</p></div></div></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.partial_to_adolc_format" href="#ADOLC.partial_to_adolc_format"><code>ADOLC.partial_to_adolc_format</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">partial_to_adolc_format(partial::Vector{I_1}, degree::I_2) where {I_1&lt;:Integer, I_2&lt;:Integer}</code></pre><p>Transforms a given <code>partial</code> to the <a href="../derivative_modes/#ADOLC-Format">ADOLC-Format</a>. </p><div class="admonition is-info"><header class="admonition-header">Note</header><div class="admonition-body"><p><code>partial</code> is required to be in the <code>Partial-format</code></p></div></div><p><strong>Example:</strong></p><pre><code class="language-julia hljs">
+partial = [1, 0, 4]
+degree = sum(partial)
+partial_to_adolc_format(partial, degree)
+
+# output
+
+5-element Vector{Int32}:
+ 3
+ 3
+ 3
+ 3
+ 1</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.partial_to_adolc_format!" href="#ADOLC.partial_to_adolc_format!"><code>ADOLC.partial_to_adolc_format!</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">partial_to_adolc_format!(res::Vector{Cint}, partial::Vector{I_1}, degree::I_2) where {I_1&lt;:Integer, I_2&lt;:Integer}
+partial_to_adolc_format!(res::Vector{Cint}, partial::Vector{Cint}, degree::I) where I &lt;: Integer</code></pre><p>Variant of <a href="#ADOLC.partial_to_adolc_format"><code>partial_to_adolc_format</code></a> that writes the result to <code>res</code>.</p><p><strong>Example:</strong></p><pre><code class="language-julia hljs">partial = [1, 3, 2, 0]
+degree = sum(partial)
+res = zeros(Int32, degree)
+partial_to_adolc_format!(res, partial, degree)
+
+# output
+
+6-element Vector{Int32}:
+ 3
+ 3
+ 2
+ 2
+ 2
+ 1</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.create_cxx_identity" href="#ADOLC.create_cxx_identity"><code>ADOLC.create_cxx_identity</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">create_cxx_identity(n::I_1, m::I_2) where {I_1 &lt;: Integer, I_2 &lt;: Integer}</code></pre><p>Creates a identity matrix of shape (<code>n</code>, <code>m</code>) of type CxxPtr{CxxPtr{Float64}} (wrapper of C++&#39;s double**).</p><p><strong>Example</strong></p><pre><code class="language-julia hljs">id = CxxMatrix(create_cxx_identity(2, 4), 2, 4)
+
+
+# output
+
+2×4 CxxMatrix:
+ 1.0  0.0  0.0  0.0
+ 0.0  1.0  0.0  0.0</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.create_partial_cxx_identity" href="#ADOLC.create_partial_cxx_identity"><code>ADOLC.create_partial_cxx_identity</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">create_partial_cxx_identity(n::I_1, idxs::Vector{I_2}) where {I_1 &lt;: Integer, I_2 &lt;: Integer}</code></pre><p>Creates a matrix of shape (<code>n</code>, <code>length(idxs)</code>) of type CxxPtr{CxxPtr{Float64}} (wrapper of C++&#39;s double**). The columns are canonical basis vectors corresponding to the entries of <code>idxs</code>. The order of the basis vectors is defined by the order of the indices in <code>idxs</code>. Details about the application can be found in this <a href="../guides/seed_matrix/#Seed-Matrix">guide</a>.</p><div class="admonition is-warning"><header class="admonition-header">Warning</header><div class="admonition-body"><p>The number of rows <code>n</code> must be smaller than the maximal index of <code>idxs</code>!</p></div></div><div class="admonition is-warning"><header class="admonition-header">Warning</header><div class="admonition-body"><p>The values of <code>idxs</code> must be non-negative!</p></div></div><p><strong>Examples</strong></p><pre><code class="language-julia hljs">n = 4
+idxs = [1, 3]
+id = CxxMatrix(create_partial_cxx_identity(n, idxs), n, length(idxs))
+# output
+
+4×2 CxxMatrix:
+ 1.0  0.0
+ 0.0  0.0
+ 0.0  1.0
+ 0.0  0.0</code></pre><p>The order in <code>idxs</code> defines the order of the basis vectors.</p><pre><code class="language-julia hljs">n = 3
+idxs = [3, 0, 1]
+id = CxxMatrix(create_partial_cxx_identity(n, idxs), n, length(idxs))
+
+
+# output
+
+3×3 CxxMatrix:
+ 0.0  0.0  1.0
+ 0.0  0.0  0.0
+ 1.0  0.0  0.0</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.seed_idxs_partial_format" href="#ADOLC.seed_idxs_partial_format"><code>ADOLC.seed_idxs_partial_format</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">seed_idxs_partial_format(partials::Vector{Vector{I}}) where I &lt;: Integer</code></pre><p>Extracts the actually required derivative directions of <code>partials</code> and returns them  ascendet sorted. </p><div class="admonition is-info"><header class="admonition-header">Note</header><div class="admonition-body"><p><code>partials</code> has to be in <a href="../derivative_modes/#Partial-Format">Partial-Format</a>.</p></div></div><p><strong>Example</strong></p><pre><code class="language-julia hljs">
+partials = [[1, 0, 0, 0, 3], [1, 0, 1, 0, 0], [0, 0, 3, 0, 0]]
+seed_idxs_partial_format(partials)
+
+# output
+
+3-element Vector{Int64}:
+ 1
+ 3
+ 5</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.seed_idxs_adolc_format" href="#ADOLC.seed_idxs_adolc_format"><code>ADOLC.seed_idxs_adolc_format</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">seed_idxs_adolc_format(partials::Vector{Vector{I}}) where I &lt;: Integer</code></pre><p>Extracts the actually required derivative directions of <code>partials</code> and returns them  ascendet sorted. </p><div class="admonition is-info"><header class="admonition-header">Note</header><div class="admonition-body"><p><code>partials</code> has to be in <a href="../derivative_modes/#ADOLC-Format">ADOLC-Format</a>.</p></div></div><p><strong>Example</strong></p><pre><code class="language-julia hljs">
+partials = [[5, 5, 5, 1], [3, 1, 0, 0], [3, 3, 3, 0]]
+seed_idxs_adolc_format(partials)
+
+# output
+
+3-element Vector{Int64}:
+ 1
+ 3
+ 5</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.partial_format_to_seed_space" href="#ADOLC.partial_format_to_seed_space"><code>ADOLC.partial_format_to_seed_space</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">partial_format_to_seed_space(partials::Vector{Vector{I_1}}, seed_idxs::Vector{I_2}) where {I_1 &lt;: Integer, I_2 &lt;: Integer}
+partial_format_to_seed_space(partials::Vector{Vector{I}}) where I &lt;: Integer</code></pre><p>Converts <code>partials</code> in <a href="../derivative_modes/#Partial-Format">Partial-Format</a> to <code>partials</code> of the same format but with (possible) reduced number  of derivatives directions. The <code>seed_idxs</code> is expected to store the result of <a href="#ADOLC.seed_idxs_partial_format"><code>seed_idxs_partial_format(seed_idxs)</code></a>. Without <code>seed_idxs</code> the function first calls <a href="#ADOLC.seed_idxs_partial_format"><code>seed_idxs_partial_format(seed_idxs)</code></a> to get the indices.</p><p><strong>Examples</strong></p><pre><code class="language-julia hljs">
+partials = [[0, 1, 1], [0, 2, 0]]
+seed_idxs = seed_idxs_partial_format(partials)
+partial_format_to_seed_space(partials, seed_idxs)
+
+# output
+
+2-element Vector{Vector{Int64}}:
+ [1, 1]
+ [2, 0]</code></pre><p>Without <code>seed_idxs</code></p><pre><code class="language-julia hljs">
+partials = [[0, 1, 1], [0, 2, 0]]
+partial_format_to_seed_space(partials)
+
+# output
+
+2-element Vector{Vector{Int64}}:
+ [1, 1]
+ [2, 0]</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.adolc_format_to_seed_space" href="#ADOLC.adolc_format_to_seed_space"><code>ADOLC.adolc_format_to_seed_space</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">adolc_format_to_seed_space(partials::Vector{Vector{I_1}}, seed_idxs::Vector{I_2}) where {I_1 &lt;: Integer, I_2 &lt;: Integer}
+adolc_format_to_seed_space(partials::Vector{Vector{I}}) where I &lt;: Integer</code></pre><p>Same as <a href="#ADOLC.partial_format_to_seed_space"><code>partial_format_to_seed_space</code></a> but with <a href="../derivative_modes/#ADOLC-Format">ADOLC-Format</a>.</p><p><strong>Examples</strong></p><pre><code class="language-julia hljs">
+partials = [[3, 2], [2, 2]]
+seed_idxs = seed_idxs_adolc_format(partials)
+adolc_format_to_seed_space(partials, seed_idxs)
+
+# output
+
+2-element Vector{Vector{Int64}}:
+ [2, 1]
+ [1, 1]</code></pre><p>Without <code>seed_idxs</code></p><pre><code class="language-julia hljs">
+partials = [[3, 2], [2, 2]]
+seed_idxs = seed_idxs_adolc_format(partials)
+adolc_format_to_seed_space(partials, seed_idxs)
+
+# output
+
+2-element Vector{Vector{Int64}}:
+ [2, 1]
+ [1, 1]</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.create_independent" href="#ADOLC.create_independent"><code>ADOLC.create_independent</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">create_independent(x::Union{Cdouble, Vector{Cdouble}})</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.allocator" href="#ADOLC.allocator"><code>ADOLC.allocator</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">allocator(m::Integer, n::Integer, mode::Symbol, num_dir::Integer, num_weights::Integer)</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.jl_allocator" href="#ADOLC.jl_allocator"><code>ADOLC.jl_allocator</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">jl_allocator(m::Int64, n::Int64, mode::Symbol, num_dir::Int64, num_weights::Int64)</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.array_types.cxx_res_to_jl_res!" href="#ADOLC.array_types.cxx_res_to_jl_res!"><code>ADOLC.array_types.cxx_res_to_jl_res!</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">cxx_res_to_jl_res!(jl_res::AbstractVector{Cdouble}, cxx_res::CxxVector)
+cxx_res_to_jl_res!(jl_res::AbstractMatrix{Float64}, cxx_res::CxxMatrix)
+cxx_res_to_jl_res!(jl_res::AbstractArray{Float64, 3}, cxx_res::CxxTensor)</code></pre><p>Copies the entries of a <code>CxxVector</code>, <code>CxxMatrix</code> or <code>CxxTensor</code>  to a <code>AbstractVector{Cdouble}</code>, <code>AbstractMatrix{Cdouble}</code> or <code>AbstractArray{Cdouble, 3}</code>.</p></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.array_types.cxx_res_to_jl_res" href="#ADOLC.array_types.cxx_res_to_jl_res"><code>ADOLC.array_types.cxx_res_to_jl_res</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">cxx_res_to_jl_res(cxx_res::CxxVector) 
+cxx_res_to_jl_res(cxx_res::CxxMatrix)
+cxx_res_to_jl_res(cxx_res::CxxTensor)</code></pre><p>Creates a <code>Vector{Cdouble}</code>, <code>Matrix{Cdouble}</code> or <code>Array{Cdouble, 3}</code> and copies the values from the given input <code>CxxVector</code>, <code>CxxMatrix</code> or <code>CxxTensor</code> to it.</p></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.array_types.jl_res_to_cxx_res!" href="#ADOLC.array_types.jl_res_to_cxx_res!"><code>ADOLC.array_types.jl_res_to_cxx_res!</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">jl_res_to_cxx_res!(cxx_res::CxxVector, jl_res::AbstractVector{Cdouble}) 
+jl_res_to_cxx_res!(cxx_res::CxxMatrix, jl_res::AbstractMatrix{Cdouble})
+jl_res_to_cxx_res!(cxx_res::CxxTensor, jl_res::AbstractArray{Cdouble, 3})</code></pre><p>Copies the values of a <code>AbstractVector{Cdouble}</code>, <code>AbstractMatrix{Cdouble}</code> or <code>AbstractArray{Cdouble, 3}</code> to a corresponding <code>CxxVector</code>, <code>CxxMatrix</code> or <code>CxxTensor</code>.</p></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.array_types.jl_res_to_cxx_res" href="#ADOLC.array_types.jl_res_to_cxx_res"><code>ADOLC.array_types.jl_res_to_cxx_res</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">jl_res_to_cxx_res(jl_res::AbstractVector{Cdouble}) 
+jl_res_to_cxx_res(jl_res::AbstractMatrix{Cdouble})
+jl_res_to_cxx_res(jl_res::AbstractArray{Cdouble, 3})</code></pre><p>Creates a <code>CxxVector</code>, <code>CxxMatrix</code> or <code>CxxTensor</code> and copies the values from the given input <code>AbstractVector{Cdouble}</code>, <code>AbstractMatrix{Cdouble}</code> or <code>AbstractArray{Cdouble, 3}</code> to it.</p></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.array_types.CxxTensor" href="#ADOLC.array_types.CxxTensor"><code>ADOLC.array_types.CxxTensor</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia hljs">mutable struct CxxTensor &lt;: AbstractArray{Cdouble, 3}</code></pre><p>Wrapper for <code>CxxPtr{CxxPtr{CxxPtr{Cdouble}}}</code>, which is used as <code>double***</code> in C++.</p></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.array_types.CxxVector" href="#ADOLC.array_types.CxxVector"><code>ADOLC.array_types.CxxVector</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia hljs">mutable struct CxxVector &lt;: AbstractVector{Cdouble}</code></pre><p>Wrapper of a <code>double*</code> (<code>CxxPtr{Cdouble}</code>).</p></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.array_types.CxxMatrix" href="#ADOLC.array_types.CxxMatrix"><code>ADOLC.array_types.CxxMatrix</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia hljs">mutable struct CxxMatrix &lt;: AbstractMatrix{Cdouble}</code></pre><p>Wrapper for <code>CxxPtr{CxxPtr{Cdouble}}</code>, which is used as <code>double**</code> in C++.</p></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.init_abs_normal_form" href="#ADOLC.init_abs_normal_form"><code>ADOLC.init_abs_normal_form</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">init_abs_normal_form(
+    f, x::Union{Cdouble,Vector{Cdouble}}; tape_id::Integer=0, reuse_tape=false
+)</code></pre></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.univariate_tpp" href="#ADOLC.univariate_tpp"><code>ADOLC.univariate_tpp</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">univariate_tpp(
+    f,
+    x::Union{Cdouble,Vector{Cdouble}},
+    degree::Integer;
+    keep::Bool=false,
+    tape_id::Integer=0,
+    reuse_tape::Bool=false,
+)</code></pre><p>The driver propagates univariate Taylor polynomials through the given function <code>f</code> at the point  <code>x</code> up to <code>degree</code>. The <code>keep</code> flag is used to prepare the tape for subsequent reverse-mode computations on the Taylor polynomial. The <code>tape_id</code> specifies the identifier of the tape and the flag <code>reuse_tape</code> should  be used for suppressing the tape creation. More information is given in the guide: <a href="../guides/utpp/#Univariate-Taylor-Polynomial-Propagation">Univariate Taylor Polynomial Propagation</a>.</p></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section><section><div><pre><code class="language-julia hljs">univariate_tpp(
+    f,
+    x::Union{Cdouble,Vector{Cdouble}},
+    degree::Integer,
+    init_tp::CxxMatrix;
+    keep::Bool=false,
+    tape_id::Integer=0,
+    reuse_tape::Bool=false,
+)</code></pre><p>Version of the <a href="#ADOLC.univariate_tpp"><code>univariate_tpp</code></a> driver, which allows additional control over the initial Taylor polynomial.  More information is given in the guide: <a href="../guides/utpp/#Univariate-Taylor-Polynomial-Propagation">Univariate Taylor Polynomial Propagation</a>.</p></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="ADOLC.univariate_tpp!" href="#ADOLC.univariate_tpp!"><code>ADOLC.univariate_tpp!</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">univariate_tpp!(
+    res::CxxMatrix,
+    f,
+    x::Union{Cdouble,Vector{Cdouble}},
+    degree::Integer,
+    init_tp::CxxMatrix;
+    keep::Bool=false,
+    tape_id::Integer=0,
+    reuse_tape::Bool=false,
+)</code></pre><p>A version of the <a href="#ADOLC.univariate_tpp"><code>univariate_tpp</code></a> driver that allows a user to pass in a pre-allocated <a href="../guides/ww_cxx_mem/#Working-with-C-Memory">CxxMatrix</a>. More information is given in the guide: <a href="../guides/utpp/#Univariate-Taylor-Polynomial-Propagation">Univariate Taylor Polynomial Propagation</a>.</p></div><a class="docs-sourcelink" target="_blank" href="github.com/TimSiebert1/ADOLC.jl">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../derivative_modes/">« Derivative Modes</a><a class="docs-footer-nextpage" href="../wrapped_fcts/">Wrapped Functions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.5.0 on <span class="colophon-date" title="Monday 5 August 2024 13:33">Monday 5 August 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body><div data-docstringscollapsed="true"></div></html>
