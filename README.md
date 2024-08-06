@@ -46,7 +46,7 @@ res = derivative(f, x, partials)
  0.0  48.0  0.0
 ```
 
-In addition there is the possibility to compute univariate Taylor polynomials with the [`univariate_tpp`](@ref) driver:
+In addition, there is the possibility to compute univariate Taylor polynomials with the [`univariate_tpp`](https://timsiebert1.github.io/ADOLC.jl/stable/lib/guides/utpp/) driver:
 ```jl
 f(x) = sin(x[1]) + x[2]
 x = [pi / 2, 0.5]
@@ -58,7 +58,7 @@ utp = univariate_tpp(f, x, 2)
 1×3 CxxMatrix:
  1.5  1.0  -0.5
 ```
-More information can be found in the corresponding guides in the docs.
+More information can be found in the corresponding [guides](https://timsiebert1.github.io/ADOLC.jl/stable/lib/guides/seed_matrix/) in the docs.
 
 
 For advanced users, there is a [list](https://timsiebert1.github.io/ADOLC.jl/dev/lib/wrapped_fcts/) of all functions wrapped from [ADOL-C](https://github.com/coin-or/ADOL-C). 
