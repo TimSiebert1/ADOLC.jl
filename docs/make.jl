@@ -15,6 +15,7 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "Guides" => [
+            "Low Level Control" => "lib/guides/low_level_control.md",
             "Seed Matrix" => "lib/guides/seed_matrix.md",
             "Univariate Taylor Polynomial Propagation" => "lib/guides/utpp.md",
             "Tape Management" => "lib/guides/tape_management.md",
