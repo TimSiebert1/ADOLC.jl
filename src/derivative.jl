@@ -1486,6 +1486,7 @@ end
 """
     create_independent(x::Union{Cdouble, Vector{Cdouble}})
 
+Creates `Adouble{TbAlloc}` values corresponding to `x` and marks them as independent variables on the current active tape.
 """
 function create_independent(x)
     n = length(x)
@@ -1494,6 +1495,11 @@ function create_independent(x)
     return a
 end
 
+"""
+    dependent(b::Adouble{TbAlloc})
+
+Marks `b` as dependent variable on the current active tape.
+"""
 function dependent(b)
     m = length(b)
     y = m == 1 ? Cdouble(0.0) : Vector{Cdouble}(undef, m)
