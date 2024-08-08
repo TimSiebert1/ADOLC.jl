@@ -20,4 +20,5 @@ my_examples
 *.pdf
 
 local_only.jl
+local_test.jl
 Manifest.toml
