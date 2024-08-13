@@ -104,23 +104,22 @@ end
 function derivative(
     f::Function,
     x::Union{Cdouble,Vector{Cdouble}},
-    mode::Symbol,
-    active;
+    param::Union{Cdouble,Vector{Cdouble}},
+    mode::Symbol;
     dir=Vector{Cdouble}(),
     weights=Vector{Cdouble}(),
     tape_id::Integer=0,
     reuse_tape::Bool=false,
 )
-    @assert issorted(active) "The list of active varibles must be sorted ascendend!"
     if !reuse_tape
         if mode == :abs_normal
-            m, n, x = create_tape(f, x, active, tape_id; enableMinMaxUsingAbs=true)
+            m, n = create_tape(f, x, param, tape_id; enableMinMaxUsingAbs=true)
         else
-            m, n, x = create_tape(f, x, active, tape_id)
+            m, n = create_tape(f, x, param, tape_id)
         end
         reuse_tape = true
     else
-        @assert length(x) == length(active) "x must correspond to the selected active variables when reusing the tape!"
+        TbadoubleModule.set_param_vec(tape_id, length(param), param)
         m = TbadoubleModule.num_dependents(tape_id)
         n = TbadoubleModule.num_independents(tape_id)
     end
@@ -1529,7 +1528,7 @@ end
 function create_tape(
     f,
     x::Union{Cdouble,Vector{Cdouble}},
-    active,
+    param::Union{Cdouble,Vector{Cdouble}},
     tape_id::Integer;
     keep::Integer=0,
     enableMinMaxUsingAbs=false,
@@ -1539,33 +1538,13 @@ function create_tape(
     end
 
     trace_on(tape_id, keep)
-    a = create_independent(x, active)
-    b = f(a)
-    dependent(b)
-    trace_off()
-    return length(b), length(active), [x[i] for i in active]
-end
-
-function _create_tape(
-    f,
-    m::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    tape_id::Integer;
-    keep::Integer=0,
-    enableMinMaxUsingAbs=false,
-)
-    if enableMinMaxUsingAbs
-        TbadoubleModule.enableMinMaxUsingAbs()
-    end
-
-    trace_on(tape_id, keep)
-    a = create_independent(x)
-    b = m == 1 ? Adouble{TbAlloc}() : [Adouble{TbAlloc}() for _ in 1:m]
-    f(b, a)
+    a, a_param = create_independent(x, param)
+    b = f(a, a_param)
     dependent(b)
     trace_off()
     return length(b), length(x)
 end
+
 """
     create_independent(x::Union{Cdouble, Vector{Cdouble}})
 
@@ -1578,22 +1557,15 @@ function create_independent(x)
 end
 
 """
-    create_independent(x::Vector{Cdouble}, active) 
+    create_independent(x::Union{Cdouble, Vector{Cdouble}}, param::Union{Cdouble,Vector{Cdouble}}) 
 
 The entries in `active` describes the indices of the entries of `x` that are selected as
 the independant variables.  
 """
-function create_independent(x::Vector{Cdouble}, active)
-    a = Vector{Adouble{TbAlloc}}(undef, length(x))
-    for i in eachindex(x)
-        if i in active
-            a[i] = Adouble{TbAlloc}(x[i], adouble=true)
-            a[i] << x[i]
-        else
-            a[i] = Adouble{TbAlloc}(x[i])
-        end
-    end
-    return a
+function create_independent(x::Union{Cdouble, Vector{Cdouble}}, param::Union{Cdouble,Vector{Cdouble}})
+    a = create_independent(x)
+    a_param = mkparam(param)
+    return a, a_param
 end
 
 function dependent(b)
