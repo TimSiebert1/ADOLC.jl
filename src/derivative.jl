@@ -502,7 +502,6 @@ function derivative!(
     end
 end
 
-
 """
     derivative!(
         res,
@@ -530,7 +529,7 @@ tape_id = 0
 m = n = 1
 res = CxxVector(1)
 derivative!(res, f, m, n, x, param, :jac, tape_id=tape_id)
-## res[1] = 6.0
+##res[1] = 6.0
 
 param = -4.5
 derivative!(res, f, m, n, x, param, :jac, reuse_tape=true, tape_id=tape_id)
@@ -543,7 +542,6 @@ res
 ```
 
 """
-
 function derivative!(
     res,
     f::Function,
@@ -1669,6 +1667,7 @@ end
 """
     create_independent(x::Union{Cdouble, Vector{Cdouble}})
 
+Marks the argument `x` as independent variable on the tape and create differentiable `Adouble{TbAlloc}` for `x`.
 """
 function create_independent(x)
     n = length(x)
@@ -1680,8 +1679,8 @@ end
 """
     create_independent(x::Union{Cdouble, Vector{Cdouble}}, param::Union{Cdouble,Vector{Cdouble}}) 
 
-The entries in `active` describes the indices of the entries of `x` that are selected as
-the independant variables.  
+The argument `x` is stored as differentiable `Adouble{TbAlloc}` and marked as independent. `param` is
+marked as parameters on the tape to be changeble without retaping.
 """
 function create_independent(x::Union{Cdouble, Vector{Cdouble}}, param::Union{Cdouble,Vector{Cdouble}})
     a = create_independent(x)
@@ -1689,6 +1688,11 @@ function create_independent(x::Union{Cdouble, Vector{Cdouble}}, param::Union{Cdo
     return a, a_param
 end
 
+"""
+    dependent(b::Union{Adouble{TbAlloc}, Vector{Adouble{TbAlloc}}})
+    
+Marks a differentiable `Adouble{TbAlloc}` `b` as dependent.
+"""
 function dependent(b)
     m = length(b)
     y = m == 1 ? Cdouble(0.0) : Vector{Cdouble}(undef, m)
