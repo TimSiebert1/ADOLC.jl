@@ -6,7 +6,6 @@ using CxxWrap
 function __init__()
     @initcxx
 end
-
 # C++ version of adouble
 export TbadoubleCxx #, getValue
 

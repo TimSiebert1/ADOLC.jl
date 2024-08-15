@@ -85,7 +85,6 @@ function derivative(
     else
         allocator(m, n, mode, size(dir, 2)[1], size(weights, 1)[1])
     end
-    # allocator creates tape in case of :abs_normal
     derivative!(
         res,
         f,
@@ -98,7 +97,90 @@ function derivative(
         tape_id=mode === :abs_normal ? res.tape_id : tape_id,
         reuse_tape=mode === :abs_normal ? true : reuse_tape,
     )
+    return res
+end
 
+"""
+    derivative(
+        f::Function,
+        x::Union{Cdouble,Vector{Cdouble}},
+        param::Union{Cdouble,Vector{Cdouble}},
+        mode::Symbol;
+        dir=Vector{Cdouble}(),
+        weights=Vector{Cdouble}(),
+        tape_id::Integer=0,
+        reuse_tape::Bool=false,
+    )
+This version of the [`derivative`](@ref) driver allows the definition of function parameters (`param`), which can be changed 
+in subsequent calls without retaping. The given function `f` is expected to have the shape `f(x, param)`.
+
+# Example:
+```jldoctest
+function f(x, param)
+    x1 = x[1] * param[1]
+    return [x1*x[2], x[2]] 
+end
+x = [-1.0, 1/2]
+param = 3.0
+dir = [2.0, -2.0]
+res = derivative(f, x, param, :jac_vec, dir=dir, tape_id=1)
+
+##res[1] == 9.0
+##res[2] == -2.0
+
+param = -3.0
+x = [1.0, 1.0]
+res = derivative(f, x, param, :jac_vec, dir=dir, tape_id=1, reuse_tape=true)
+res 
+
+# output
+
+2-element CxxVector:
+  0.0
+ -2.0
+```
+
+"""
+function derivative(
+    f::Function,
+    x::Union{Cdouble,Vector{Cdouble}},
+    param::Union{Cdouble,Vector{Cdouble}},
+    mode::Symbol;
+    dir=Vector{Cdouble}(),
+    weights=Vector{Cdouble}(),
+    tape_id::Integer=0,
+    reuse_tape::Bool=false,
+)
+    if !reuse_tape
+        if mode == :abs_normal
+            m, n = create_tape(f, x, param, tape_id; enableMinMaxUsingAbs=true)
+        else
+            m, n = create_tape(f, x, param, tape_id)
+        end
+        reuse_tape = true
+    else
+        TbadoubleModule.set_param_vec(tape_id, length(param), param)
+        m = TbadoubleModule.num_dependents(tape_id)
+        n = TbadoubleModule.num_independents(tape_id)
+    end
+
+    res = if mode === :abs_normal
+        init_abs_normal_form(f, x; tape_id=tape_id, reuse_tape=reuse_tape)
+    else
+        allocator(m, n, mode, size(dir, 2)[1], size(weights, 1)[1])
+    end
+    derivative!(
+        res,
+        f,
+        m,
+        n,
+        x,
+        mode;
+        dir=dir,
+        weights=weights,
+        tape_id=mode === :abs_normal ? res.tape_id : tape_id,
+        reuse_tape=mode === :abs_normal ? true : reuse_tape,
+    )
     return res
 end
 
@@ -419,6 +501,87 @@ function derivative!(
         throw(ArgumentError("mode $mode not implemented!"))
     end
 end
+
+
+"""
+    derivative!(
+        res,
+        f::Function,
+        x::Union{Cdouble,Vector{Cdouble}},
+        param::Union{Cdouble,Vector{Cdouble}},
+        mode::Symbol;
+        dir=Vector{Cdouble}(),
+        weights=Vector{Cdouble}(),
+        tape_id::Integer=0,
+        reuse_tape::Bool=false,
+    )
+This version of the [`derivative!`](@ref) driver allows the definition of function parameters (`param`), which can be changed 
+in subsequent calls without retaping. The given function `f` is expected to have the shape `f(x, param)`.
+
+# Example:
+```jldoctest
+function f(x, param)
+    a = x*param
+    return a^2
+end
+x = 3.0
+param = -1.0
+tape_id = 0
+m = n = 1
+res = CxxVector(1)
+derivative!(res, f, m, n, x, param, :jac, tape_id=tape_id)
+## res[1] = 6.0
+
+param = -4.5
+derivative!(res, f, m, n, x, param, :jac, reuse_tape=true, tape_id=tape_id)
+res
+
+# output 
+
+1-element CxxVector:
+ 121.5
+```
+
+"""
+
+function derivative!(
+    res,
+    f::Function,
+    m::Integer,
+    n::Integer,
+    x::Union{Cdouble,Vector{Cdouble}},
+    param::Union{Cdouble,Vector{Cdouble}},
+    mode::Symbol;
+    dir=Vector{Cdouble}(),
+    weights=Vector{Cdouble}(),
+    tape_id::Integer=0,
+    reuse_tape::Bool=false,
+)
+    if !reuse_tape
+        if mode == :abs_normal
+            create_tape(f, x, param, tape_id; enableMinMaxUsingAbs=true)
+        else
+            create_tape(f, x, param, tape_id)
+        end
+        reuse_tape = true
+    else
+        TbadoubleModule.set_param_vec(tape_id, length(param), param)
+    end
+
+    derivative!(
+        res,
+        f,
+        m,
+        n,
+        x,
+        mode;
+        dir=dir,
+        weights=weights,
+        tape_id=tape_id,
+        reuse_tape=reuse_tape,
+    )
+end
+
 
 """
     derivative!(
@@ -1483,6 +1646,26 @@ function create_tape(
     return length(b), length(x)
 end
 
+function create_tape(
+    f,
+    x::Union{Cdouble,Vector{Cdouble}},
+    param::Union{Cdouble,Vector{Cdouble}},
+    tape_id::Integer;
+    keep::Integer=0,
+    enableMinMaxUsingAbs=false,
+)
+    if enableMinMaxUsingAbs
+        TbadoubleModule.enableMinMaxUsingAbs()
+    end
+
+    trace_on(tape_id, keep)
+    a, a_param = create_independent(x, param)
+    b = f(a, a_param)
+    dependent(b)
+    trace_off()
+    return length(b), length(x)
+end
+
 """
     create_independent(x::Union{Cdouble, Vector{Cdouble}})
 
@@ -1492,6 +1675,18 @@ function create_independent(x)
     a = n == 1 ? Adouble{TbAlloc}() : [Adouble{TbAlloc}() for _ in 1:n]
     a << x
     return a
+end
+
+"""
+    create_independent(x::Union{Cdouble, Vector{Cdouble}}, param::Union{Cdouble,Vector{Cdouble}}) 
+
+The entries in `active` describes the indices of the entries of `x` that are selected as
+the independant variables.  
+"""
+function create_independent(x::Union{Cdouble, Vector{Cdouble}}, param::Union{Cdouble,Vector{Cdouble}})
+    a = create_independent(x)
+    a_param = mkparam(param)
+    return a, a_param
 end
 
 function dependent(b)
