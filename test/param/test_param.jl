@@ -52,6 +52,62 @@ end
     @test res[2] == -2.0
 end
 
+@testset "test4" begin()
+    function f(x, param)
+        return abs(abs(x[1] - param)^2)
+    end
+
+
+    x = -1.0
+    param = 2.0
+    res = derivative(f, x, param, :abs_normal, tape_id=1)
+
+    @test res.tape_id == 1
+    @test res.m == 1
+    @test res.n == 1
+    @test res.num_switches == 2
+    @test res.x[1] == -1.0
+    @test res.y[1] == 9.0
+    @test res.z[1] == -3.0
+    @test res.z[2] == 9.0
+    @test res.cz[1] == -3.0
+    @test res.cz[2] == -9.0
+    @test res.cy[1] == 0.0
+    @test res.Y[1, 1] == 0.0
+    @test res.J[1, 1] == 0.0 
+    @test res.J[1, 2] == 1.0
+    @test res.Z[1, 1] == 1.0
+    @test res.Z[2, 1] == 0.0
+    @test res.L[1, 1] == 0.0
+    @test res.L[1, 2] == 0.0
+    @test res.L[2, 1] == 6.0
+    @test res.L[2, 2] == 0.0
+
+    param = -2.0
+    res = derivative(f, x, param, :abs_normal, reuse_tape=true, tape_id=res.tape_id)
+
+    @test res.tape_id == 1
+    @test res.m == 1
+    @test res.n == 1
+    @test res.num_switches == 2
+    @test res.x[1] == -1.0
+    @test res.y[1] == 1.0
+    @test res.z[1] == 1.0
+    @test res.z[2] == 1.0
+    @test res.cz[1] == 1.0
+    @test res.cz[2] == -1.0
+    @test res.cy[1] == 0.0
+    @test res.Y[1, 1] == 0.0
+    @test res.J[1, 1] == 0.0 
+    @test res.J[1, 2] == 1.0
+    @test res.Z[1, 1] == 1.0
+    @test res.Z[2, 1] == 0.0
+    @test res.L[1, 1] == 0.0
+    @test res.L[1, 2] == 0.0
+    @test res.L[2, 1] == 2.0
+    @test res.L[2, 2] == 0.0
+
+end
 
 @testset "test1_mutating" begin()
     function f(x, param)
@@ -111,4 +167,64 @@ end
 
     @test res[1] == 0.0
     @test res[2] == -2.0
+end
+
+
+
+@testset "test4_mutating" begin()
+    function f(x, param)
+        return abs(abs(x[1] - param)^2)
+    end
+
+
+    x = -1.0
+    param = 2.0
+    res = init_abs_normal_form(f, x, param) 
+    derivative!(res, f, 1, 1, x, param, :abs_normal, tape_id=res.tape_id)
+
+    @test res.tape_id == 0
+    @test res.m == 1
+    @test res.n == 1
+    @test res.num_switches == 2
+    @test res.x[1] == -1.0
+    @test res.y[1] == 9.0
+    @test res.z[1] == -3.0
+    @test res.z[2] == 9.0
+    @test res.cz[1] == -3.0
+    @test res.cz[2] == -9.0
+    @test res.cy[1] == 0.0
+    @test res.Y[1, 1] == 0.0
+    @test res.J[1, 1] == 0.0 
+    @test res.J[1, 2] == 1.0
+    @test res.Z[1, 1] == 1.0
+    @test res.Z[2, 1] == 0.0
+    @test res.L[1, 1] == 0.0
+    @test res.L[1, 2] == 0.0
+    @test res.L[2, 1] == 6.0
+    @test res.L[2, 2] == 0.0
+
+    param = -2.0
+    derivative!(res, f, 1, 1, x, param, :abs_normal, tape_id=res.tape_id, reuse_tape=true)
+
+    @test res.tape_id == 0
+    @test res.m == 1
+    @test res.n == 1
+    @test res.num_switches == 2
+    @test res.x[1] == -1.0
+    @test res.y[1] == 1.0
+    @test res.z[1] == 1.0
+    @test res.z[2] == 1.0
+    @test res.cz[1] == 1.0
+    @test res.cz[2] == -1.0
+    @test res.cy[1] == 0.0
+    @test res.Y[1, 1] == 0.0
+    @test res.J[1, 1] == 0.0 
+    @test res.J[1, 2] == 1.0
+    @test res.Z[1, 1] == 1.0
+    @test res.Z[2, 1] == 0.0
+    @test res.L[1, 1] == 0.0
+    @test res.L[1, 2] == 0.0
+    @test res.L[2, 1] == 2.0
+    @test res.L[2, 2] == 0.0
+
 end
