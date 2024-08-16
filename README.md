@@ -47,7 +47,7 @@ res = derivative(f, x, partials)
 ```
 You can also define parameters (`param`) not used for differentiation, which can be changed 
 in subsequent calls without retaping. The given function `f` is expected to have the shape `f(x, param)`:
-```jldoctest
+```jl
 function f(x, param)
     x1 = x[1] * param[1]
     return [x1*x[2], x[2]] 
@@ -57,8 +57,8 @@ param = 3.0
 dir = [2.0, -2.0]
 res = derivative(f, x, param, :jac_vec, dir=dir, tape_id=1)
 
-##res[1] == 9.0
-##res[2] == -2.0
+res[1] == 9.0
+res[2] == -2.0
 
 param = -3.0
 x = [1.0, 1.0]
