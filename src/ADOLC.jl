@@ -49,6 +49,7 @@ export derivative,
     jl_res_to_cxx_res,
     jl_res_to_cxx_res!,
     init_abs_normal_form
+
 export erf, eps
 
 export gradient
