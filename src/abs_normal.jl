@@ -27,16 +27,16 @@ mutable struct AbsNormalForm
     Z::CxxMatrix
     L::CxxMatrix
 
-    function AbsNormalForm(tape_id::Int64, m, n, x::Vector{Cdouble}, y::Cdouble) 
-        AbsNormalForm(tape_id, m, n, x, [y])
+    function AbsNormalForm(tape_id::Int64, m, n, x::Vector{Cdouble}, y::Cdouble)
+        return AbsNormalForm(tape_id, m, n, x, [y])
     end
 
-    function AbsNormalForm(tape_id::Int64, m, n, x::Cdouble, y::Vector{Cdouble}) 
-        AbsNormalForm(tape_id, m, n, [x], y)
+    function AbsNormalForm(tape_id::Int64, m, n, x::Cdouble, y::Vector{Cdouble})
+        return AbsNormalForm(tape_id, m, n, [x], y)
     end
 
-    function AbsNormalForm(tape_id::Int64, m, n, x::Cdouble, y::Cdouble) 
-        AbsNormalForm(tape_id, m, n, [x], [y])
+    function AbsNormalForm(tape_id::Int64, m, n, x::Cdouble, y::Cdouble)
+        return AbsNormalForm(tape_id, m, n, [x], [y])
     end
     function AbsNormalForm(tape_id::Int64, m, n, x::Vector{Cdouble}, y::Vector{Cdouble})
         num_switches = TbadoubleModule.get_num_switches(tape_id)
@@ -129,7 +129,11 @@ end
     )
 """
 function init_abs_normal_form(
-    f, x::Union{Cdouble,Vector{Cdouble}}, param::Union{Cdouble, Vector{Cdouble}}; tape_id::Integer=0, reuse_tape=false
+    f,
+    x::Union{Cdouble,Vector{Cdouble}},
+    param::Union{Cdouble,Vector{Cdouble}};
+    tape_id::Integer=0,
+    reuse_tape=false,
 )
     if !reuse_tape
         m, n = create_tape(f, x, param, tape_id; enableMinMaxUsingAbs=true)

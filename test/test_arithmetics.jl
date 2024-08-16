@@ -46,7 +46,7 @@ comps = [>=, >, <=, <, ==]
         a = t(2.0; adouble=true)
 
         op = ^
-        @test getValue(op(a,-2.0)) == op(2.0, -2.0)
+        @test getValue(op(a, -2.0)) == op(2.0, -2.0)
         @test getValue(op(a, a)) == op(getValue(a), getValue(a))
         a = t(2.0; adouble=false)
         @test getValue(op(a, -2.0)) == op(2.0, -2.0)

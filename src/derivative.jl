@@ -357,7 +357,17 @@ function derivative(
         n = TbadoubleModule.num_independents(tape_id)
     end
     res = CxxMatrix(m, binomial(n + degree, degree))
-    derivative!(res, f, m, n, x, degree, CxxMatrix(create_cxx_identity(n, n), n, n), tape_id=tape_id, reuse_tape=reuse_tape)
+    derivative!(
+        res,
+        f,
+        m,
+        n,
+        x,
+        degree,
+        CxxMatrix(create_cxx_identity(n, n), n, n);
+        tape_id=tape_id,
+        reuse_tape=reuse_tape,
+    )
     return res
 end
 
@@ -388,10 +398,9 @@ function derivative(
     end
     num_seeds = size(seed, 2)
     res = CxxMatrix(m, binomial(num_seeds + degree, degree))
-    derivative!(res, f, m, n, x, degree, seed, tape_id=tape_id, reuse_tape=reuse_tape)
+    derivative!(res, f, m, n, x, degree, seed; tape_id=tape_id, reuse_tape=reuse_tape)
     return res
 end
-
 
 """
     derivative!(
@@ -566,7 +575,7 @@ function derivative!(
         TbadoubleModule.set_param_vec(tape_id, length(param), param)
     end
 
-    derivative!(
+    return derivative!(
         res,
         f,
         m,
@@ -579,7 +588,6 @@ function derivative!(
         reuse_tape=reuse_tape,
     )
 end
-
 
 """
     derivative!(
@@ -1013,23 +1021,12 @@ function check_resue_abs_normal_problem(tape_id::Integer, abs_normal_problem::Ab
     return true
 end
 
-
-function abs_normal!(
-    abs_normal_problem,
-    f,
-    x::Cdouble,
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
+function abs_normal!(abs_normal_problem, f, x::Cdouble, tape_id::Integer, reuse_tape::Bool)
     return abs_normal!(abs_normal_problem, f, [x], tape_id, reuse_tape)
 end
 
 function abs_normal!(
-    abs_normal_problem,
-    f,
-    x::Vector{Cdouble},
-    tape_id::Integer,
-    reuse_tape::Bool,
+    abs_normal_problem, f, x::Vector{Cdouble}, tape_id::Integer, reuse_tape::Bool
 )
     if !reuse_tape
         _ = create_tape(f, x, tape_id; enableMinMaxUsingAbs=true)
@@ -1695,7 +1692,9 @@ end
 The argument `x` is stored as differentiable `Adouble{TbAlloc}` and marked as independent. `param` is
 marked as parameters on the tape to be changeble without retaping.
 """
-function create_independent(x::Union{Cdouble, Vector{Cdouble}}, param::Union{Cdouble,Vector{Cdouble}})
+function create_independent(
+    x::Union{Cdouble,Vector{Cdouble}}, param::Union{Cdouble,Vector{Cdouble}}
+)
     a = create_independent(x)
     a_param = mkparam(param)
     return a, a_param

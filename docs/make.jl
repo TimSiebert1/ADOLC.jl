@@ -20,7 +20,7 @@ makedocs(;
             "Tape Management" => "lib/guides/tape_management.md",
             "Working with C++ Memory" => "lib/guides/ww_cxx_mem.md",
             "Performance Tips" => "lib/guides/performance_tips.md",
-            ],
+        ],
         "Derivative Modes" => "lib/derivative_modes.md",
         "Reference" => "lib/reference.md",
         "Wrapped Functions" => "lib/wrapped_fcts.md",

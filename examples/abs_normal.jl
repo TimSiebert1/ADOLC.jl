@@ -1,6 +1,5 @@
 using ADOLC
 
-
 function f(x)
     return (
         max(-x[1] - x[2], -x[1] - x[2] + x[1]^2 + x[2]^2 - 1) +
@@ -31,4 +30,6 @@ using Test
 @test abs_normal_form.L[2, 2] == 0.0
 
 x_new = [-0.500000, -0.500000, -0.111110]
-abs_normal_form = derivative(f, x, :abs_normal, tape_id=abs_normal_form.tape_id, reuse_tape=true)
+abs_normal_form = derivative(
+    f, x, :abs_normal; tape_id=abs_normal_form.tape_id, reuse_tape=true
+)

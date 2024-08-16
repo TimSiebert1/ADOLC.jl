@@ -83,7 +83,7 @@ end
 #--------------- Operation: ^ -------------------
 
 function Base.:^(a::Adouble{T}, b::Adouble{T}) where {T<:Union{TbAlloc,TlAlloc}}
-    return Adouble{T}(a.val ^ b.val)
+    return Adouble{T}(a.val^b.val)
 end
 
 #--------------- Operation: >= -------------------
@@ -167,7 +167,7 @@ function Base.ldexp(a::Adouble{T}, n::Integer) where {T<:Union{TbAlloc,TlAlloc}}
     return Adouble{T}(ldexp(a.val, n))
 end
 function Base.frexp(a::Adouble{T}, n::Cint) where {T<:Union{TbAlloc,TlAlloc}}
-    return Adouble{T}(frexp(a.val, n), adouble=true)
+    return Adouble{T}(frexp(a.val, n); adouble=true)
 end
 
 erf(a::Adouble{TbAlloc}) = Adouble{TbAlloc}(TbadoubleModule.erf(a.val))
