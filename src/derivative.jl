@@ -1013,10 +1013,21 @@ function check_resue_abs_normal_problem(tape_id::Integer, abs_normal_problem::Ab
     return true
 end
 
+
 function abs_normal!(
     abs_normal_problem,
     f,
-    x::Union{Cdouble,Vector{Cdouble}},
+    x::Cdouble,
+    tape_id::Integer,
+    reuse_tape::Bool,
+)
+    return abs_normal!(abs_normal_problem, f, [x], tape_id, reuse_tape)
+end
+
+function abs_normal!(
+    abs_normal_problem,
+    f,
+    x::Vector{Cdouble},
     tape_id::Integer,
     reuse_tape::Bool,
 )
