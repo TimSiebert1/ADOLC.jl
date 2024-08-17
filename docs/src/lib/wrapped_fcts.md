@@ -79,7 +79,7 @@
     <=
     ==
 
-## Unary Functions
+## Basic Operations
 
     abs
     sqrt
