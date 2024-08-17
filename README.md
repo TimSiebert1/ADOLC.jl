@@ -83,7 +83,7 @@ utp = univariate_tpp(f, x, 2)
 1×3 CxxMatrix:
  1.5  1.0  -0.5
 ```
-More information can be found in the corresponding [guides](https://timsiebert1.github.io/ADOLC.jl/stable/lib/guides/seed_matrix/) in the docs.
+More information can be found in the [guides](https://timsiebert1.github.io/ADOLC.jl/stable/lib/guides/seed_matrix/) in the docs.
 
 
 For advanced users, there is a [list](https://timsiebert1.github.io/ADOLC.jl/dev/lib/wrapped_fcts/) of all functions wrapped from [ADOL-C](https://github.com/coin-or/ADOL-C). 
