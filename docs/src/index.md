@@ -78,7 +78,7 @@ res
 ```
 
 In addition, there is the possibility to compute univariate Taylor polynomials with the [`univariate_tpp`](@ref) driver:
-```jl
+```jldoctest
 f(x) = sin(x[1]) + x[2]
 x = [pi / 2, 0.5]
 d = 2
