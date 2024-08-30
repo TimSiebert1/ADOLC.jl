@@ -402,6 +402,32 @@ function derivative(
     return res
 end
 
+function function_and_derivative_value!(
+    res::Vector,
+    f::Function,
+    m::Integer,
+    n::Integer,
+    x::Union{Cdouble,Vector{Cdouble}},
+    mode::Symbol;
+    dir=Vector{Cdouble}(),
+    weights=Vector{Cdouble}(),
+    tape_id::Integer=0,
+    reuse_tape::Bool=false,
+)
+    return derivative!(
+        res,
+        f,
+        m,
+        n,
+        x,
+        mode;
+        dir=dir,
+        weights=weights,
+        tape_id=tape_id,
+        reuse_tape=reuse_tape,
+    )
+end
+
 """
     derivative!(
         res,
@@ -790,7 +816,8 @@ function jac!(
     reuse_tape::Bool,
 )
     if m == 1
-        gradient!(res, f, n, x, tape_id, reuse_tape)
+        cxx_weights = CxxVector([1.0])
+        fos_reverse!(res, f, m, n, x, cxx_weights, tape_id, reuse_tape)
     else
         if n / 2 < m
             tape_less_forward!(res, f, n, x)
@@ -801,27 +828,13 @@ function jac!(
     end
 end
 
-function gradient!(
-    res,
-    f,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    if !reuse_tape
-        create_tape(f, x, tape_id)
-    end
-    return TbadoubleModule.gradient(tape_id, n, x, res.data)
-end
-
-function gradient!(res, n::Integer, a::Adouble{TlAlloc})
+function jac!(res, n::Integer, a::Adouble{TlAlloc})
     for i in 1:n
         res[i] = getADValue(a, i)
     end
 end
 
-function gradient!(res, n::Integer, a::Vector{Adouble{TlAlloc}})
+function jac!(res, n::Integer, a::Vector{Adouble{TlAlloc}})
     for i in eachindex(a)
         for j in 1:n
             res[i, j] = getADValue(a[i], j)
@@ -855,7 +868,14 @@ function tape_less_forward!(
     res, f, n::Integer, a::Union{Adouble{TlAlloc},Vector{Adouble{TlAlloc}}}
 )
     b = f(a)
-    return gradient!(res, n, b)
+    return jac!(res, n, b)
+end
+
+function tape_less_forward!(
+    res::Vector, f, n::Integer, a::Union{Adouble{TlAlloc},Vector{Adouble{TlAlloc}}}
+)
+    res[1] = f(a)
+    return jac!(res[2], n, res[1])
 end
 
 function fos_reverse!(
@@ -871,9 +891,29 @@ function fos_reverse!(
     if !reuse_tape
         create_tape(f, x, tape_id; keep=1)
     else
+        x = isa(x, Number) ? [x] : x
         TbadoubleModule.zos_forward(tape_id, m, n, 1, x, Vector{Cdouble}(undef, m))
     end
     return TbadoubleModule.fos_reverse(tape_id, m, n, weights, res.data)
+end
+
+function fos_reverse!(
+    res::Vector,
+    f,
+    m::Integer,
+    n::Integer,
+    x::Union{Cdouble,Vector{Cdouble}},
+    weights::Vector{Cdouble},
+    tape_id::Integer,
+    reuse_tape,
+)
+    if !reuse_tape
+        create_tape!(res[1], f, x, tape_id; keep=1)
+    else
+        x = isa(x, Number) ? [x] : x
+        TbadoubleModule.zos_forward(tape_id, m, n, 1, x, res[1])
+    end
+    return TbadoubleModule.fos_reverse(tape_id, m, n, weights, res[2].data)
 end
 
 function fos_reverse!(
@@ -889,9 +929,29 @@ function fos_reverse!(
     if !reuse_tape
         create_tape(f, x, tape_id; keep=1)
     else
+        x = isa(x, Number) ? [x] : x
         TbadoubleModule.zos_forward(tape_id, m, n, 1, x, Vector{Cdouble}(undef, m))
     end
     return TbadoubleModule.fos_reverse(tape_id, m, n, weights.data, res.data)
+end
+
+function fos_reverse!(
+    res::Vector,
+    f,
+    m::Integer,
+    n::Integer,
+    x::Union{Cdouble,Vector{Cdouble}},
+    weights::CxxVector,
+    tape_id::Integer,
+    reuse_tape,
+)
+    if !reuse_tape
+        create_tape!(res[1], f, x, tape_id; keep=1)
+    else
+        x = isa(x, Number) ? [x] : x
+        TbadoubleModule.zos_forward(tape_id, m, n, 1, x, res[1])
+    end
+    return TbadoubleModule.fos_reverse(tape_id, m, n, weights.data, res[2].data)
 end
 
 function fov_reverse!(
@@ -923,8 +983,27 @@ function fov_reverse!(
     else
         TbadoubleModule.zos_forward(tape_id, m, n, 1, x, Vector{Cdouble}(undef, m))
     end
-
     return TbadoubleModule.fov_reverse(tape_id, m, n, weights.dim1, weights.data, res.data)
+end
+
+function fov_reverse!(
+    res::Vector,
+    f,
+    m::Integer,
+    n::Integer,
+    x::Union{Cdouble,Vector{Cdouble}},
+    weights::CxxMatrix,
+    tape_id::Integer,
+    reuse_tape::Bool,
+)
+    if !reuse_tape
+        create_tape(f, x, tape_id; keep=1)
+    else
+        TbadoubleModule.zos_forward(tape_id, m, n, 1, x, res[1])
+    end
+    return TbadoubleModule.fov_reverse(
+        tape_id, m, n, weights.dim1, weights.data, res[2].data
+    )
 end
 
 function fos_forward!(
@@ -1652,6 +1731,26 @@ function create_tape(
     return length(b), length(x)
 end
 
+function create_tape!(
+    func_value,
+    f,
+    x::Union{Cdouble,Vector{Cdouble}},
+    tape_id::Integer;
+    keep::Integer=0,
+    enableMinMaxUsingAbs=false,
+)
+    if enableMinMaxUsingAbs
+        TbadoubleModule.enableMinMaxUsingAbs()
+    end
+
+    trace_on(tape_id, keep)
+    a = create_independent(x)
+    b = f(a)
+    dependent(b, func_value)
+    trace_off()
+
+    return length(b), length(x)
+end
 function create_tape(
     f,
     x::Union{Cdouble,Vector{Cdouble}},
@@ -1709,4 +1808,8 @@ function dependent(b)
     m = length(b)
     y = m == 1 ? Cdouble(0.0) : Vector{Cdouble}(undef, m)
     return b >> y
+end
+
+function dependent(b, func_value)
+    return b >> func_value
 end

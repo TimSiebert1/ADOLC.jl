@@ -38,6 +38,7 @@ export abs_normal!, AbsNormalForm
 
 export derivative,
     derivative!,
+    function_and_derivative_value!,
     univariate_tpp!,
     univariate_tpp,
     allocator,
