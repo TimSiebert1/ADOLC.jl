@@ -11,11 +11,18 @@ function Base.:>>(b::Vector{Adouble{TbAlloc}}, y::Vector{Cdouble})
     @assert length(b) == length(y)
     for i in eachindex(y)
         b[i].val >> y[i]
+        y[i] = TbadoubleModule.getValue(b[i].val)
     end
     return y
 end
 function Base.:>>(b::Adouble{TbAlloc}, y::Cdouble)
-    return b.val >> y
+    b.val >> y
+    return y = TbadoubleModule.getValue(b.val)
+end
+function Base.:>>(b::Adouble{TbAlloc}, y::Vector{Cdouble})
+    @assert(length(y) == 1)
+    b.val >> y[1]
+    return y[1] = TbadoubleModule.getValue(b.val)
 end
 
 #--------------- Operation: * -------------------
