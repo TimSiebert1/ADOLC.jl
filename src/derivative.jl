@@ -433,7 +433,7 @@ function_and_derivative_value!(res, f, 1, 1, float(π), :jac)
 res 
 # output
 
-1-element CxxVector:
+2-element Vector{AbstractVector{Float64}}:
  [1.2246467991473532e-16]
  [-1.0]
 ```
