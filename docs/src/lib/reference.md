@@ -7,6 +7,7 @@ CollapsedDocStrings = true
 ```@docs
 ADOLC.derivative
 ADOLC.derivative!
+ADOLC.function_and_derivative_value!
 ADOLC.tensor_address
 ADOLC.partial_to_adolc_format
 ADOLC.partial_to_adolc_format!

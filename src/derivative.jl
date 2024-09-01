@@ -402,6 +402,42 @@ function derivative(
     return res
 end
 
+"""
+    function_and_derivative_value!(
+        res::Vector,
+        f::Function,
+        m::Integer,
+        n::Integer,
+        x::Union{Cdouble,Vector{Cdouble}},
+        mode::Symbol;
+        dir=Vector{Cdouble}(),
+        weights=Vector{Cdouble}(),
+        tape_id::Integer=0,
+        reuse_tape::Bool=false,
+    )
+Variant of the [derivative!](@ref) function, which stores the value of `f` at `x` in the first entry of `res`. The second entry 
+stores the derivatives.
+
+!!! note
+    
+    Currently, only first-order derivatives are supported!
+
+# Example
+```jldoctest
+
+f(x) = sin(x)
+jac_val = CxxVector([0.0])
+func_val = [0.0]
+res = [func_val, jac_val]
+function_and_derivative_value!(res, f, 1, 1, float(π), :jac)
+res 
+# output
+
+1-element CxxVector:
+ [1.2246467991473532e-16]
+ [-1.0]
+```
+"""
 function function_and_derivative_value!(
     res::Vector,
     f::Function,
@@ -414,6 +450,7 @@ function function_and_derivative_value!(
     tape_id::Integer=0,
     reuse_tape::Bool=false,
 )
+
     return derivative!(
         res,
         f,
