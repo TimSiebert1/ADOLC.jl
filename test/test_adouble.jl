@@ -1,57 +1,48 @@
 
-@testset "Adouble" begin
-    for t in [TbAlloc, TlAlloc]
-        A = Adouble{t}()
-        @test typeof(A.val) == t
-        @test typeof(A) == Adouble{t}
+@testset "adouble" begin
+    ()
+    a = ccall((:create_tb_adouble, ADOLC_JLL_PATH), TapeBasedAD, (Cdouble,), 3.0)
+    @test get_value(Adouble{TapeBasedAD}(a)) == 3.0
+    @test get_value(Adouble{TapeBasedAD}(3.0)) == 3.0
+    @test get_value(Adouble{TapeBasedAD}(3.0; is_diff=true)) == 3.0
 
-        a = t == TbAlloc ? ADOLC.TbadoubleCxx(3.0) : ADOLC.TladoubleCxx(3.0)
-        A = Adouble{t}(a)
+    @test get_value(Adouble{TapeBasedAD}()) == 0.0
 
-        @test a === A.val
-        @test typeof(A.val) == t
-        @test typeof(A) == Adouble{t}
+    @test get_value(Adouble{TapeLessAD}(3.0)) == 3.0
+    @test get_value(Adouble{TapeLessAD}(3.0; is_diff=true)) == 3.0
+    @test get_value(Adouble{TapeLessAD}(3.0, 4.0)) == 3.0
+    @test get_ad_value(Adouble{TapeLessAD}(3.0, 4.0)) == 4.0
+    a = Adouble{TapeLessAD}(0.0; is_diff=true)
+    set_value(a, 3.0)
+    @test get_value(a) == 3.0
+    set_ad_value(a, 4.0)
+    @test get_ad_value(a) == 4.0
 
-        a = Adouble{t}(1)
-        @test typeof(a.val) == Float64
-        @test typeof(a) == Adouble{t}
-        @test a.val == 1.0
-
-        A = Adouble{t}(3.0)
-        B = Adouble{t}(A)
-        @test A.val == B.val
-
-        a = Adouble{t}(15.3; adouble=true)
-        @test getValue(a) == 15.3
-        @test typeof(a.val) == t
-
-        a = Adouble{t}(true; adouble=true)
-        @test getValue(a) == 1.0
-        @test typeof(a.val) == t
-
-        a = Adouble{t}(15.3; adouble=false)
-        @test getValue(a) == 15.3
-        @test typeof(a.val) == Float64
-
-        A = Adouble{t}([i for i in 1:10]; adouble=true)
-        @test [float(i) for i in 1:10] == getValue(A)
-        @test typeof(A) == Vector{Adouble{t}}
-
-        A = Adouble{t}([i for i in 1:10])
-        @test [float(i) for i in 1:10] == A
-        @test typeof(A) == Vector{Adouble{t}}
-    end
+    set_num_dir(10)
+    a = Adouble{TapeLessAD}(-1.0; is_diff=true)
+    @test all(
+        get_ad_values(Adouble{TapeLessAD}(3.0, ones(Cdouble, 10)), 10) == ones(Cdouble, 10)
+    )
+    set_ad_value(a, ones(Cdouble, 10))
+    @test all(get_ad_values(a, 10) == ones(Cdouble, 10))
+    set_ad_value(a, zeros(Cdouble, 10))
+    set_ad_value(a, 3, -4.0)
+    @test get_ad_value(a, 3) == -4.0
+    set_ad_value(a, 10, -2.0)
+    @test get_ad_value(a, 10) == -2.0
+    set_ad_value(a, 1, -2.1)
+    @test get_ad_value(a, 1) == -2.1
 end
 
 @testset "type handling" begin
     ()
 
-    for t in [Adouble{TlAlloc}, Adouble{TbAlloc}]
-        a = t(3.0; adouble=true)
+    for t in [Adouble{TapeLessAD}, Adouble{TapeBasedAD}]
+        a = t(3.0; is_diff=true)
         @test typeof(promote(1, a).val) == Cdouble
         @test typeof(promote(1, a)) == t
 
-        b = t(3.0; adouble=false)
+        b = t(3.0; is_diff=false)
         @test typeof(promote(1, b).val) == Cdouble
         @test typeof(promote(1, b)) == t
 

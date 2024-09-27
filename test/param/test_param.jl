@@ -121,11 +121,14 @@ end
     tape_id = 0
     m = n = 1
     res = CxxVector(1)
-    derivative!(res, f, m, n, x, param, :jac; tape_id=tape_id)
+    tape_id = 3
+    create_tape(f, x, param, tape_id)
+    derivative!(res, tape_id, m, n, x, :jac)
     @test res[1] == 2 * x * param^2
 
     param = -4.5
-    derivative!(res, f, m, n, x, param, :jac; reuse_tape=true, tape_id=tape_id)
+    set_param_vec(tape_id, param)
+    derivative!(res, tape_id, m, n, x, :jac)
     @test res[1] == 2 * x * param^2
 end
 
@@ -137,12 +140,15 @@ end
     m = 1
     n = 2
     res = CxxVector(2)
-    derivative!(res, f, m, n, x, param, :jac; tape_id=1)
+    tape_id = 3
+    create_tape(f, x, param, tape_id)
+    derivative!(res, tape_id, m, n, x, :jac)
     @test res[1] == 24.0
     @test res[2] == 6.0
 
     param_new = [-3.0, 1 / 2]
-    derivative!(res, f, m, n, x, param_new, :jac; tape_id=1, reuse_tape=true)
+    set_param_vec(tape_id, param_new)
+    derivative!(res, tape_id, m, n, x, :jac)
     @test res[1] == -6.0
     @test res[2] == -3 / 2
 end
@@ -159,14 +165,17 @@ end
     dir = [2.0, -2.0]
     m = n = 2
     res = CxxVector(2)
-    derivative!(res, f, m, n, x, param, :jac_vec; dir=dir, tape_id=1)
+    tape_id = 3
+    create_tape(f, x, param, tape_id)
+    derivative!(res, tape_id, m, n, x, :jac_vec; dir=dir)
 
     @test res[1] == 9.0
     @test res[2] == -2.0
 
     param = -3.0
     x = [1.0, 1.0]
-    derivative!(res, f, m, n, x, param, :jac_vec; dir=dir, tape_id=1, reuse_tape=true)
+    set_param_vec(tape_id, param)
+    derivative!(res, tape_id, m, n, x, :jac_vec; dir=dir)
 
     @test res[1] == 0.0
     @test res[2] == -2.0
@@ -180,10 +189,12 @@ end
 
     x = -1.0
     param = 2.0
-    res = init_abs_normal_form(f, x, param)
-    derivative!(res, f, 1, 1, x, param, :abs_normal; tape_id=res.tape_id)
+    tape_id = 3
+    create_tape(f, x, param, tape_id; enableMinMaxUsingAbs=true)
+    res = init_abs_normal_form(tape_id, x)
+    derivative!(res)
 
-    @test res.tape_id == 0
+    @test res.tape_id == tape_id
     @test res.m == 1
     @test res.n == 1
     @test res.num_switches == 2
@@ -205,9 +216,10 @@ end
     @test res.L[2, 2] == 0.0
 
     param = -2.0
-    derivative!(res, f, 1, 1, x, param, :abs_normal; tape_id=res.tape_id, reuse_tape=true)
+    set_param_vec(tape_id, param)
+    derivative!(res)
 
-    @test res.tape_id == 0
+    @test res.tape_id == tape_id
     @test res.m == 1
     @test res.n == 1
     @test res.num_switches == 2

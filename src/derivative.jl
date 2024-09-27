@@ -69,34 +69,17 @@ function derivative(
     reuse_tape::Bool=false,
 )
     if !reuse_tape
-        if mode == :abs_normal
-            m, n = create_tape(f, x, tape_id; enableMinMaxUsingAbs=true)
-        else
-            m, n = create_tape(f, x, tape_id)
-        end
-        reuse_tape = true
+        _, m, n = create_tape(f, x, tape_id; enableMinMaxUsingAbs=mode == :abs_normal)
     else
-        m = TbadoubleModule.num_dependents(tape_id)
-        n = TbadoubleModule.num_independents(tape_id)
+        m = ccall((:num_dependent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
+        n = ccall((:num_independent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
     end
-
-    res = if mode === :abs_normal
-        init_abs_normal_form(f, x; tape_id=tape_id, reuse_tape=reuse_tape)
+    res = allocator(tape_id, m, n, mode, size(dir, 2)[1], size(weights, 1)[1], x)
+    if mode === :abs_normal
+        derivative!(res)
     else
-        allocator(m, n, mode, size(dir, 2)[1], size(weights, 1)[1])
+        derivative!(res, tape_id, m, n, x, mode; dir=dir, weights=weights)
     end
-    derivative!(
-        res,
-        f,
-        m,
-        n,
-        x,
-        mode;
-        dir=dir,
-        weights=weights,
-        tape_id=mode === :abs_normal ? res.tape_id : tape_id,
-        reuse_tape=mode === :abs_normal ? true : reuse_tape,
-    )
     return res
 end
 
@@ -152,35 +135,20 @@ function derivative(
     reuse_tape::Bool=false,
 )
     if !reuse_tape
-        if mode == :abs_normal
-            m, n = create_tape(f, x, param, tape_id; enableMinMaxUsingAbs=true)
-        else
-            m, n = create_tape(f, x, param, tape_id)
-        end
-        reuse_tape = true
+        _, m, n = create_tape(
+            f, x, param, tape_id; enableMinMaxUsingAbs=mode == :abs_normal
+        )
     else
-        TbadoubleModule.set_param_vec(tape_id, length(param), param)
-        m = TbadoubleModule.num_dependents(tape_id)
-        n = TbadoubleModule.num_independents(tape_id)
+        set_param_vec(tape_id, param)
+        m = ccall((:num_dependent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
+        n = ccall((:num_independent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
     end
-
-    res = if mode === :abs_normal
-        init_abs_normal_form(f, x; tape_id=tape_id, reuse_tape=reuse_tape)
+    res = allocator(tape_id, m, n, mode, size(dir, 2)[1], size(weights, 1)[1], x)
+    if mode === :abs_normal
+        derivative!(res)
     else
-        allocator(m, n, mode, size(dir, 2)[1], size(weights, 1)[1])
+        derivative!(res, tape_id, m, n, x, mode; dir, weights)
     end
-    derivative!(
-        res,
-        f,
-        m,
-        n,
-        x,
-        mode;
-        dir=dir,
-        weights=weights,
-        tape_id=mode === :abs_normal ? res.tape_id : tape_id,
-        reuse_tape=mode === :abs_normal ? true : reuse_tape,
-    )
     return res
 end
 
@@ -246,25 +214,14 @@ function derivative(
     adolc_format::Bool=false,
 )
     if !reuse_tape
-        m, n = create_tape(f, x, tape_id)
+        _, m, n = create_tape(f, x, tape_id)
         reuse_tape = true
     else
-        m = TbadoubleModule.num_dependents(tape_id)
-        n = TbadoubleModule.num_independents(tape_id)
+        m = ccall((:num_dependent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
+        n = ccall((:num_independent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
     end
     res = CxxMatrix(m, length(partials))
-    derivative!(
-        res,
-        f,
-        m,
-        n,
-        x,
-        partials;
-        tape_id=tape_id,
-        reuse_tape=reuse_tape,
-        id_seed=id_seed,
-        adolc_format=adolc_format,
-    )
+    derivative!(res, tape_id, m, n, x, partials; id_seed=id_seed, adolc_format=adolc_format)
     return res
 end
 
@@ -310,26 +267,15 @@ function derivative(
     adolc_format::Bool=false,
 )
     if !reuse_tape
-        m, n = create_tape(f, x, tape_id)
+        _, m, n = create_tape(f, x, tape_id)
         reuse_tape = true
     else
-        m = TbadoubleModule.num_dependents(tape_id)
-        n = TbadoubleModule.num_independents(tape_id)
+        m = ccall((:num_dependent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
+        n = ccall((:num_independent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
     end
 
     res = CxxMatrix(m, length(partials))
-    derivative!(
-        res,
-        f,
-        m,
-        n,
-        x,
-        partials,
-        seed;
-        tape_id=tape_id,
-        reuse_tape=reuse_tape,
-        adolc_format=adolc_format,
-    )
+    derivative!(res, tape_id, m, n, x, partials, seed; adolc_format=adolc_format)
     return res
 end
 
@@ -350,24 +296,14 @@ function derivative(
     reuse_tape::Bool=false,
 )
     if !reuse_tape
-        m, n = create_tape(f, x, tape_id)
+        _, m, n = create_tape(f, x, tape_id)
         reuse_tape = true
     else
-        m = TbadoubleModule.num_dependents(tape_id)
-        n = TbadoubleModule.num_independents(tape_id)
+        m = ccall((:num_dependent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
+        n = ccall((:num_independent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
     end
     res = CxxMatrix(m, binomial(n + degree, degree))
-    derivative!(
-        res,
-        f,
-        m,
-        n,
-        x,
-        degree,
-        CxxMatrix(create_cxx_identity(n, n), n, n);
-        tape_id=tape_id,
-        reuse_tape=reuse_tape,
-    )
+    derivative!(res, tape_id, m, n, x, degree, CxxMatrix(create_cxx_identity(n, n), n, n))
     return res
 end
 
@@ -390,15 +326,15 @@ function derivative(
     reuse_tape::Bool=false,
 )
     if !reuse_tape
-        m, n = create_tape(f, x, tape_id)
+        _, m, n = create_tape(f, x, tape_id)
         reuse_tape = true
     else
-        m = TbadoubleModule.num_dependents(tape_id)
-        n = TbadoubleModule.num_independents(tape_id)
+        m = ccall((:num_dependent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
+        n = ccall((:num_independent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
     end
     num_seeds = size(seed, 2)
     res = CxxMatrix(m, binomial(num_seeds + degree, degree))
-    derivative!(res, f, m, n, x, degree, seed; tape_id=tape_id, reuse_tape=reuse_tape)
+    derivative!(res, tape_id, m, n, x, degree, seed)
     return res
 end
 
@@ -450,7 +386,6 @@ function function_and_derivative_value!(
     tape_id::Integer=0,
     reuse_tape::Bool=false,
 )
-
     return derivative!(
         res,
         f,
@@ -468,15 +403,13 @@ end
 """
     derivative!(
         res,
-        f::Function,
+        tape_id::Integer
         m::Integer,
         n::Integer,
         x::Union{Cdouble,Vector{Cdouble}},
         mode::Symbol;
         dir::Union{Vector{Cdouble},Matrix{Cdouble}}=Vector{Cdouble}(),
         weights::Union{Vector{Cdouble},Matrix{Cdouble}}=Vector{Cdouble}(),
-        tape_id::Integer=0,
-        reuse_tape::Bool=false,
     )
 A variant of the [`derivative`](@ref) driver for [first-](@ref "First-Order"),
 [second-order](@ref "Second-Order") and [abs-normal-form](@ref "Abs-Normal-Form") 
@@ -524,132 +457,58 @@ AbsNormalForm(0, 1, 2, 1, [1.0, 1.0], [1.0], [0.0], [0.0], [1.0], [1.5 0.5], [0.
 """
 function derivative!(
     res,
-    f::Function,
+    tape_id::Integer,
     m::Integer,
     n::Integer,
     x::Union{Cdouble,Vector{Cdouble}},
     mode::Symbol;
     dir=Vector{Cdouble}(),
     weights=Vector{Cdouble}(),
-    tape_id::Integer=0,
-    reuse_tape::Bool=false,
 )
+    x = isa(x, Number) ? [x] : x
     if mode === :jac
-        jac!(res, f, m, n, x, tape_id, reuse_tape)
+        jac!(res, tape_id, m, n, x)
     elseif mode === :hess
-        hessian!(res, f, m, n, x, tape_id, reuse_tape)
-
+        hessian!(res, tape_id, m, n, x)
     elseif mode === :jac_vec
-        fos_forward!(res, f, m, n, x, dir, tape_id, reuse_tape)
+        fos_forward!(res, tape_id, m, n, x, dir)
     elseif mode === :jac_mat
-        fov_forward!(res, f, m, n, x, dir, tape_id, reuse_tape)
+        fov_forward!(res, tape_id, m, n, x, dir)
     elseif mode === :hess_vec
-        hess_vec!(res, f, m, n, x, dir, tape_id, reuse_tape)
+        hess_vec!(res, tape_id, m, n, x, dir)
     elseif mode === :hess_mat
-        hess_mat!(res, f, m, n, x, dir, tape_id, reuse_tape)
+        hess_mat!(res, tape_id, m, n, x, dir)
 
     elseif mode === :vec_jac
-        fos_reverse!(res, f, m, n, x, weights, tape_id, reuse_tape)
+        tmp_out = Vector{Cdouble}(undef, m)
+        zos_forward!(tmp_out, tape_id, m, n, x)
+        fos_reverse!(res, tape_id, m, n, weights)
     elseif mode === :mat_jac
-        fov_reverse!(res, f, m, n, x, weights, tape_id, reuse_tape)
+        tmp_out = Vector{Cdouble}(undef, m)
+        zos_forward!(tmp_out, tape_id, m, n, x)
+        fov_reverse!(res, tape_id, m, n, weights)
+
     elseif mode === :vec_hess
-        vec_hess!(res, f, m, n, x, weights, tape_id, reuse_tape)
+        vec_hess!(res, tape_id, m, n, x, weights)
     elseif mode === :mat_hess
-        mat_hess!(res, f, m, n, x, weights, tape_id, reuse_tape)
+        mat_hess!(res, tape_id, m, n, x, weights)
 
     elseif mode === :vec_hess_vec
-        vec_hess_vec!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
+        vec_hess_vec!(res, tape_id, m, n, x, dir, weights)
     elseif mode === :mat_hess_vec
-        mat_hess_vec!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
+        mat_hess_vec!(res, tape_id, m, n, x, dir, weights)
     elseif mode === :vec_hess_mat
-        vec_hess_mat!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
+        vec_hess_mat!(res, tape_id, m, n, x, dir, weights)
     elseif mode === :mat_hess_mat
-        mat_hess_mat!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
-
-    elseif mode === :abs_normal
-        abs_normal!(res, f, x, tape_id, reuse_tape)
+        mat_hess_mat!(res, tape_id, m, n, x, dir, weights)
 
     else
         throw(ArgumentError("mode $mode not implemented!"))
     end
 end
 
-"""
-    derivative!(
-        res,
-        f::Function,
-        x::Union{Cdouble,Vector{Cdouble}},
-        param::Union{Cdouble,Vector{Cdouble}},
-        mode::Symbol;
-        dir=Vector{Cdouble}(),
-        weights=Vector{Cdouble}(),
-        tape_id::Integer=0,
-        reuse_tape::Bool=false,
-    )
-This version of the [`derivative!`](@ref) driver allows the definition of function parameters (`param`), which can be changed 
-in subsequent calls without retaping. The given function `f` is expected to have the shape `f(x, param)`.
-
-# Example:
-```jldoctest
-function f(x, param)
-    a = x*param
-    return a^2
-end
-x = 3.0
-param = -1.0
-tape_id = 0
-m = n = 1
-res = CxxVector(1)
-derivative!(res, f, m, n, x, param, :jac, tape_id=tape_id)
-##res[1] = 6.0
-
-param = -4.5
-derivative!(res, f, m, n, x, param, :jac, reuse_tape=true, tape_id=tape_id)
-res
-
-# output
-
-1-element CxxVector:
- 121.5
-```
-
-"""
-function derivative!(
-    res,
-    f::Function,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    param::Union{Cdouble,Vector{Cdouble}},
-    mode::Symbol;
-    dir=Vector{Cdouble}(),
-    weights=Vector{Cdouble}(),
-    tape_id::Integer=0,
-    reuse_tape::Bool=false,
-)
-    if !reuse_tape
-        if mode == :abs_normal
-            create_tape(f, x, param, tape_id; enableMinMaxUsingAbs=true)
-        else
-            create_tape(f, x, param, tape_id)
-        end
-        reuse_tape = true
-    else
-        TbadoubleModule.set_param_vec(tape_id, length(param), param)
-    end
-
-    return derivative!(
-        res,
-        f,
-        m,
-        n,
-        x,
-        mode;
-        dir=dir,
-        weights=weights,
-        tape_id=tape_id,
-        reuse_tape=reuse_tape,
-    )
+function derivative!(abs_normal_form::AbsNormalForm)
+    return abs_normal!(abs_normal_form)
 end
 
 """
@@ -694,16 +553,15 @@ res
 """
 function derivative!(
     res,
-    f,
+    tape_id,
     m::Integer,
     n::Integer,
     x::Union{Cdouble,Vector{Cdouble}},
     partials::Vector{Vector{Int64}};
-    tape_id::Integer=0,
-    reuse_tape::Bool=false,
     id_seed::Bool=false,
     adolc_format::Bool=false,
 )
+    x = isa(x, Number) ? [x] : x
     if id_seed
         seed = CxxMatrix(create_cxx_identity(n, n), n, n)
     else
@@ -719,9 +577,7 @@ function derivative!(
         end
         seed = CxxMatrix(create_partial_cxx_identity(n, seed_idxs), n, length(seed_idxs))
     end
-    return higher_order!(
-        res, f, m, n, x, partials, seed, n, tape_id, reuse_tape, adolc_format
-    )
+    return higher_order!(res, tape_id, m, n, x, partials, seed, n, adolc_format)
 end
 
 """
@@ -764,19 +620,15 @@ res
 """
 function derivative!(
     res,
-    f,
+    tape_id,
     m::Integer,
     n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
+    x::Vector{Cdouble},
     partials::Vector{Vector{Int64}},
     seed::CxxMatrix;
-    tape_id::Integer=0,
-    reuse_tape::Bool=false,
     adolc_format::Bool=false,
 )
-    return higher_order!(
-        res, f, m, n, x, partials, seed, size(seed, 2), tape_id, reuse_tape, adolc_format
-    )
+    return higher_order!(res, tape_id, m, n, x, partials, seed, size(seed, 2), adolc_format)
 end
 
 """
@@ -795,16 +647,14 @@ end
 
 function derivative!(
     res::CxxMatrix,
-    f,
+    tape_id,
     m::Integer,
     n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
+    x::Vector{Cdouble},
     degree::Integer,
-    seed::CxxMatrix;
-    tape_id::Integer=0,
-    reuse_tape::Bool=false,
+    seed::CxxMatrix,
 )
-    return higher_order!(res, f, m, n, x, degree, seed, tape_id, reuse_tape)
+    return higher_order!(res, tape_id, m, n, x, degree, seed)
 end
 
 """
@@ -822,960 +672,670 @@ end
 
 function derivative!(
     res::CxxMatrix,
-    f,
+    tape_id,
     m::Integer,
     n::Integer,
     x::Union{Cdouble,Vector{Cdouble}},
-    degree::Integer;
-    tape_id::Integer=0,
-    reuse_tape::Bool=false,
+    degree::Integer,
 )
     return higher_order!(
-        res,
-        f,
-        m,
-        n,
-        x,
-        degree,
-        CxxMatrix(create_cxx_identity(n, n), n, n),
-        tape_id,
-        reuse_tape,
+        res, tape_id, m, n, x, degree, CxxMatrix(create_cxx_identity(n, n), n, n)
     )
 end
 
 function jac!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    tape_id::Integer,
-    reuse_tape::Bool,
+    res, tape_id::Integer, m::Integer, n::Integer, x::Union{Cdouble,Vector{Cdouble}}
 )
     if m == 1
-        cxx_weights = CxxVector([1.0])
-        fos_reverse!(res, f, m, n, x, cxx_weights, tape_id, reuse_tape)
+        tmp_out = Vector{Cdouble}(undef, m)
+        zos_forward!(tmp_out, tape_id, m, n, x)
+        fos_reverse!(res, tape_id, m, n, [1.0])
     else
         if n / 2 < m
-            tape_less_forward!(res, f, n, x)
+            if n == 1
+                fos_forward!(res, tape_id, m, n, x, [1.0])
+            else
+                dir = CxxMatrix(create_cxx_identity(n, n), n, n)
+                fov_forward!(res, tape_id, m, n, x, dir)
+            end
         else
-            cxx_weights = CxxMatrix(create_cxx_identity(m, m), m, m)
-            fov_reverse!(res, f, m, n, x, cxx_weights, tape_id, reuse_tape)
+            tmp_out = Vector{Cdouble}(undef, m)
+            zos_forward!(tmp_out, tape_id, m, n, x)
+            weights = CxxMatrix(create_cxx_identity(m, m), m, m)
+            fov_reverse!(res, tape_id, m, n, weights)
         end
     end
 end
 
-function jac!(res, n::Integer, a::Adouble{TlAlloc})
+function jac!(
+    res::Vector, tape_id::Integer, m::Integer, n::Integer, x::Union{Cdouble,Vector{Cdouble}}
+)
+    if m == 1
+        zos_forward!(res[1], tape_id, m, n, x)
+        fos_reverse!(res[2], tape_id, m, n, [1.0])
+    else
+        if n / 2 < m
+            if n == 1
+                fos_forward!(res, tape_id, m, n, x, [1.0])
+            else
+                dir = CxxMatrix(create_cxx_identity(n, n), n, n)
+                fov_forward!(res, tape_id, m, n, x, dir)
+            end
+        else
+            zos_forward!(res[1], tape_id, m, n, x)
+            weights = CxxMatrix(create_cxx_identity(m, m), m, m)
+            fov_reverse!(res[2], tape_id, m, n, weights)
+        end
+    end
+end
+
+function zos_forward!(
+    out::Vector{Cdouble}, tape_id::Integer, m::Integer, n::Integer, x::Vector{Cdouble}
+)
+    return ccall(
+        (:zos_forward, ADOLC_JLL_PATH),
+        Cint,
+        (Cshort, Cint, Cint, Cint, Ptr{Cdouble}, Ptr{Cdouble}),
+        tape_id,
+        m,
+        n,
+        1,
+        x,
+        out,
+    )
+end
+
+function fos_reverse!(res::CxxVector, tape_id::Integer, m::Integer, n::Integer, weights)
+    return ccall(
+        (:fos_reverse, ADOLC_JLL_PATH),
+        Cint,
+        (Cshort, Cint, Cint, Ptr{Cdouble}, Ptr{Cdouble}),
+        tape_id,
+        m,
+        n,
+        weights,
+        res,
+    )
+end
+
+function fov_reverse!(
+    res, tape_id::Integer, m::Integer, n::Integer, weights::Matrix{Cdouble}
+)
+    cxx_weights = CxxMatrix(weights)
+    return fov_reverse!(res, tape_id, m, n, cxx_weights)
+end
+
+function fov_reverse!(
+    res::CxxMatrix, tape_id::Integer, m::Integer, n::Integer, weights::CxxMatrix
+)
+    num_weights = size(weights, 1)
+    return ccall(
+        (:fov_reverse, ADOLC_JLL_PATH),
+        Cint,
+        (Cshort, Cint, Cint, Cint, Ptr{Ptr{Cdouble}}, Ptr{Ptr{Cdouble}}),
+        tape_id,
+        m,
+        n,
+        num_weights,
+        weights,
+        res,
+    )
+end
+
+function fos_forward!(
+    res::Vector,
+    tape_id::Integer,
+    m::Integer,
+    n::Integer,
+    x::Vector{Cdouble},
+    dir;
+    keep::Integer=0,
+)
+    return ccall(
+        (:fos_forward, ADOLC_JLL_PATH),
+        Cint,
+        (Cshort, Cint, Cint, Cint, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cdouble}),
+        tape_id,
+        m,
+        n,
+        keep,
+        x,
+        dir,
+        res[1],
+        res[2],
+    )
+end
+
+function fos_forward!(
+    res::CxxVector,
+    tape_id::Integer,
+    m::Integer,
+    n::Integer,
+    x::Vector{Cdouble},
+    dir;
+    keep::Integer=0,
+)
+    tmp_out = Vector{Cdouble}(undef, m)
+    return fos_forward!([tmp_out, res], tape_id, m, n, x, dir; keep=keep)
+end
+
+function fov_forward!(
+    res::Vector,
+    tape_id::Integer,
+    m::Integer,
+    n::Integer,
+    x::Vector{Cdouble},
+    dir::CxxMatrix,
+)
+    num_dir = size(dir, 2)
+    return ccall(
+        (:fov_forward, ADOLC_JLL_PATH),
+        Cint,
+        (
+            Cshort,
+            Cint,
+            Cint,
+            Cint,
+            Ptr{Cdouble},
+            Ptr{Ptr{Cdouble}},
+            Ptr{Cdouble},
+            Ptr{Ptr{Cdouble}},
+        ),
+        tape_id,
+        m,
+        n,
+        num_dir,
+        x,
+        dir,
+        res[1],
+        res[2],
+    )
+end
+function fov_forward!(
+    res::CxxMatrix,
+    tape_id::Integer,
+    m::Integer,
+    n::Integer,
+    x::Vector{Cdouble},
+    dir::CxxMatrix,
+)
+    tmp_out = Vector{Cdouble}(undef, m)
+    return fov_forward!([tmp_out, res], tape_id, m, n, x, dir)
+end
+
+function fov_forward!(
+    res, tape_id, m::Integer, n::Integer, x::Vector{Cdouble}, dir::Matrix{Cdouble}
+)
+    cxx_dir = CxxMatrix(dir)
+    return fov_forward!(res, tape_id, m, n, x, cxx_dir)
+end
+
+function vec_hess_vec!(
+    res::CxxMatrix,
+    res_grad,
+    res_out,
+    tape_id::Integer,
+    m::Integer,
+    n::Integer,
+    x::Vector{Cdouble},
+    dir,
+    weights,
+)
+    rc = fos_forward!([res_out, res_grad], tape_id, m, n, x, dir; keep=2)
+    if rc < 0
+        throw("Not twice differentiable!")
+    end
+    return ccall(
+        (:hos_reverse, ADOLC_JLL_PATH),
+        Cint,
+        (Cshort, Cint, Cint, Cint, Ptr{Cdouble}, Ptr{Ptr{Cdouble}}),
+        tape_id,
+        m,
+        n,
+        1,
+        weights,
+        res,
+    )
+end
+function vec_hess_vec!(
+    res::Vector, tape_id::Integer, m::Integer, n::Integer, x::Vector{Cdouble}, dir, weights
+)
+    res_tmp = CxxMatrix(n, 2)
+    rc = vec_hess_vec!(res_tmp, res[2], res[1], tape_id, m, n, x, dir, weights)
     for i in 1:n
-        res[i] = getADValue(a, i)
+        res[3][i] = res_tmp[i, 2]
     end
+    return rc
 end
 
-function jac!(res, n::Integer, a::Vector{Adouble{TlAlloc}})
-    for i in eachindex(a)
-        for j in 1:n
-            res[i, j] = getADValue(a[i], j)
+function vec_hess_vec!(
+    res::CxxVector,
+    tape_id::Integer,
+    m::Integer,
+    n::Integer,
+    x::Vector{Cdouble},
+    dir,
+    weights,
+)
+    res_tangent = CxxVector(m)
+    res_out = CxxVector(m)
+    return vec_hess_vec!([res_out, res_tangent, res], tape_id, m, n, x, dir, weights)
+end
+
+function vec_hess_mat!(
+    res_tmp::CxxMatrix,
+    res::CxxMatrix,
+    res_tangent::Vector{CxxVector},
+    res_out,
+    tape_id::Integer,
+    m::Integer,
+    n::Integer,
+    x::Vector{Cdouble},
+    dir,
+    weights,
+)
+    rc = 0
+    for (j, col) in enumerate(eachcol(dir))
+        rc = vec_hess_vec!(res_tmp, res_tangent[j], res_out, tape_id, m, n, x, col, weights)
+        for i in 1:n
+            res[i, j] = res_tmp[i, 2]
         end
     end
+    return rc
 end
 
-function init_tl_gradient(a::Adouble{TlAlloc})
-    return TladoubleModule.setADValue(a.val, 1.0)
+function vec_hess_mat!(
+    res::Vector, tape_id::Integer, m::Integer, n::Integer, x::Vector{Cdouble}, dir, weights
+)
+    res_tmp = CxxMatrix(n, 2)
+    return vec_hess_mat!(res_tmp, res[3], res[2], res[1], tape_id, m, n, x, dir, weights)
 end
 
-function init_tl_gradient(a::Vector{Adouble{TlAlloc}})
-    for j in eachindex(a)
-        for i in eachindex(a)
-            TladoubleModule.setADValue(a[i].val, 0.0, j)
-            if i == j
-                TladoubleModule.setADValue(a[i].val, 1.0, i)
+function vec_hess_mat!(
+    res::CxxMatrix,
+    tape_id::Integer,
+    m::Integer,
+    n::Integer,
+    x::Vector{Cdouble},
+    dir,
+    weights,
+)
+    res_tmp = CxxMatrix(n, 2)
+    res_tangent_tmp = CxxVector(n)
+    res_out = CxxVector(m)
+    rc = 0
+    for j in 1:size(dir, 2)
+        rc = vec_hess_vec!(
+            res_tmp, res_tangent_tmp, res_out, tape_id, m, n, x, dir[:, j], weights
+        )
+        for i in 1:n
+            res[i, j] = res_tmp[i, 2]
+        end
+    end
+    return rc
+end
+
+function vec_hess!(res, tape_id, m::Integer, n::Integer, x::Vector{Cdouble}, weights)
+    dir = Matrix{Cdouble}(I, n, n)
+    return vec_hess_mat!(res, tape_id, m, n, x, dir, weights)
+end
+
+function vec_hess!(
+    res::Vector, tape_id, m::Integer, n::Integer, x::Vector{Cdouble}, weights
+)
+    dir = Matrix{Cdouble}(I, n, n)
+    res_tangent_tmp = [CxxVector(n) for _ in 1:n]
+    rc = vec_hess_mat!([res[1], res_tangent_tmp, res[3]], tape_id, m, n, x, dir, weights)
+    res[2] = res_tangent_tmp
+    return rc
+end
+
+function mat_hess_vec!(
+    res_tmp,
+    res,
+    res_grad,
+    res_out,
+    tape_id,
+    m::Integer,
+    n::Integer,
+    x::Vector{Cdouble},
+    dir,
+    weights,
+)
+    num_weights = size(weights, 1)
+    fos_forward!([res_out, res_grad], tape_id, m, n, x, dir; keep=2)
+    rc = ccall(
+        (:hov_reverse, ADOLC_JLL_PATH),
+        Cint,
+        (Cshort, Cint, Cint, Cint, Cint, Ptr{Ptr{Cdouble}}, Ptr{Ptr{Ptr{Cdouble}}}),
+        tape_id,
+        m,
+        n,
+        1,
+        num_weights,
+        isa(weights, Matrix) ? CxxMatrix(weights) : weights,
+        res_tmp,
+    )
+    for i in 1:num_weights
+        for j in 1:n
+            res[i, j] = res_tmp[i, j, 2]
+        end
+    end
+    return rc
+end
+
+function mat_hess_vec!(
+    res_tmp,
+    res,
+    res_grad,
+    res_out,
+    tape_id,
+    m::Integer,
+    n::Integer,
+    x::Vector{Cdouble},
+    dir,
+    weights,
+    tensor_idx;
+    lower_triag=false,
+)
+    num_weights = size(weights, 1)
+    mat_short = ccall(
+        (:alloc_short_mat, ADOLC_JLL_PATH), Ptr{Ptr{Cshort}}, (Cint, Cint), num_weights, n
+    )
+    cxx_weights = isa(weights, Matrix) ? CxxMatrix(weights) : weights
+    fos_forward!([res_out, res_grad], tape_id, m, n, x, dir; keep=2)
+    rc = ccall(
+        (:hov_reverse, ADOLC_JLL_PATH),
+        Cint,
+        (
+            Cshort,
+            Cint,
+            Cint,
+            Cint,
+            Cint,
+            Ptr{Ptr{Cdouble}},
+            Ptr{Ptr{Ptr{Cdouble}}},
+            Ptr{Ptr{Cshort}},
+        ),
+        tape_id,
+        m,
+        n,
+        1,
+        num_weights,
+        cxx_weights,
+        res_tmp,
+        mat_short,
+    )
+    ccall((:free_short_mat, ADOLC_JLL_PATH), Cvoid, (Ptr{Ptr{Cshort}},), mat_short)
+    if lower_triag
+        for i in 1:num_weights
+            for j in 1:n
+                if tensor_idx <= j
+                    res[i, j, tensor_idx] = res_tmp[i, j, 2]
+                end
+            end
+        end
+    else
+        for i in 1:num_weights
+            for j in 1:n
+                res[i, j, tensor_idx] = res_tmp[i, j, 2]
             end
         end
     end
-end
-
-function tape_less_forward!(res, f, n::Integer, x::Union{Cdouble,Vector{Cdouble}})
-    TladoubleModule.set_num_dir(n)
-    a = Adouble{TlAlloc}(x; adouble=true)
-    init_tl_gradient(a)
-    return tape_less_forward!(res, f, n, a)
-end
-
-function tape_less_forward!(
-    res, f, n::Integer, a::Union{Adouble{TlAlloc},Vector{Adouble{TlAlloc}}}
-)
-    b = f(a)
-    return jac!(res, n, b)
-end
-
-function tape_less_forward!(
-    res::Vector, f, n::Integer, a::Union{Adouble{TlAlloc},Vector{Adouble{TlAlloc}}}
-)
-    b = f(a)
-    res[1] = getValue(b)
-    return jac!(res[2], n, b)
-end
-
-function fos_reverse!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    weights::Vector{Cdouble},
-    tape_id::Integer,
-    reuse_tape,
-)
-    if !reuse_tape
-        create_tape(f, x, tape_id; keep=1)
-    else
-        x = isa(x, Number) ? [x] : x
-        TbadoubleModule.zos_forward(tape_id, m, n, 1, x, Vector{Cdouble}(undef, m))
-    end
-    return TbadoubleModule.fos_reverse(tape_id, m, n, weights, res.data)
-end
-
-function fos_reverse!(
-    res::Vector,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    weights::Vector{Cdouble},
-    tape_id::Integer,
-    reuse_tape,
-)
-    if !reuse_tape
-        create_tape!(res[1], f, x, tape_id; keep=1)
-    else
-        x = isa(x, Number) ? [x] : x
-        TbadoubleModule.zos_forward(tape_id, m, n, 1, x, res[1])
-    end
-    return TbadoubleModule.fos_reverse(tape_id, m, n, weights, res[2].data)
-end
-
-function fos_reverse!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    weights::CxxVector,
-    tape_id::Integer,
-    reuse_tape,
-)
-    if !reuse_tape
-        create_tape(f, x, tape_id; keep=1)
-    else
-        x = isa(x, Number) ? [x] : x
-        TbadoubleModule.zos_forward(tape_id, m, n, 1, x, Vector{Cdouble}(undef, m))
-    end
-    return TbadoubleModule.fos_reverse(tape_id, m, n, weights.data, res.data)
-end
-
-function fos_reverse!(
-    res::Vector,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    weights::CxxVector,
-    tape_id::Integer,
-    reuse_tape,
-)
-    if !reuse_tape
-        create_tape!(res[1], f, x, tape_id; keep=1)
-    else
-        x = isa(x, Number) ? [x] : x
-        TbadoubleModule.zos_forward(tape_id, m, n, 1, x, res[1])
-    end
-    return TbadoubleModule.fos_reverse(tape_id, m, n, weights.data, res[2].data)
-end
-
-function fov_reverse!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    weights::Matrix{Cdouble},
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    cxx_weights = CxxMatrix(weights)
-    return fov_reverse!(res, f, m, n, x, cxx_weights, tape_id, reuse_tape)
-end
-
-function fov_reverse!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    weights::CxxMatrix,
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    if !reuse_tape
-        create_tape(f, x, tape_id; keep=1)
-    else
-        x = isa(x, Number) ? [x] : x
-        TbadoubleModule.zos_forward(tape_id, m, n, 1, x, Vector{Cdouble}(undef, m))
-    end
-    return TbadoubleModule.fov_reverse(tape_id, m, n, weights.dim1, weights.data, res.data)
-end
-
-
-function fov_reverse!(
-    res::Vector,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    weights::CxxMatrix,
-    tape_id::Integer,
-    reuse_tape::Bool,
-)   
-    if !reuse_tape
-        create_tape!(res[1], f, x, tape_id; keep=1)
-    else
-        x = isa(x, Number) ? [x] : x
-        TbadoubleModule.zos_forward(tape_id, m, n, 1, x, res[1])
-    end
-    return TbadoubleModule.fov_reverse(
-        tape_id, m, n, weights.dim1, weights.data, res[2].data
-    )
-end
-
-function fos_forward!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::Vector{Cdouble},
-    tape_id::Integer,
-    reuse_tape,
-)
-    if !reuse_tape
-        create_tape(f, x, tape_id)
-    end
-    return TbadoubleModule.fos_forward(
-        tape_id, m, n, 0, x, dir, Vector{Cdouble}(undef, m), res.data
-    )
-end
-
-function fos_forward!(
-    res::Vector,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::Vector{Cdouble},
-    tape_id::Integer,
-    reuse_tape,
-)
-    if !reuse_tape
-        create_tape!(res[1], f, x, tape_id)
-    end
-    x = isa(x, Number) ? [x] : x
-    return TbadoubleModule.fos_forward(
-        tape_id, m, n, 0, x, dir, res[1], res[2].data
-    )
-end
-
-function fos_forward!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::CxxVector,
-    tape_id::Integer,
-    reuse_tape,
-)
-    if !reuse_tape
-        create_tape(f, x, tape_id)
-    end
-    x = isa(x, Number) ? [x] : x
-    return TbadoubleModule.fos_forward(
-        tape_id, m, n, 0, x, dir.data, Vector{Cdouble}(undef, m), res.data
-    )
-end
-
-function fos_forward!(
-    res::Vector,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::CxxVector,
-    tape_id::Integer,
-    reuse_tape,
-)
-    if !reuse_tape
-        create_tape!(res[1], f, x, tape_id)
-    end
-    x = isa(x, Number) ? [x] : x
-    return TbadoubleModule.fos_forward(
-        tape_id, m, n, 0, x, dir.data, res[1], res[1].data
-    )
-end
-
-function fov_forward!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::Matrix{Cdouble},
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    cxx_dir = CxxMatrix(dir)
-    return fov_forward!(res, f, m, n, x, cxx_dir, tape_id, reuse_tape)
-end
-
-function fov_forward!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::CxxMatrix,
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    if !reuse_tape
-        create_tape(f, x, tape_id)
-    end
-    x = isa(x, Number) ? [x] : x
-    return TbadoubleModule.fov_forward(
-        tape_id, m, n, dir.dim2, x, dir.data, Vector{Cdouble}(undef, m), res.data
-    )
-end
-
-function fov_forward!(
-    res::Vector,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::CxxMatrix,
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    if !reuse_tape
-        create_tape!(res[1], f, x, tape_id)
-    end
-    x = isa(x, Number) ? [x] : x
-    return TbadoubleModule.fov_forward(
-        tape_id, m, n, dir.dim2, x, dir.data, res[1], res[2].data
-    )
-end
-
-function check_resue_abs_normal_problem(tape_id::Integer, abs_normal_problem::AbsNormalForm)
-    m = TbadoubleModule.num_dependents(tape_id)
-    n = TbadoubleModule.num_independents(tape_id)
-    if abs_normal_problem.tape_id != tape_id
-        throw(
-            "Tape_id mismatch ($(abs_normal_problem.tape_id) vs. $tape_id)! The tape id has to be the same when reusing abs_normal_problem!",
-        )
-    end
-    if abs_normal_problem.m != m
-        throw(
-            "Outputdimension mismatch ($(abs_normal_problem.m) vs. $m)! The dimensions has to remain the same when resuing abs_normal_problem!",
-        )
-    end
-    if abs_normal_problem.n != n
-        throw(
-            "Inputdimension mismatch ($(abs_normal_problem.n) vs. $n)! The dimensions has to remain the same when resuing abs_normal_problem!",
-        )
-    end
-    if get_num_switches(tape_id) != abs_normal_problem.num_switches
-        throw(
-            "NumSwitches mismatcht ($(abs_normal_problem.num_switches) vs. $(get_num_switches(tape_id)))! The number of switches has to remain the same when reusing abs_normal_problem!",
-        )
-    end
-    return true
-end
-
-function abs_normal!(abs_normal_problem, f, x::Cdouble, tape_id::Integer, reuse_tape::Bool)
-    return abs_normal!(abs_normal_problem, f, [x], tape_id, reuse_tape)
-end
-
-function abs_normal!(
-    abs_normal_problem, f, x::Vector{Cdouble}, tape_id::Integer, reuse_tape::Bool
-)
-    if !reuse_tape
-        _ = create_tape(f, x, tape_id; enableMinMaxUsingAbs=true)
-    else
-        @assert check_resue_abs_normal_problem(tape_id, abs_normal_problem)
-        ADOLC.jl_res_to_cxx_res!(abs_normal_problem.x, x)
-    end
-    return abs_normal!(abs_normal_problem)
-end
-
-function vec_hess_vec!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::Vector{Cdouble},
-    weights::Vector{Cdouble},
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    if !(reuse_tape)
-        create_tape(f, x, tape_id)
-    end
-    return TbadoubleModule.lagra_hess_vec(tape_id, m, n, x, dir, weights, res.data)
-end
-
-function vec_hess_vec!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::Vector{Cdouble},
-    weights::CxxVector,
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    if !(reuse_tape)
-        create_tape(f, x, tape_id)
-    end
-    return TbadoubleModule.lagra_hess_vec(tape_id, m, n, x, dir, weights.data, res.data)
-end
-
-function vec_hess_vec!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::CxxVector,
-    weights::CxxVector,
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    if !(reuse_tape)
-        create_tape(f, x, tape_id)
-    end
-    return TbadoubleModule.lagra_hess_vec(
-        tape_id, m, n, x, dir.data, weights.data, res.data
-    )
-end
-
-function vec_hess_mat!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::Matrix{Cdouble},
-    weights::Vector{Cdouble},
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    if !(reuse_tape)
-        create_tape(f, x, tape_id)
-    end
-    res_tmp = CxxVector(n)
-    return vec_hess_mat!(res, f, m, n, x, dir, weights, res_tmp, tape_id, reuse_tape)
-end
-
-function vec_hess_mat!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::CxxMatrix,
-    weights::CxxVector,
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    if !(reuse_tape)
-        create_tape(f, x, tape_id)
-    end
-    res_tmp = CxxVector(n)
-    return vec_hess_mat!(res, f, m, n, x, dir, weights, res_tmp, tape_id, reuse_tape)
-end
-
-function vec_hess_mat!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::Matrix{Cdouble},
-    weights::Vector{Cdouble},
-    res_tmp::CxxVector,
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    if !(reuse_tape)
-        create_tape(f, x, tape_id)
-    end
-    for i in axes(dir, 2)
-        vec_hess_vec!(res_tmp, f, m, n, x, dir[:, i], weights, tape_id, true)
-        for j in 1:n
-            res[j, i] = res_tmp[j]
-            res_tmp[j] = 0.0
-        end
-    end
-end
-
-function vec_hess_mat!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::CxxMatrix,
-    weights::CxxVector,
-    res_tmp::CxxVector,
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    if !(reuse_tape)
-        create_tape(f, x, tape_id)
-    end
-    for i in axes(dir, 2)
-        vec_hess_vec!(res_tmp, f, m, n, x, dir[:, i], weights, tape_id, true)
-        for j in 1:n
-            res[j, i] = res_tmp[j]
-            res_tmp[j] = 0.0
-        end
-    end
-end
-
-function vec_hess!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    weights::Vector{Cdouble},
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    dir = Matrix{Cdouble}(I, n, n)
-    return vec_hess_mat!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
-end
-
-function vec_hess!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    weights::CxxVector,
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    dir = CxxMatrix(create_cxx_identity(n, n), n, n)
-    return vec_hess_mat!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
+    return rc
 end
 
 function mat_hess_vec!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::Vector{Cdouble},
-    weights::Matrix{Cdouble},
-    tape_id::Integer,
-    reuse_tape::Bool,
+    res::Vector, tape_id, m::Integer, n::Integer, x::Vector{Cdouble}, dir, weights
 )
-    cxx_weights = CxxMatrix(weights)
-    num_weights = cxx_weights.dim1
-    res_fos_tmp = CxxVector(m)
-    nz_tmp = alloc_mat_short(num_weights, n)
-    res_hov_tmp = CxxTensor(num_weights, n, 2)
-    mat_hess_vec!(
-        res,
-        f,
-        m,
-        n,
-        x,
-        dir,
-        cxx_weights,
-        tape_id,
-        reuse_tape,
-        res_fos_tmp,
-        nz_tmp,
-        res_hov_tmp,
-    )
-    return free_mat_short(nz_tmp, num_weights)
+    res_tmp = CxxTensor(size(weights, 1), n, 2)
+    return mat_hess_vec!(res_tmp, res[3], res[2], res[1], tape_id, m, n, x, dir, weights)
 end
 
 function mat_hess_vec!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::Vector{Cdouble},
-    weights::CxxMatrix,
-    tape_id::Integer,
-    reuse_tape::Bool,
+    res, tape_id, m::Integer, n::Integer, x::Vector{Cdouble}, dir, weights
 )
-    num_weights = weights.dim1
-    res_fos_tmp = CxxVector(m)
-    nz_tmp = alloc_mat_short(num_weights, n)
-    res_hov_tmp = CxxTensor(num_weights, n, 2)
-    mat_hess_vec!(
-        res, f, m, n, x, dir, weights, tape_id, reuse_tape, res_fos_tmp, nz_tmp, res_hov_tmp
-    )
-    return free_mat_short(nz_tmp, num_weights)
+    res_out = CxxVector(m)
+    res_grad = CxxVector(m)
+    return mat_hess_vec!([res_out, res_grad, res], tape_id, m, n, x, dir, weights)
 end
 
-function mat_hess_vec!(
+function _mat_hess_mat!(
+    res_tmp,
     res,
-    f,
+    res_grad,
+    res_out,
+    tape_id,
     m::Integer,
     n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::Vector{Cdouble},
-    weights::CxxMatrix,
-    tape_id::Integer,
-    reuse_tape::Bool,
-    res_fos_tmp::CxxVector,
-    nz_tmp::CxxPtr{CxxPtr{Cshort}},
-    res_hov_tmp::CxxTensor,
-)
-    if !(reuse_tape)
-        create_tape(f, x, tape_id)
-    end
-    num_weights = weights.dim1
-    degree = 1
-    keep = degree + 1
-    TbadoubleModule.fos_forward(
-        tape_id, m, n, keep, x, dir, Vector{Cdouble}(undef, m), res_fos_tmp.data
-    )
-    TbadoubleModule.hov_reverse(
-        tape_id, m, n, degree, num_weights, weights.data, res_hov_tmp.data, nz_tmp
-    )
-    for i in 1:num_weights
-        for j in 1:n
-            res[i, j] = res_hov_tmp[i, j, degree + 1]
-            res_hov_tmp[i, j, degree + 1] = 0.0
-        end
-    end
-end
-
-function mat_hess_vec!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::CxxVector,
-    weights::CxxMatrix,
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    num_weights = weights.dim1
-    res_fos_tmp = CxxVector(m)
-    nz_tmp = alloc_mat_short(num_weights, n)
-    res_hov_tmp = CxxTensor(num_weights, n, 2)
-    mat_hess_vec!(
-        res, f, m, n, x, dir, weights, tape_id, reuse_tape, res_fos_tmp, nz_tmp, res_hov_tmp
-    )
-    return free_mat_short(nz_tmp, num_weights)
-end
-
-function mat_hess_vec!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::CxxVector,
-    weights::CxxMatrix,
-    tape_id::Integer,
-    reuse_tape::Bool,
-    res_fos_tmp::CxxVector,
-    nz_tmp::CxxPtr{CxxPtr{Cshort}},
-    res_hov_tmp::CxxTensor,
-)
-    if !(reuse_tape)
-        create_tape(f, x, tape_id)
-    end
-    num_weights = weights.dim1
-    degree = 1
-    keep = degree + 1
-    TbadoubleModule.fos_forward(
-        tape_id, m, n, keep, x, dir.data, Vector{Cdouble}(undef, m), res_fos_tmp.data
-    )
-    TbadoubleModule.hov_reverse(
-        tape_id, m, n, degree, num_weights, weights.data, res_hov_tmp.data, nz_tmp
-    )
-    for i in 1:num_weights
-        for j in 1:n
-            res[i, j] = res_hov_tmp[i, j, degree + 1]
-            res_hov_tmp[i, j, degree + 1] = 0.0
-        end
-    end
-end
-
-function mat_hess_mat!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::Matrix{Cdouble},
-    weights::Matrix{Cdouble},
-    tape_id::Integer,
-    reuse_tape::Bool;
+    x::Vector{Cdouble},
+    dir,
+    weights,
+    tensor_idx;
     lower_triag::Bool=false,
 )
-    cxx_dir = CxxMatrix(dir)
-    cxx_weights = CxxMatrix(weights)
-    num_weights = cxx_weights.dim1
-    res_tmp = CxxMatrix(num_weights, n)
-    res_fos_tmp = CxxVector(m)
-    nz_tmp = alloc_mat_short(num_weights, n)
-    res_hov_tmp = CxxTensor(num_weights, n, 2)
-    mat_hess_mat!(
-        res,
-        f,
-        m,
-        n,
-        x,
-        cxx_dir,
-        cxx_weights,
-        tape_id,
-        reuse_tape,
+    return mat_hess_vec!(
         res_tmp,
-        res_fos_tmp,
-        nz_tmp,
-        res_hov_tmp;
-        lower_triag=lower_triag,
-    )
-    return free_mat_short(nz_tmp, num_weights)
-end
-
-function mat_hess_mat!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::CxxMatrix,
-    weights::CxxMatrix,
-    tape_id::Integer,
-    reuse_tape::Bool;
-    lower_triag::Bool=false,
-)
-    num_weights = weights.dim1
-    res_tmp = CxxMatrix(num_weights, n)
-    res_fos_tmp = CxxVector(m)
-    nz_tmp = alloc_mat_short(num_weights, n)
-    res_hov_tmp = CxxTensor(num_weights, n, 2)
-    mat_hess_mat!(
         res,
-        f,
+        res_grad,
+        res_out,
+        tape_id,
         m,
         n,
         x,
         dir,
         weights,
-        tape_id,
-        reuse_tape,
-        res_tmp,
-        res_fos_tmp,
-        nz_tmp,
-        res_hov_tmp;
+        tensor_idx;
         lower_triag=lower_triag,
     )
-    return free_mat_short(nz_tmp, num_weights)
 end
 
 function mat_hess_mat!(
+    res_tmp,
     res,
-    f,
+    res_grad::Vector,
+    res_out,
+    tape_id,
     m::Integer,
     n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::CxxMatrix,
-    weights::CxxMatrix,
-    tape_id::Integer,
-    reuse_tape::Bool,
-    res_tmp::CxxMatrix,
-    res_fos_tmp::CxxVector,
-    nz_tmp::CxxPtr{CxxPtr{Cshort}},
-    res_hov_tmp::CxxTensor;
+    x::Vector{Cdouble},
+    dir,
+    weights;
     lower_triag::Bool=false,
 )
-    if !(reuse_tape)
-        create_tape(f, x, tape_id)
-    end
+    rc = 0
     for i in axes(dir, 2)
-        mat_hess_vec!(
+        rc = _mat_hess_mat!(
             res_tmp,
-            f,
+            res,
+            res_grad[i],
+            res_out,
+            tape_id,
             m,
             n,
             x,
             dir[:, i],
             weights,
-            tape_id,
-            true,
-            res_fos_tmp,
-            nz_tmp,
-            res_hov_tmp,
+            i;
+            lower_triag=lower_triag,
         )
-        if lower_triag
-            for j in 1:m
-                for k in 1:n
-                    if i <= k
-                        res[j, k, i] = res_tmp[j, k]
-                        res_tmp[j, k] = 0.0
-                    end
-                end
-            end
-        else
-            for j in 1:(weights.dim1)
-                for k in 1:n
-                    res[j, k, i] = res_tmp[j, k]
-                    res_tmp[j, k] = 0.0
-                end
-            end
-        end
     end
+    return rc
 end
 
-function hessian!(
+function mat_hess_mat!(
+    res_tmp,
     res,
-    f::Function,
+    res_grad,
+    res_out,
+    tape_id,
     m::Integer,
     n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    tape_id::Integer,
-    reuse_tape::Bool,
+    x::Vector{Cdouble},
+    dir,
+    weights;
+    lower_triag::Bool=false,
 )
-    cxx_dir = CxxMatrix(create_cxx_identity(n, n), n, n)
-    cxx_weights = CxxMatrix(create_cxx_identity(m, m), m, m)
+    rc = 0
+    for i in axes(dir, 2)
+        rc = _mat_hess_mat!(
+            res_tmp,
+            res,
+            res_grad,
+            res_out,
+            tape_id,
+            m,
+            n,
+            x,
+            dir[:, i],
+            weights,
+            i;
+            lower_triag=lower_triag,
+        )
+    end
+    return rc
+end
+
+function mat_hess_mat!(
+    res::Vector,
+    tape_id,
+    m::Integer,
+    n::Integer,
+    x::Vector{Cdouble},
+    dir,
+    weights;
+    lower_triag::Bool=false,
+)
+    num_weights = size(weights, 1)
+    res_tmp = CxxTensor(num_weights, n, 2)
     return mat_hess_mat!(
-        res, f, m, n, x, cxx_dir, cxx_weights, tape_id, reuse_tape; lower_triag=true
+        res_tmp,
+        res[3],
+        res[2],
+        res[1],
+        tape_id,
+        m,
+        n,
+        x,
+        dir,
+        weights;
+        lower_triag=lower_triag,
     )
 end
 
-function hess_vec!(
+function mat_hess_mat!(
     res,
-    f,
+    tape_id,
     m::Integer,
     n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::Vector{Cdouble},
-    tape_id::Integer,
-    reuse_tape::Bool,
+    x::Vector{Cdouble},
+    dir,
+    weights;
+    lower_triag::Bool=false,
 )
-    weights = CxxMatrix(create_cxx_identity(m, m), m, m)
-    return mat_hess_vec!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
+    res_out = CxxVector(m)
+    res_grad = CxxVector(m)
+    return mat_hess_mat!(
+        [res_out, res_grad, res], tape_id, m, n, x, dir, weights; lower_triag=lower_triag
+    )
+end
+
+function hessian!(res, tape_id, m::Integer, n::Integer, x::Vector{Cdouble})
+    cxx_dir = CxxMatrix(create_cxx_identity(n, n), n, n)
+    cxx_weights = CxxMatrix(create_cxx_identity(m, m), m, m)
+    return mat_hess_mat!(res, tape_id, m, n, x, cxx_dir, cxx_weights; lower_triag=true)
 end
 
 function hess_vec!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::CxxVector,
-    tape_id::Integer,
-    reuse_tape::Bool,
+    res, tape_id, m::Integer, n::Integer, x::Union{Cdouble,Vector{Cdouble}}, dir
 )
     weights = CxxMatrix(create_cxx_identity(m, m), m, m)
-    return mat_hess_vec!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
+    return mat_hess_vec!(res, tape_id, m, n, x, dir, weights)
 end
 
-function mat_hess!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    weights::Matrix{Cdouble},
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    dir = Matrix{Cdouble}(I, n, n)
-    return mat_hess_mat!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
-end
-
-function mat_hess!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    weights::CxxMatrix,
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
+function mat_hess!(res, tape_id, m::Integer, n::Integer, x::Vector{Cdouble}, weights)
     dir = CxxMatrix(create_cxx_identity(n, n), n, n)
-    return mat_hess_mat!(res, f, m, n, x, dir, weights, tape_id, reuse_tape)
+    return mat_hess_mat!(res, tape_id, m, n, x, dir, weights)
 end
 
-function hess_mat!(
-    res,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::Matrix{Cdouble},
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    cxx_dir = CxxMatrix(dir)
+function hess_mat!(res, tape_id, m::Integer, n::Integer, x::Vector{Cdouble}, dir)
     cxx_weights = CxxMatrix(create_cxx_identity(m, m), m, m)
-    return mat_hess_mat!(res, f, m, n, x, cxx_dir, cxx_weights, tape_id, reuse_tape)
+    return mat_hess_mat!(res, tape_id, m, n, x, dir, cxx_weights)
 end
 
-function hess_mat!(
-    res,
-    f,
+function higher_order!(
+    res::CxxMatrix,
+    tape_id,
     m::Integer,
     n::Integer,
-    x::Union{Cdouble,Vector{Cdouble}},
-    dir::CxxMatrix,
-    tape_id::Integer,
-    reuse_tape::Bool,
+    x::Vector{Cdouble},
+    degree::Integer,
+    seed::CxxMatrix,
 )
-    cxx_weights = CxxMatrix(create_cxx_identity(m, m), m, m)
-    return mat_hess_mat!(res, f, m, n, x, dir, cxx_weights, tape_id, reuse_tape)
+    num_seeds = seed.dim2
+    return ccall(
+        (:tensor_eval, ADOLC_JLL_PATH),
+        Cint,
+        (
+            Cshort,
+            Cint,
+            Cint,
+            Cint,
+            Cint,
+            Ptr{Cdouble},
+            Ptr{Ptr{Cdouble}},
+            Ptr{Ptr{Cdouble}},
+        ),
+        tape_id,
+        m,
+        n,
+        degree,
+        num_seeds,
+        x,
+        res,
+        seed,
+    )
 end
 
 function higher_order!(
     res,
-    f,
+    tape_id,
     m::Integer,
     n::Integer,
     x::Vector{Cdouble},
     partials::Vector{Vector{Int64}},
     seed::CxxMatrix,
     num_seeds::Integer,
-    tape_id::Integer,
-    reuse_tape::Bool,
     adolc_format::Bool,
 )
-    if !reuse_tape
-        create_tape(f, x, tape_id)
-    end
     if adolc_format
         degree = length(partials[1])
     else
         degree = maximum(map(sum, partials))
     end
     res_tmp = CxxMatrix(m, binomial(num_seeds + degree, degree))
-    tensor_eval(tape_id, m, n, degree, num_seeds, x, res_tmp.data, seed.data)
+    rc = ccall(
+        (:tensor_eval, ADOLC_JLL_PATH),
+        Cint,
+        (
+            Cshort,
+            Cint,
+            Cint,
+            Cint,
+            Cint,
+            Ptr{Cdouble},
+            Ptr{Ptr{Cdouble}},
+            Ptr{Ptr{Cdouble}},
+        ),
+        tape_id,
+        m,
+        n,
+        degree,
+        num_seeds,
+        x,
+        res_tmp,
+        seed,
+    )
     if !adolc_format
         adolc_partial = zeros(Cint, degree)
     end
@@ -1791,125 +1351,5 @@ function higher_order!(
             end
         end
     end
-end
-
-function higher_order!(
-    res::CxxMatrix,
-    f,
-    m::Integer,
-    n::Integer,
-    x::Vector{Cdouble},
-    degree::Integer,
-    seed::CxxMatrix,
-    tape_id::Integer,
-    reuse_tape::Bool,
-)
-    if !reuse_tape
-        create_tape(f, x, tape_id)
-    end
-    num_seeds = seed.dim2
-    return tensor_eval(tape_id, m, n, degree, num_seeds, x, res.data, seed.data)
-end
-
-function create_tape(
-    f,
-    x::Union{Cdouble,Vector{Cdouble}},
-    tape_id::Integer;
-    keep::Integer=0,
-    enableMinMaxUsingAbs=false,
-)
-    if enableMinMaxUsingAbs
-        TbadoubleModule.enableMinMaxUsingAbs()
-    end
-
-    trace_on(tape_id, keep)
-    a = create_independent(x)
-    b = f(a)
-    dependent(b)
-    trace_off()
-
-    return length(b), length(x)
-end
-
-function create_tape!(
-    func_value,
-    f,
-    x::Union{Cdouble,Vector{Cdouble}},
-    tape_id::Integer;
-    keep::Integer=0,
-    enableMinMaxUsingAbs=false,
-)
-    if enableMinMaxUsingAbs
-        TbadoubleModule.enableMinMaxUsingAbs()
-    end
-
-    trace_on(tape_id, keep)
-    a = create_independent(x)
-    b = f(a)
-    dependent(b, func_value)
-    trace_off()
-
-    return length(b), length(x)
-end
-function create_tape(
-    f,
-    x::Union{Cdouble,Vector{Cdouble}},
-    param::Union{Cdouble,Vector{Cdouble}},
-    tape_id::Integer;
-    keep::Integer=0,
-    enableMinMaxUsingAbs=false,
-)
-    if enableMinMaxUsingAbs
-        TbadoubleModule.enableMinMaxUsingAbs()
-    end
-
-    trace_on(tape_id, keep)
-    a, a_param = create_independent(x, param)
-    b = f(a, a_param)
-    dependent(b)
-    trace_off()
-    return length(b), length(x)
-end
-
-"""
-    create_independent(x::Union{Cdouble, Vector{Cdouble}})
-
-
-
-Marks the argument `x` as independent variable on the tape and create differentiable `Adouble{TbAlloc}` for `x`.
-"""
-function create_independent(x)
-    n = length(x)
-    a = n == 1 ? Adouble{TbAlloc}() : [Adouble{TbAlloc}() for _ in 1:n]
-    a << x
-    return a
-end
-
-"""
-    create_independent(x::Union{Cdouble, Vector{Cdouble}}, param::Union{Cdouble,Vector{Cdouble}}) 
-
-The argument `x` is stored as differentiable `Adouble{TbAlloc}` and marked as independent. `param` is
-marked as parameters on the tape to be changeble without retaping.
-"""
-function create_independent(
-    x::Union{Cdouble,Vector{Cdouble}}, param::Union{Cdouble,Vector{Cdouble}}
-)
-    a = create_independent(x)
-    a_param = mkparam(param)
-    return a, a_param
-end
-
-"""
-    dependent(b::Union{Adouble{TbAlloc}, Vector{Adouble{TbAlloc}}})
-    
-Marks a differentiable `Adouble{TbAlloc}` `b` as dependent.
-"""
-function dependent(b)
-    m = length(b)
-    y = m == 1 ? Cdouble(0.0) : Vector{Cdouble}(undef, m)
-    return b >> y
-end
-
-function dependent(b, func_value)
-    return b >> func_value
+    return rc
 end

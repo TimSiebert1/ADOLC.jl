@@ -1,99 +1,189 @@
 module array_types
-using ADOLC_jll
-using CxxWrap
-
-@wrapmodule(() -> libadolc_wrap, :julia_module_array_types)
-
-function __init__()
-    @initcxx
+const ADOLC_JLL_PATH = "/Users/timsiebert/Projects/ADOLCInterface/ADOLCInterface.jl/ADOL-CInterface/ADOL-C/c_interface/libADOLCInterface.dylib"
+function Base.getindex(cxx_ptr_ptr_ptr::Ptr{Ptr{Ptr{Cdouble}}}, dim)
+    return ccall(
+        (:getindex_tens, ADOLC_JLL_PATH),
+        Ptr{Ptr{Cdouble}},
+        (Ptr{Ptr{Ptr{Cdouble}}}, Cint),
+        cxx_ptr_ptr_ptr,
+        dim - 1,
+    )
 end
-
-function Base.getindex(cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim)
-    return getindex_tens(cxx_ptr_ptr_ptr, dim)
+function Base.getindex(cxx_ptr_ptr_ptr::Ptr{Ptr{Ptr{Cdouble}}}, dim::Int64)
+    return ccall(
+        (:getindex_tens, ADOLC_JLL_PATH),
+        Ptr{Ptr{Cdouble}},
+        (Ptr{Ptr{Ptr{Cdouble}}}, Cint),
+        cxx_ptr_ptr_ptr,
+        dim - 1,
+    )
 end
-function Base.getindex(cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64)
-    return getindex_tens(cxx_ptr_ptr_ptr, dim)
-end
-function Base.getindex(cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim, row, col)
-    return getindex_tens(cxx_ptr_ptr_ptr, dim, row, col)
+function Base.getindex(cxx_ptr_ptr_ptr::Ptr{Ptr{Ptr{Cdouble}}}, dim, row, col)
+    return ccall(
+        (:getindex_tens, ADOLC_JLL_PATH),
+        Cdouble,
+        (Ptr{Ptr{Ptr{Cdouble}}}, Cint, Cint, Cint),
+        cxx_ptr_ptr_ptr,
+        dim - 1,
+        row - 1,
+        col - 1,
+    )
 end
 function Base.getindex(
-    cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim::Int64, row::Int64, col::Int64
+    cxx_ptr_ptr_ptr::Ptr{Ptr{Ptr{Cdouble}}}, dim::Int64, row::Int64, col::Int64
 )
-    return getindex_tens(cxx_ptr_ptr_ptr, dim, row, col)
+    return ccall(
+        (:getindex_tens, ADOLC_JLL_PATH),
+        Cdouble,
+        (Ptr{Ptr{Ptr{Cdouble}}}, Cint, Cint, Cint),
+        cxx_ptr_ptr_ptr,
+        dim - 1,
+        row - 1,
+        col - 1,
+    )
+end
+function Base.setindex!(cxx_ptr_ptr_ptr::Ptr{Ptr{Ptr{Cdouble}}}, val, dim, row, col)
+    return ccall(
+        (:setindex_tens, ADOLC_JLL_PATH),
+        Cvoid,
+        (Ptr{Ptr{Ptr{Cdouble}}}, Cdouble, Cint, Cint, Cint),
+        cxx_ptr_ptr_ptr,
+        Cdouble(val),
+        dim - 1,
+        row - 1,
+        col - 1,
+    )
 end
 function Base.setindex!(
-    cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, val, dim, row, col
-)
-    return setindex_tens(cxx_ptr_ptr_ptr, Cdouble(val), dim, row, col)
-end
-function Base.setindex!(
-    cxx_ptr_ptr_ptr::CxxPtr{CxxPtr{CxxPtr{Cdouble}}},
+    cxx_ptr_ptr_ptr::Ptr{Ptr{Ptr{Cdouble}}},
     val::Cdouble,
     dim::Int64,
     row::Int64,
     col::Int64,
 )
-    return setindex_tens(cxx_ptr_ptr_ptr, val, dim, row, col)
+    return ccall(
+        (:setindex_tens, ADOLC_JLL_PATH),
+        Cvoid,
+        (Ptr{Ptr{Ptr{Cdouble}}}, Cdouble, Cint, Cint, Cint),
+        cxx_ptr_ptr_ptr,
+        Cdouble(val),
+        dim - 1,
+        row - 1,
+        col - 1,
+    )
 end
-function Base.getindex(cxx_ptr_ptr::CxxPtr{CxxPtr{Cdouble}}, row, col)
-    return getindex_mat(cxx_ptr_ptr, row, col)
+function Base.getindex(cxx_ptr_ptr::Ptr{Ptr{Cdouble}}, row, col)
+    return ccall(
+        (:getindex_mat, ADOLC_JLL_PATH),
+        Cdouble,
+        (Ptr{Ptr{Cdouble}}, Cint, Cint),
+        cxx_ptr_ptr,
+        row - 1,
+        col - 1,
+    )
 end
-function Base.getindex(cxx_ptr_ptr::CxxPtr{CxxPtr{Cdouble}}, row::Int64, col::Int64)
-    return getindex_mat(cxx_ptr_ptr, row, col)
+function Base.getindex(cxx_ptr_ptr::Ptr{Ptr{Cdouble}}, row::Int64, col::Int64)
+    return ccall(
+        (:getindex_mat, ADOLC_JLL_PATH),
+        Cdouble,
+        (Ptr{Ptr{Cdouble}}, Cint, Cint),
+        cxx_ptr_ptr,
+        row - 1,
+        col - 1,
+    )
 end
-function Base.setindex!(cxx_ptr_ptr::CxxPtr{CxxPtr{Cdouble}}, val, row, col)
-    return setindex_mat(cxx_ptr_ptr, Cdouble(val), row, col)
+function Base.setindex!(cxx_ptr_ptr::Ptr{Ptr{Cdouble}}, val, row, col)
+    return ccall(
+        (:setindex_mat, ADOLC_JLL_PATH),
+        Cvoid,
+        (Ptr{Ptr{Cdouble}}, Cdouble, Cint, Cint),
+        cxx_ptr_ptr,
+        Cdouble(val),
+        row - 1,
+        col - 1,
+    )
 end
 function Base.setindex!(
-    cxx_ptr_ptr::CxxPtr{CxxPtr{Cdouble}}, val::Cdouble, row::Int64, col::Int64
+    cxx_ptr_ptr::Ptr{Ptr{Cdouble}}, val::Cdouble, row::Int64, col::Int64
 )
-    return setindex_mat(cxx_ptr_ptr, val, row, col)
+    return ccall(
+        (:setindex_mat, ADOLC_JLL_PATH),
+        Cvoid,
+        (Ptr{Ptr{Cdouble}}, Cdouble, Cint, Cint),
+        cxx_ptr_ptr,
+        Cdouble(val),
+        row - 1,
+        col - 1,
+    )
 end
-Base.getindex(cxx_ptr::CxxPtr{Cdouble}, row::Int64) = getindex_vec(cxx_ptr, row)
-Base.getindex(cxx_ptr::CxxPtr{Cdouble}, row) = getindex_vec(cxx_ptr, row)
-function Base.setindex!(cxx_ptr::CxxPtr{Cdouble}, val::Cdouble, row::Int64)
-    return setindex_vec(cxx_ptr, val, row)
+function Base.getindex(cxx_ptr::Ptr{Cdouble}, row::Int64)
+    return ccall(
+        (:getindex_vec, ADOLC_JLL_PATH), Cdouble, (Ptr{Cdouble}, Cint), cxx_ptr, row - 1
+    )
 end
-function Base.setindex!(cxx_ptr::CxxPtr{Cdouble}, val, row)
-    return setindex_vec(cxx_ptr, Cdouble(val), row)
+function Base.getindex(cxx_ptr::Ptr{Cdouble}, row)
+    return ccall(
+        (:getindex_vec, ADOLC_JLL_PATH), Cdouble, (Ptr{Cdouble}, Cint), cxx_ptr, row - 1
+    )
 end
-Base.getindex(cxx_ptr::CxxPtr{Cshort}, row::Int64) = getindex_vec(cxx_ptr, row)
-Base.getindex(cxx_ptr::CxxPtr{Cshort}, row) = getindex_vec(cxx_ptr, row)
-function Base.setindex!(cxx_ptr::CxxPtr{Cshort}, val::Cshort, row::Int64)
-    return setindex_vec(cxx_ptr, val, row)
+function Base.setindex!(cxx_ptr::Ptr{Cdouble}, val::Cdouble, row::Int64)
+    return ccall(
+        (:setindex_vec, ADOLC_JLL_PATH),
+        Cvoid,
+        (Ptr{Cdouble}, Cdouble, Cint),
+        cxx_ptr,
+        val,
+        row - 1,
+    )
 end
-function Base.setindex!(cxx_ptr::CxxPtr{Cshort}, val, row)
-    return setindex_vec(cxx_ptr, Cshort(val), row)
+function Base.setindex!(cxx_ptr::Ptr{Cdouble}, val, row)
+    return ccall(
+        (:setindex_vec, ADOLC_JLL_PATH),
+        Cvoid,
+        (Ptr{Cdouble}, Cdouble, Cint),
+        cxx_ptr,
+        val,
+        row - 1,
+    )
 end
 
-function cxx_tensor_finalizer(cxx_tensor)
-    return myfree3(cxx_tensor.data)
+function cxx_tensor_finalizer(x)
+    return ccall((:myfree3, ADOLC_JLL_PATH), Cvoid, (Ptr{Ptr{Ptr{Cvoid}}},), x.data)
+end
+function alloc_tensor(dim1, dim2, dim3)
+    return ccall(
+        (:myalloc3, ADOLC_JLL_PATH),
+        Ptr{Ptr{Ptr{Cdouble}}},
+        (Cint, Cint, Cint),
+        dim1,
+        dim2,
+        dim3,
+    )
 end
 """
     mutable struct CxxTensor <: AbstractArray{Cdouble, 3}
 
-Wrapper for `CxxPtr{CxxPtr{CxxPtr{Cdouble}}}`, which is used as `double***` in C++.
+Wrapper for `Ptr{Ptr{Ptr{Cdouble}}}`, which is used as `double***` in C++.
 """
 mutable struct CxxTensor <: AbstractArray{Cdouble,3}
-    data::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}
+    data::Ptr{Ptr{Ptr{Cdouble}}}
     dim1::Integer
     dim2::Integer
     dim3::Integer
 
     function CxxTensor(dim1::Integer, dim2::Integer, dim3::Integer)
-        cxx_tensor = new(myalloc3(dim1, dim2, dim3), dim1, dim2, dim3)
+        cxx_tensor = new(alloc_tensor(dim1, dim2, dim3), dim1, dim2, dim3)
         return finalizer(cxx_tensor_finalizer, cxx_tensor)
     end
     function CxxTensor(
-        x::CxxPtr{CxxPtr{CxxPtr{Cdouble}}}, dim1::Integer, dim2::Integer, dim3::Integer
+        x::Ptr{Ptr{Ptr{Cdouble}}}, dim1::Integer, dim2::Integer, dim3::Integer
     )
         cxx_tensor = new(x, dim1, dim2, dim3)
         return finalizer(cxx_tensor_finalizer, cxx_tensor)
     end
     function CxxTensor(jl_tensor::AbstractArray{Cdouble,3})
         dim1, dim2, dim3 = size(jl_tensor)
-        cxx_tensor = new(myalloc3(dim1, dim2, dim3), dim1, dim2, dim3)
+        cxx_tensor = new(alloc_tensor(dim1, dim2, dim3), dim1, dim2, dim3)
         for k in 1:dim3
             for j in 1:dim2
                 for i in 1:dim1
@@ -134,31 +224,34 @@ function Base.getindex(cxx_tensor::CxxTensor, dim1::Integer, dim2::Integer, dim3
 end
 
 function cxx_mat_finalizer(cxx_mat)
-    return myfree2(cxx_mat.data)
+    return ccall((:myfree2, ADOLC_JLL_PATH), Cvoid, (Ptr{Ptr{Cdouble}},), cxx_mat.data)
+end
+function alloc_matrix(dim1, dim2)
+    return ccall((:myalloc2, ADOLC_JLL_PATH), Ptr{Ptr{Cdouble}}, (Cint, Cint), dim1, dim2)
 end
 
 """
     mutable struct CxxMatrix <: AbstractMatrix{Cdouble}
 
-Wrapper for `CxxPtr{CxxPtr{Cdouble}}`, which is used as `double**` in C++.
+Wrapper for `Ptr{Ptr{Cdouble}}`, which is used as `double**` in C++.
 """
 mutable struct CxxMatrix <: AbstractMatrix{Cdouble}
-    data::CxxPtr{CxxPtr{Cdouble}}
+    data::Ptr{Ptr{Cdouble}}
     dim1::Integer
     dim2::Integer
     function CxxMatrix(dim1::Integer, dim2::Integer)
-        cxx_mat = new(myalloc2(dim1, dim2), dim1, dim2)
+        cxx_mat = new(alloc_matrix(dim1, dim2), dim1, dim2)
         return finalizer(cxx_mat_finalizer, cxx_mat)
     end
 
-    function CxxMatrix(x::CxxPtr{CxxPtr{Cdouble}}, dim1::Integer, dim2::Integer)
+    function CxxMatrix(x::Ptr{Ptr{Cdouble}}, dim1::Integer, dim2::Integer)
         cxx_mat = new(x, dim1, dim2)
         return finalizer(cxx_mat_finalizer, cxx_mat)
     end
 
     function CxxMatrix(jl_mat::AbstractMatrix{Cdouble})
         dim1, dim2 = size(jl_mat)
-        cxx_mat = new(myalloc2(dim1, dim2), dim1, dim2)
+        cxx_mat = new(alloc_matrix(dim1, dim2), dim1, dim2)
         for j in 1:dim2
             for i in 1:dim1
                 cxx_mat[i, j] = jl_mat[i, j]
@@ -187,28 +280,28 @@ function Base.getindex(cxx_mat::CxxMatrix, dim1::Integer, dim2::Integer)
 end
 
 function cxx_vec_finalizer(cxx_vec)
-    return free_vec_double(cxx_vec.data)
+    return ccall((:myfree1, ADOLC_JLL_PATH), Cvoid, (Ptr{Cdouble},), cxx_vec.data)
 end
-
+alloc_vector(dim) = ccall((:myalloc1, ADOLC_JLL_PATH), Ptr{Cdouble}, (Cint,), dim)
 """
     mutable struct CxxVector <: AbstractVector{Cdouble}
-Wrapper of a `double*` (`CxxPtr{Cdouble}`).
+Wrapper of a `double*` (`Ptr{Cdouble}`).
 """
 mutable struct CxxVector <: AbstractVector{Cdouble}
-    data::CxxPtr{Cdouble}
+    data::Ptr{Cdouble}
     dim::Integer
     function CxxVector(dim::Integer)
-        cxx_vec = new(alloc_vec_double(dim), dim)
+        cxx_vec = new(alloc_vector(dim), dim)
         return finalizer(cxx_vec_finalizer, cxx_vec)
     end
-    function CxxVector(x::CxxPtr{Cdouble}, dim::Integer)
+    function CxxVector(x::Ptr{Cdouble}, dim::Integer)
         cxx_vec = new(x, dim)
         return finalizer(cxx_vec_finalizer, cxx_vec)
     end
 
     function CxxVector(jl_vec::AbstractVector{Cdouble})
         dim = size(jl_vec)[1]
-        cxx_vec = new(alloc_vec_double(dim), dim)
+        cxx_vec = new(alloc_vector(dim), dim)
         for i in 1:dim
             cxx_vec[i] = jl_vec[i]
         end
@@ -226,178 +319,113 @@ function Base.setindex!(cxx_vec::CxxVector, val::Number, dim::Integer)
     return setindex!(cxx_vec.data, Cdouble(val), dim)
 end
 
-function jl_vec_to_cxx_vec!(cxx_vec::CxxVector, jl_vec::AbstractVector{Cdouble})
-    if cxx_vec.dim != size(jl_vec, 1)
-        throw(DimensionMismatch("Size of cxx_vec not equal to size of jl_vec"))
-    end
-    for i in 1:(cxx_vec.dim)
-        cxx_vec[i] = jl_vec[i]
-    end
+Base.unsafe_convert(::Type{Ptr{Ptr{Ptr{Cdouble}}}}, x::CxxTensor) = x.data
+Base.unsafe_convert(::Type{Ptr{Ptr{Cdouble}}}, x::CxxMatrix) = x.data
+Base.unsafe_convert(::Type{Ptr{Cdouble}}, x::CxxVector) = x.data
+
+function Array{Cdouble,3}(x::CxxTensor)
+    return unsafe_wrap(
+        Array{Cdouble,3}, Ptr{Cdouble}(x.data), (x.dim1, x.dim2, x.dim3); own=true
+    )
 end
-function jl_mat_to_cxx_mat!(cxx_mat::CxxMatrix, jl_mat::AbstractMatrix{Cdouble})
-    if cxx_mat.dim1 != size(jl_mat, 1) || cxx_mat.dim2 != size(jl_mat, 2)
-        throw(DimensionMismatch("Size of cxx_mat not equal to size of jl_mat"))
-    end
-    for j in 1:(cxx_mat.dim2)
-        for i in 1:(cxx_mat.dim1)
-            cxx_mat[i, j] = jl_mat[i, j]
-        end
-    end
+function Matrix{Cdouble}(x::CxxMatrix)
+    return unsafe_wrap(Matrix{Cdouble}, Ptr{Cdouble}(x.data), (x.dim1, x.dim2); own=true)
 end
-function jl_tensor_to_cxx_tensor!(
-    cxx_tensor::CxxTensor, jl_tensor::AbstractArray{Cdouble,3}
-)
-    if cxx_tensor.dim1 != size(jl_tensor, 1) ||
-        cxx_tensor.dim2 != size(jl_tensor, 2) ||
-        cxx_tensor.dim3 != size(jl_tensor, 3)
-        throw(DimensionMismatch("Size of cxx_tensor not equal to size of jl_tensor"))
-    end
-    for k in 1:(cxx_tensor.dim3)
-        for j in 1:(cxx_tensor.dim2)
-            for i in 1:(cxx_tensor.dim1)
-                cxx_tensor[i, j, k] = jl_tensor[i, j, k]
+Vector{Cdouble}(x::CxxVector) = unsafe_wrap(Vector{Cdouble}, x.data, x.dim; own=true)
+
+"""
+    create_cxx_identity(n::I_1, m::I_2) where {I_1 <: Integer, I_2 <: Integer}
+
+Creates a identity matrix of shape (`n`, `m`) of type CxxPtr{CxxPtr{Float64}} (wrapper of C++'s double**).
+
+
+# Example
+```jldoctest
+id = CxxMatrix(create_cxx_identity(2, 4), 2, 4)
+
+
+# output
+
+2×4 CxxMatrix:
+ 1.0  0.0  0.0  0.0
+ 0.0  1.0  0.0  0.0
+```
+"""
+function create_cxx_identity(n::I_1, m::I_2) where {I_1<:Integer,I_2<:Integer}
+    I = alloc_matrix(n, m)
+    for i in 1:n
+        for j in 1:m
+            I[i, j] = 0.0
+            if i == j
+                I[i, i] = 1.0
             end
         end
     end
+    return I
 end
 
 """
-    jl_res_to_cxx_res!(cxx_res::CxxVector, jl_res::AbstractVector{Cdouble}) 
-    jl_res_to_cxx_res!(cxx_res::CxxMatrix, jl_res::AbstractMatrix{Cdouble})
-    jl_res_to_cxx_res!(cxx_res::CxxTensor, jl_res::AbstractArray{Cdouble, 3})
+    create_partial_cxx_identity(n::I_1, idxs::Vector{I_2}) where {I_1 <: Integer, I_2 <: Integer}
 
-Copies the values of a `AbstractVector{Cdouble}`, `AbstractMatrix{Cdouble}` or `AbstractArray{Cdouble, 3}` to
-a corresponding `CxxVector`, `CxxMatrix` or `CxxTensor`.
+Creates a matrix of shape (`n`, `length(idxs)`) of type CxxPtr{CxxPtr{Float64}} (wrapper of C++'s double**).
+The columns are canonical basis vectors corresponding to the entries of `idxs`. The order of the basis vectors
+is defined by the order of the indices in `idxs`. Details about the application can be found in this [guide](@ref "Seed-Matrix").
+
+!!! warning
+    The number of rows `n` must be smaller than the maximal index of `idxs`!
+
+!!! warning
+    The values of `idxs` must be non-negative!
+
+# Examples
+```jldoctest
+n = 4
+idxs = [1, 3]
+id = CxxMatrix(create_partial_cxx_identity(n, idxs), n, length(idxs))
+# output
+
+4×2 CxxMatrix:
+ 1.0  0.0
+ 0.0  0.0
+ 0.0  1.0
+ 0.0  0.0
+```
+The order in `idxs` defines the order of the basis vectors.
+```jldoctest
+n = 3
+idxs = [3, 0, 1]
+id = CxxMatrix(create_partial_cxx_identity(n, idxs), n, length(idxs))
+
+
+# output
+
+3×3 CxxMatrix:
+ 0.0  0.0  1.0
+ 0.0  0.0  0.0
+ 1.0  0.0  0.0
+```
 """
-function jl_res_to_cxx_res!(cxx_res::CxxVector, jl_res::AbstractVector{Cdouble})
-    return jl_vec_to_cxx_vec!(cxx_res, jl_res)
-end
-function jl_res_to_cxx_res!(cxx_res::CxxMatrix, jl_res::AbstractMatrix{Cdouble})
-    return jl_mat_to_cxx_mat!(cxx_res, jl_res)
-end
-function jl_res_to_cxx_res!(cxx_res::CxxTensor, jl_res::AbstractArray{Cdouble,3})
-    return jl_tensor_to_cxx_tensor!(cxx_res, jl_res)
-end
-
-"""
-    jl_res_to_cxx_res(jl_res::AbstractVector{Cdouble}) 
-    jl_res_to_cxx_res(jl_res::AbstractMatrix{Cdouble})
-    jl_res_to_cxx_res(jl_res::AbstractArray{Cdouble, 3})
-
-Creates a `CxxVector`, `CxxMatrix` or `CxxTensor` and copies the values from the given input
-`AbstractVector{Cdouble}`, `AbstractMatrix{Cdouble}` or `AbstractArray{Cdouble, 3}` to it.
-"""
-function jl_res_to_cxx_res(jl_res::AbstractVector{Cdouble})
-    cxx_res = CxxVector(size(jl_res)...)
-    jl_vec_to_cxx_vec!(cxx_res, jl_res)
-    return cxx_res
-end
-function jl_res_to_cxx_res(jl_res::AbstractMatrix{Cdouble})
-    cxx_res = CxxMatrix(size(jl_res)...)
-    jl_mat_to_cxx_mat!(cxx_res, jl_res)
-    return cxx_res
-end
-function jl_res_to_cxx_res(jl_res::AbstractArray{Cdouble,3})
-    cxx_res = CxxTensor(size(jl_res)...)
-    jl_tensor_to_cxx_tensor!(cxx_res, jl_res)
-    return cxx_res
-end
-
-function cxx_vec_to_jl_vec!(jl_vec::AbstractVector{Cdouble}, cxx_vec::CxxVector)
-    if cxx_vec.dim != size(jl_vec, 1)
-        throw(DimensionMismatch("Size of cxx_vec not equal to size of jl_vec"))
+function create_partial_cxx_identity(
+    n::I_1, idxs::Vector{I_2}
+) where {I_1<:Integer,I_2<:Integer}
+    if n < maximum(idxs)
+        throw(
+            "ArgumentError: The number of rows must be greater than the largest index: $n < $(maximum(idxs)).",
+        )
     end
-    for i in 1:(cxx_vec.dim)
-        jl_vec[i] = cxx_vec[i]
-    end
-end
-function cxx_mat_to_jl_mat!(jl_mat::AbstractMatrix{Cdouble}, cxx_mat::CxxMatrix)
-    if cxx_mat.dim1 != size(jl_mat, 1) || cxx_mat.dim2 != size(jl_mat, 2)
-        throw(DimensionMismatch("Size of cxx_mat not equal to size of jl_mat"))
-    end
-    for i in 1:(cxx_mat.dim2)
-        for j in 1:(cxx_mat.dim1)
-            jl_mat[j, i] = cxx_mat[j, i]
+    m = length(idxs)
+    I = alloc_matrix(n, m)
+    for j in 1:m
+        for i in 1:n
+            I[i, j] = 0.0
+        end
+        if idxs[j] > 0
+            I[idxs[j], j] = 1.0
         end
     end
-end
-function cxx_tensor_to_jl_tensor!(
-    jl_tensor::AbstractArray{Cdouble,3}, cxx_tensor::CxxTensor
-)
-    if cxx_tensor.dim1 != size(jl_tensor, 1) ||
-        cxx_tensor.dim2 != size(jl_tensor, 2) ||
-        cxx_tensor.dim3 != size(jl_tensor, 3)
-        throw(DimensionMismatch("Size of cxx_tensor not equal to size of jl_tensor"))
-    end
-    for k in 1:(cxx_tensor.dim3)
-        for j in 1:(cxx_tensor.dim2)
-            for i in 1:(cxx_tensor.dim1)
-                jl_tensor[i, j, k] = cxx_tensor[i, j, k]
-            end
-        end
-    end
-end
-"""
-    cxx_res_to_jl_res!(jl_res::AbstractVector{Cdouble}, cxx_res::CxxVector)
-    cxx_res_to_jl_res!(jl_res::AbstractMatrix{Float64}, cxx_res::CxxMatrix)
-    cxx_res_to_jl_res!(jl_res::AbstractArray{Float64, 3}, cxx_res::CxxTensor)
-
-Copies the entries of a `CxxVector`, `CxxMatrix` or `CxxTensor` 
-to a `AbstractVector{Cdouble}`, `AbstractMatrix{Cdouble}` or `AbstractArray{Cdouble, 3}`.
-"""
-function cxx_res_to_jl_res!(jl_res::AbstractVector{Cdouble}, cxx_res::CxxVector)
-    return cxx_vec_to_jl_vec!(jl_res, cxx_res)
-end
-function cxx_res_to_jl_res!(jl_res::AbstractMatrix{Float64}, cxx_res::CxxMatrix)
-    return cxx_mat_to_jl_mat!(jl_res, cxx_res)
-end
-function cxx_res_to_jl_res!(jl_res::AbstractArray{Float64,3}, cxx_res::CxxTensor)
-    return cxx_tensor_to_jl_tensor!(jl_res, cxx_res)
+    return I
 end
 
-"""
-    cxx_res_to_jl_res(cxx_res::CxxVector) 
-    cxx_res_to_jl_res(cxx_res::CxxMatrix)
-    cxx_res_to_jl_res(cxx_res::CxxTensor)
-
-Creates a `Vector{Cdouble}`, `Matrix{Cdouble}` or `Array{Cdouble, 3}`
-and copies the values from the given input `CxxVector`, `CxxMatrix` or `CxxTensor` to it.
-"""
-function cxx_res_to_jl_res(cxx_res::CxxVector)
-    jl_res = Vector{Cdouble}(undef, size(cxx_res)...)
-    cxx_vec_to_jl_vec!(jl_res, cxx_res)
-    return jl_res
-end
-
-function cxx_res_to_jl_res(cxx_res::CxxMatrix)
-    jl_res = Matrix{Cdouble}(undef, size(cxx_res)...)
-    cxx_mat_to_jl_mat!(jl_res, cxx_res)
-    return jl_res
-end
-
-function cxx_res_to_jl_res(cxx_res::CxxTensor)
-    jl_res = Array{Cdouble,3}(undef, size(cxx_res)...)
-    cxx_tensor_to_jl_tensor!(jl_res, cxx_res)
-    return jl_res
-end
-
-export CxxMatrix,
-    CxxVector,
-    CxxTensor,
-    cxx_res_to_jl_res,
-    cxx_res_to_jl_res!,
-    jl_res_to_cxx_res!,
-    jl_res_to_cxx_res
-
-export myalloc3,
-    myalloc2,
-    alloc_vec_double,
-    alloc_vec_short,
-    alloc_vec,
-    alloc_mat_short,
-    myfree3,
-    myfree2,
-    free_vec_double,
-    free_vec_short,
-    free_mat_short
+export CxxMatrix, CxxVector, CxxTensor, create_cxx_identity, create_partial_cxx_identity
+export alloc_tensor, alloc_matrix, alloc_vector
 end # module arry_types

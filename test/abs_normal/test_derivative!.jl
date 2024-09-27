@@ -8,9 +8,10 @@
     end
 
     x = [-0.5, -0.5, -0.5]
-
-    abs_normal_form = ADOLC.init_abs_normal_form(f, x)
-    derivative!(abs_normal_form, f, 1, 3, x, :abs_normal)
+    tape_id = 3
+    create_tape(f, x, tape_id; enableMinMaxUsingAbs=true)
+    abs_normal_form = init_abs_normal_form(tape_id, x)
+    derivative!(abs_normal_form)
 
     @test abs_normal_form.Y[1, 1] == -1.5
     @test abs_normal_form.Y[1, 2] == -3.0
@@ -41,34 +42,18 @@ end
     end
 
     x = [-1.5, -1.5, -1.5]
-
-    abs_normal_form = ADOLC.init_abs_normal_form(f, x)
-    derivative!(
-        abs_normal_form,
-        f,
-        1,
-        3,
-        x,
-        :abs_normal;
-        tape_id=abs_normal_form.tape_id,
-        reuse_tape=true,
-    )
+    tape_id = 3
+    create_tape(f, x, tape_id; enableMinMaxUsingAbs=true)
+    abs_normal_form = init_abs_normal_form(tape_id, x)
+    derivative!(abs_normal_form)
     y = f(x)
 
     @test abs_normal_form.y[1] == y
 
     x = [-0.5, -0.5, -0.5]
     # reuse abs_normal_form with same id and without retaping
-    derivative!(
-        abs_normal_form,
-        f,
-        1,
-        3,
-        x,
-        :abs_normal;
-        tape_id=abs_normal_form.tape_id,
-        reuse_tape=true,
-    )
+    copyto!(abs_normal_form.x, x)
+    derivative!(abs_normal_form)
     y = f(x)
 
     @test abs_normal_form.y[1] == y

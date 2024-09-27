@@ -15,7 +15,9 @@
         [2, 0, 0, 0],
     ]
     res = CxxMatrix(1, length(partials))
-    derivative!(res, f, 1, length(x), x, partials)
+    tape_id = 3
+    create_tape(f, x, tape_id)
+    derivative!(res, tape_id, 1, length(x), x, partials)
 
     @test res[1] ≈ 24.0
     @test res[2] ≈ 8.0
@@ -42,7 +44,9 @@ end
         [2, 0, 0, 0],
     ]
     res = CxxMatrix(2, length(partials))
-    derivative!(res, f, 2, length(x), x, partials)
+    tape_id = 10
+    create_tape(f, x, tape_id)
+    derivative!(res, tape_id, 2, length(x), x, partials)
 
     @test res[1, 1] ≈ 8.0
     @test res[2, 1] ≈ 0.0
@@ -74,7 +78,9 @@ end
     x = [1.0, 2.0, 3.0, 4.0]
     partials = [[1, 0, 0], [3, 0, 0], [2, 1, 0], [4, 3, 0], [3, 2, 1], [4, 3, 3], [1, 1, 0]]
     res = CxxMatrix(2, length(partials))
-    derivative!(res, f, 2, length(x), x, partials; adolc_format=true)
+    tape_id = 10
+    create_tape(f, x, tape_id)
+    derivative!(res, tape_id, 2, length(x), x, partials; adolc_format=true)
 
     @test res[1, 1] ≈ 8.0
     @test res[2, 1] ≈ 0.0
@@ -106,7 +112,9 @@ end
     x = [1.0, 2.0, 3.0, 4.0]
     partials = [[1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 2, 0], [2, 0, 0, 0]]
     res = CxxMatrix(2, length(partials))
-    derivative!(res, f, 2, length(x), x, partials)
+    tape_id = 10
+    create_tape(f, x, tape_id)
+    derivative!(res, tape_id, 2, length(x), x, partials)
 
     @test res[1, 1] ≈ 8.0
     @test res[2, 1] ≈ 0.0
@@ -129,7 +137,9 @@ end
     x = [1.0, 2.0, 3.0, 4.0]
     partials = [[1, 0], [3, 0], [3, 3], [1, 1]]
     res = CxxMatrix(2, length(partials))
-    derivative!(res, f, 2, length(x), x, partials; adolc_format=true)
+    tape_id = 10
+    create_tape(f, x, tape_id)
+    derivative!(res, tape_id, 2, length(x), x, partials; adolc_format=true)
 
     @test res[1, 1] ≈ 8.0
     @test res[2, 1] ≈ 0.0
@@ -167,7 +177,9 @@ end
     seed = CxxMatrix([[1.0, 0.0] [0.0, 2.0] [1.0, 1.0]])
 
     res = CxxMatrix(1, length(partials))
-    derivative!(res, f, 1, length(x), x, partials, seed)
+    tape_id = 10
+    create_tape(f, x, tape_id)
+    derivative!(res, tape_id, 1, length(x), x, partials, seed)
 
     @test res[1] ≈ 8.0
     @test res[2] ≈ 8.0
@@ -193,73 +205,77 @@ end
     num_seeds = n
     degree = 2
     res = CxxMatrix(m, binomial(num_seeds + degree, degree))
-    derivative!(res, f, m, n, x, degree, CxxMatrix(create_cxx_identity(n, n), n, n))
+    tape_id = 10
+    create_tape(f, x, tape_id)
+    derivative!(res, tape_id, m, n, x, degree, CxxMatrix(create_cxx_identity(n, n), n, n))
 
-    @test res[1, ADOLC.tensor_address(degree, [1, 0])] == 8.0
-    @test res[1, ADOLC.tensor_address(degree, [2, 0])] == 4.0
-    @test res[1, ADOLC.tensor_address(degree, [3, 0])] == 0.0
-    @test res[1, ADOLC.tensor_address(degree, [4, 0])] == 0.0
+    @test res[1, tensor_address(degree, [1, 0])] == 8.0
+    @test res[1, tensor_address(degree, [2, 0])] == 4.0
+    @test res[1, tensor_address(degree, [3, 0])] == 0.0
+    @test res[1, tensor_address(degree, [4, 0])] == 0.0
 
-    @test res[2, ADOLC.tensor_address(degree, [1, 0])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [2, 0])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [3, 0])] == 96.0
-    @test res[2, ADOLC.tensor_address(degree, [4, 0])] == 72.0
+    @test res[2, tensor_address(degree, [1, 0])] == 0.0
+    @test res[2, tensor_address(degree, [2, 0])] == 0.0
+    @test res[2, tensor_address(degree, [3, 0])] == 96.0
+    @test res[2, tensor_address(degree, [4, 0])] == 72.0
 
-    @test res[1, ADOLC.tensor_address(degree, [1, 1])] == 8.0
-    @test res[1, ADOLC.tensor_address(degree, [2, 1])] == 8.0
-    @test res[1, ADOLC.tensor_address(degree, [3, 1])] == 0.0
-    @test res[1, ADOLC.tensor_address(degree, [4, 1])] == 0.0
-    @test res[1, ADOLC.tensor_address(degree, [2, 2])] == 2.0
-    @test res[1, ADOLC.tensor_address(degree, [3, 2])] == 0.0
-    @test res[1, ADOLC.tensor_address(degree, [4, 3])] == 0.0
-    @test res[1, ADOLC.tensor_address(degree, [3, 3])] == 0.0
-    @test res[1, ADOLC.tensor_address(degree, [4, 3])] == 0.0
-    @test res[1, ADOLC.tensor_address(degree, [4, 4])] == 0.0
-    @test res[1, ADOLC.tensor_address(degree, [4, 2])] == 0.0
+    @test res[1, tensor_address(degree, [1, 1])] == 8.0
+    @test res[1, tensor_address(degree, [2, 1])] == 8.0
+    @test res[1, tensor_address(degree, [3, 1])] == 0.0
+    @test res[1, tensor_address(degree, [4, 1])] == 0.0
+    @test res[1, tensor_address(degree, [2, 2])] == 2.0
+    @test res[1, tensor_address(degree, [3, 2])] == 0.0
+    @test res[1, tensor_address(degree, [4, 3])] == 0.0
+    @test res[1, tensor_address(degree, [3, 3])] == 0.0
+    @test res[1, tensor_address(degree, [4, 3])] == 0.0
+    @test res[1, tensor_address(degree, [4, 4])] == 0.0
+    @test res[1, tensor_address(degree, [4, 2])] == 0.0
 
-    @test res[2, ADOLC.tensor_address(degree, [1, 1])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [2, 1])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [3, 1])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [4, 1])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [2, 2])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [3, 2])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [4, 2])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [4, 3])] == 48.0
-    @test res[2, ADOLC.tensor_address(degree, [3, 3])] == 32.0
-    @test res[2, ADOLC.tensor_address(degree, [4, 4])] == 18.0
+    @test res[2, tensor_address(degree, [1, 1])] == 0.0
+    @test res[2, tensor_address(degree, [2, 1])] == 0.0
+    @test res[2, tensor_address(degree, [3, 1])] == 0.0
+    @test res[2, tensor_address(degree, [4, 1])] == 0.0
+    @test res[2, tensor_address(degree, [2, 2])] == 0.0
+    @test res[2, tensor_address(degree, [3, 2])] == 0.0
+    @test res[2, tensor_address(degree, [4, 2])] == 0.0
+    @test res[2, tensor_address(degree, [4, 3])] == 48.0
+    @test res[2, tensor_address(degree, [3, 3])] == 32.0
+    @test res[2, tensor_address(degree, [4, 4])] == 18.0
 
-    derivative!(res, f, m, n, x, degree)
+    tape_id = 10
+    create_tape(f, x, tape_id)
+    derivative!(res, tape_id, m, n, x, degree)
 
-    @test res[1, ADOLC.tensor_address(degree, [1, 0])] == 8.0
-    @test res[1, ADOLC.tensor_address(degree, [2, 0])] == 4.0
-    @test res[1, ADOLC.tensor_address(degree, [3, 0])] == 0.0
-    @test res[1, ADOLC.tensor_address(degree, [4, 0])] == 0.0
+    @test res[1, tensor_address(degree, [1, 0])] == 8.0
+    @test res[1, tensor_address(degree, [2, 0])] == 4.0
+    @test res[1, tensor_address(degree, [3, 0])] == 0.0
+    @test res[1, tensor_address(degree, [4, 0])] == 0.0
 
-    @test res[2, ADOLC.tensor_address(degree, [1, 0])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [2, 0])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [3, 0])] == 96.0
-    @test res[2, ADOLC.tensor_address(degree, [4, 0])] == 72.0
+    @test res[2, tensor_address(degree, [1, 0])] == 0.0
+    @test res[2, tensor_address(degree, [2, 0])] == 0.0
+    @test res[2, tensor_address(degree, [3, 0])] == 96.0
+    @test res[2, tensor_address(degree, [4, 0])] == 72.0
 
-    @test res[1, ADOLC.tensor_address(degree, [1, 1])] == 8.0
-    @test res[1, ADOLC.tensor_address(degree, [2, 1])] == 8.0
-    @test res[1, ADOLC.tensor_address(degree, [3, 1])] == 0.0
-    @test res[1, ADOLC.tensor_address(degree, [4, 1])] == 0.0
-    @test res[1, ADOLC.tensor_address(degree, [2, 2])] == 2.0
-    @test res[1, ADOLC.tensor_address(degree, [3, 2])] == 0.0
-    @test res[1, ADOLC.tensor_address(degree, [4, 3])] == 0.0
-    @test res[1, ADOLC.tensor_address(degree, [3, 3])] == 0.0
-    @test res[1, ADOLC.tensor_address(degree, [4, 3])] == 0.0
-    @test res[1, ADOLC.tensor_address(degree, [4, 4])] == 0.0
-    @test res[1, ADOLC.tensor_address(degree, [4, 2])] == 0.0
+    @test res[1, tensor_address(degree, [1, 1])] == 8.0
+    @test res[1, tensor_address(degree, [2, 1])] == 8.0
+    @test res[1, tensor_address(degree, [3, 1])] == 0.0
+    @test res[1, tensor_address(degree, [4, 1])] == 0.0
+    @test res[1, tensor_address(degree, [2, 2])] == 2.0
+    @test res[1, tensor_address(degree, [3, 2])] == 0.0
+    @test res[1, tensor_address(degree, [4, 3])] == 0.0
+    @test res[1, tensor_address(degree, [3, 3])] == 0.0
+    @test res[1, tensor_address(degree, [4, 3])] == 0.0
+    @test res[1, tensor_address(degree, [4, 4])] == 0.0
+    @test res[1, tensor_address(degree, [4, 2])] == 0.0
 
-    @test res[2, ADOLC.tensor_address(degree, [1, 1])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [2, 1])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [3, 1])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [4, 1])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [2, 2])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [3, 2])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [4, 2])] == 0.0
-    @test res[2, ADOLC.tensor_address(degree, [4, 3])] == 48.0
-    @test res[2, ADOLC.tensor_address(degree, [3, 3])] == 32.0
-    @test res[2, ADOLC.tensor_address(degree, [4, 4])] == 18.0
+    @test res[2, tensor_address(degree, [1, 1])] == 0.0
+    @test res[2, tensor_address(degree, [2, 1])] == 0.0
+    @test res[2, tensor_address(degree, [3, 1])] == 0.0
+    @test res[2, tensor_address(degree, [4, 1])] == 0.0
+    @test res[2, tensor_address(degree, [2, 2])] == 0.0
+    @test res[2, tensor_address(degree, [3, 2])] == 0.0
+    @test res[2, tensor_address(degree, [4, 2])] == 0.0
+    @test res[2, tensor_address(degree, [4, 3])] == 48.0
+    @test res[2, tensor_address(degree, [3, 3])] == 32.0
+    @test res[2, tensor_address(degree, [4, 4])] == 18.0
 end

@@ -31,7 +31,9 @@ end
         end
     end
     res = CxxMatrix(m, degree + 1)
-    univariate_tpp!(res, f, x, degree, init_tp)
+    tape_id = 1
+    _, m, n = create_tape(f, x, tape_id)
+    univariate_tpp!(res, tape_id, m, n, degree, init_tp)
 
     @test res[1, 1] ≈ 4.0
     @test res[1, 2] ≈ 12.0

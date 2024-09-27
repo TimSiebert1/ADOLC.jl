@@ -1,23 +1,18 @@
 module ADOLC
-
+const ADOLC_JLL_PATH = "/Users/timsiebert/Projects/ADOLCInterface/ADOLCInterface.jl/ADOL-CInterface/ADOL-C/c_interface/libADOLCInterface.dylib"
 using CxxWrap
-using ADOLC_jll
 using LinearAlgebra
 using SpecialFunctions: SpecialFunctions
 
 include("array_types.jl")
+using .array_types
 include("abs_normal.jl")
-include("TbadoubleModule.jl")
-include("TladoubleModule.jl")
 include("Adouble.jl")
 include("arithmetics.jl")
 include("utils.jl")
 include("derivative.jl")
 include("univariate_tpp.jl")
-
-using .array_types
-using .TbadoubleModule
-using .TladoubleModule
+include("tape_handling.jl")
 
 export partial_to_adolc_format,
     partial_to_adolc_format!,
@@ -27,13 +22,19 @@ export partial_to_adolc_format,
     seed_idxs_adolc_format,
     partial_format_to_seed_space,
     adolc_format_to_seed_space,
-    myalloc2,
     CxxVector,
     CxxMatrix,
     CxxTensor
 
-export TbAlloc, TlAlloc, Adouble, getValue, get_gradient
-
+export TapeBasedAD,
+    TapeLessAD,
+    Adouble,
+    get_value,
+    get_ad_value,
+    get_ad_values,
+    set_value,
+    set_ad_value,
+    set_num_dir
 export abs_normal!, AbsNormalForm
 
 export derivative,
@@ -43,17 +44,16 @@ export derivative,
     univariate_tpp,
     allocator,
     jl_allocator,
+    create_tape,
     create_independent,
-    dependent,
-    cxx_res_to_jl_res!,
-    cxx_res_to_jl_res,
-    jl_res_to_cxx_res,
-    jl_res_to_cxx_res!,
-    init_abs_normal_form
+    create_dependent,
+    init_abs_normal_form,
+    tensor_address,
+    set_param_vec,
+    fov_forward!,
+    fov_reverse!
 
 export erf, eps
-
-export gradient
 export mkparam
-
+export ADOLC_JLL_PATH
 end # module ADOLC

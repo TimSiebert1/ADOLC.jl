@@ -39,7 +39,7 @@ mutable struct AbsNormalForm
         return AbsNormalForm(tape_id, m, n, [x], [y])
     end
     function AbsNormalForm(tape_id::Int64, m, n, x::Vector{Cdouble}, y::Vector{Cdouble})
-        num_switches = TbadoubleModule.get_num_switches(tape_id)
+        num_switches = ccall((:get_num_switches, ADOLC_JLL_PATH), Cint, (Cshort,), tape_id)
         z = CxxVector(num_switches)
         cz = CxxVector(num_switches)
         cy = CxxVector(length(y))
@@ -101,46 +101,46 @@ function _abs_normal!(
     Z = Z_cxx.data
     L = L_cxx.data
 
-    return TbadoubleModule.abs_normal(
-        tape_id, m, n, num_switches, x, y, z, cz, cy, Y, J, Z, L
+    return ccall(
+        (:abs_normal, ADOLC_JLL_PATH),
+        Cint,
+        (
+            Cshort,
+            Cint,
+            Cint,
+            Cint,
+            Ptr{Cdouble},
+            Ptr{Cdouble},
+            Ptr{Cdouble},
+            Ptr{Cdouble},
+            Ptr{Cdouble},
+            Ptr{Ptr{Cdouble}},
+            Ptr{Ptr{Cdouble}},
+            Ptr{Ptr{Cdouble}},
+            Ptr{Ptr{Cdouble}},
+        ),
+        tape_id,
+        m,
+        n,
+        num_switches,
+        x,
+        y,
+        z,
+        cz,
+        cy,
+        Y,
+        J,
+        Z,
+        L,
     )
 end
 """
     init_abs_normal_form(
-        f, x::Union{Cdouble,Vector{Cdouble}}; tape_id::Integer=0, reuse_tape=false
+        tape_id::Integer, x::Union{Cdouble,Vector{Cdouble}}
     )
 """
-function init_abs_normal_form(
-    f, x::Union{Cdouble,Vector{Cdouble}}; tape_id::Integer=0, reuse_tape=false
-)
-    if !reuse_tape
-        m, n = create_tape(f, x, tape_id; enableMinMaxUsingAbs=true)
-        reuse_tape = true
-    else
-        m = TbadoubleModule.num_dependents(tape_id)
-        n = TbadoubleModule.num_independents(tape_id)
-    end
-    return AbsNormalForm(tape_id, m, n, x, Vector{Cdouble}(undef, m))
-end
-
-"""
-    init_abs_normal_form(
-        f, x::Union{Cdouble,Vector{Cdouble}}, param::Union{Cdouble, Vector{Cdouble}}; tape_id::Integer=0, reuse_tape=false
-    )
-"""
-function init_abs_normal_form(
-    f,
-    x::Union{Cdouble,Vector{Cdouble}},
-    param::Union{Cdouble,Vector{Cdouble}};
-    tape_id::Integer=0,
-    reuse_tape=false,
-)
-    if !reuse_tape
-        m, n = create_tape(f, x, param, tape_id; enableMinMaxUsingAbs=true)
-        reuse_tape = true
-    else
-        m = TbadoubleModule.num_dependents(tape_id)
-        n = TbadoubleModule.num_independents(tape_id)
-    end
+function init_abs_normal_form(tape_id::Integer, x::Union{Cdouble,Vector{Cdouble}})
+    m = ccall((:num_dependent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
+    n = ccall((:num_independent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
     return AbsNormalForm(tape_id, m, n, x, Vector{Cdouble}(undef, m))
 end

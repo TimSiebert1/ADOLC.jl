@@ -4,10 +4,12 @@
     end
 
     x = [1.0, 2.0, 2.0]
+    tape_id = 1
+    _, m, n = create_tape(f, x, tape_id)
     dir = [-1.0, 1.0, 3.0]
     weights = [2.0, 1.0]
-    res = CxxVector(3)
-    derivative!(res, f, 2, 3, x, :vec_hess_vec; dir=dir, weights=weights)
+    res = CxxVector(n)
+    derivative!(res, tape_id, 2, 3, x, :vec_hess_vec; dir=dir, weights=weights)
 
     @test res[1] == 32.0
     @test res[2] == -4.0
@@ -28,10 +30,12 @@ end
     # 12 0   12
 
     x = [1.0, 2.0, 2.0]
+    tape_id = 2
+    _, m, n = create_tape(f, x, tape_id)
     dir = [[1.0, 2.0, 3.0] [-1.0, -2.0, -3.0]]
     weights = [2.0, 1.0]
     res = CxxMatrix(3, 2)
-    derivative!(res, f, 2, 3, x, :vec_hess_mat; dir=dir, weights=weights)
+    derivative!(res, tape_id, 2, 3, x, :vec_hess_mat; dir=dir, weights=weights)
 
     @test res[1, 1] == 52.0
     @test res[1, 2] == -52.0
@@ -55,9 +59,11 @@ end
 
     # 
     x = [1.0, 2.0, 2.0]
+    tape_id = 1
+    _, m, n = create_tape(f, x, tape_id)
     weights = [-1.0]
     res = CxxMatrix(3, 3)
-    derivative!(res, f, 1, 3, x, :vec_hess; weights=weights)
+    derivative!(res, tape_id, 1, 3, x, :vec_hess; weights=weights)
 
     @test res[1, 1] == 0.0
     @test res[1, 2] == 0.0
@@ -88,9 +94,10 @@ end
 
     x = [1.0, 2.0, 2.0]
     weights = [-1.0, 1.0]
-
+    tape_id = 1
+    _, m, n = create_tape(f, x, tape_id)
     res = CxxMatrix(3, 3)
-    derivative!(res, f, 2, 3, x, :vec_hess; weights=weights)
+    derivative!(res, tape_id, 2, 3, x, :vec_hess; weights=weights)
 
     @test res[1, 1] == -4.0
     @test res[1, 2] == -2.0
@@ -131,7 +138,9 @@ end
     end
     weights[3, 2] = -1.0
     res = CxxMatrix(3, 3)
-    derivative!(res, f, 2, 3, x, :mat_hess_vec; dir=dir, weights=weights)
+    tape_id = 34
+    _, m, n = create_tape(f, x, tape_id)
+    derivative!(res, tape_id, 2, 3, x, :mat_hess_vec; dir=dir, weights=weights)
 
     @test res[1, 1] == -2.0
     @test res[1, 2] == -2.0
@@ -146,60 +155,6 @@ end
     @test res[3, 3] == -24.0
 end
 
-@testset "hess_1D" begin
-    function f(x)
-        return x[1]^3 + x[2]^2 * x[3]
-    end
-    res = CxxTensor(1, 3, 3)
-    derivative!(res, f, 1, 3, [-1.0, 1.0, 2.0], :hess)
-
-    @test res[1, 1, 1] == -6.0
-    @test res[1, 2, 1] == 0.0
-    @test res[1, 3, 1] == 0.0
-
-    @test res[1, 1, 2] == 0.0
-    @test res[1, 2, 2] == 4.0
-    @test res[1, 3, 2] == 2.0
-
-    @test res[1, 1, 3] == 0.0
-    @test res[1, 2, 3] == 0.0
-    @test res[1, 3, 3] == 0.0
-end
-
-@testset "hess_2D" begin
-    function f(x)
-        return [x[1]^3 + x[2]^2, 3 * x[2] * x[3]^3]
-    end
-
-    x = [-1.0, 2.0, 2.0]
-    res = CxxTensor(2, 3, 3)
-    derivative!(res, f, 2, 3, x, :hess; tape_id=1)
-
-    @test res[1, 1, 1] == -6.0
-    @test res[1, 2, 1] == 0.0
-    @test res[1, 3, 1] == 0.0
-
-    @test res[2, 1, 1] == 0.0
-    @test res[2, 2, 1] == 0.0
-    @test res[2, 3, 1] == 0.0
-
-    @test res[1, 1, 2] == 0.0
-    @test res[1, 2, 2] == 2.0
-    @test res[1, 3, 2] == 0.0
-
-    @test res[2, 1, 2] == 0.0
-    @test res[2, 2, 2] == 0.0
-    @test res[2, 3, 2] == 36.0
-
-    @test res[1, 1, 3] == 0.0
-    @test res[1, 2, 3] == 0.0
-    @test res[1, 3, 3] == 0.0
-
-    @test res[2, 1, 3] == 0.0
-    @test res[2, 2, 3] == 0.0
-    @test res[2, 3, 3] == 72.0
-end
-
 @testset "mat_hess_mat" begin
     ()
     function f(x)
@@ -210,9 +165,11 @@ end
     dir = [[1.0, 2.0, 3.0] [-1.0, -2.0, -3.0]]
     weights = [[1.0, 0.0, 0.0] [0.0, 1.0, -1.0]]
 
+    tape_id = 3
+    create_tape(f, x, tape_id)
     res = CxxTensor(3, 3, 2)
 
-    derivative!(res, f, 2, 3, x, :mat_hess_mat; dir=dir, weights=weights)
+    derivative!(res, tape_id, 2, 3, x, :mat_hess_mat; dir=dir, weights=weights)
 
     @test res[1, 1, 1] == 8.0
     @test res[1, 1, 2] == -8.0
@@ -242,6 +199,65 @@ end
     @test res[3, 3, 2] == 48.0
 end
 
+@testset "hess_1D" begin
+    function f(x)
+        return x[1]^3 + x[2]^2 * x[3]
+    end
+    res = CxxTensor(1, 3, 3)
+    x = [-1.0, 1.0, 2.0]
+    tape_id = 34
+    _, m, n = create_tape(f, x, tape_id)
+    derivative!(res, tape_id, 1, 3, x, :hess)
+
+    @test res[1, 1, 1] == -6.0
+    @test res[1, 2, 1] == 0.0
+    @test res[1, 3, 1] == 0.0
+
+    @test res[1, 1, 2] == 0.0
+    @test res[1, 2, 2] == 4.0
+    @test res[1, 3, 2] == 2.0
+
+    @test res[1, 1, 3] == 0.0
+    @test res[1, 2, 3] == 0.0
+    @test res[1, 3, 3] == 0.0
+end
+
+@testset "hess_2D" begin
+    function f(x)
+        return [x[1]^3 + x[2]^2, 3 * x[2] * x[3]^3]
+    end
+
+    x = [-1.0, 2.0, 2.0]
+    tape_id = 43
+    create_tape(f, x, tape_id)
+    res = CxxTensor(2, 3, 3)
+    derivative!(res, tape_id, 2, 3, x, :hess)
+
+    @test res[1, 1, 1] == -6.0
+    @test res[1, 2, 1] == 0.0
+    @test res[1, 3, 1] == 0.0
+
+    @test res[2, 1, 1] == 0.0
+    @test res[2, 2, 1] == 0.0
+    @test res[2, 3, 1] == 0.0
+
+    @test res[1, 1, 2] == 0.0
+    @test res[1, 2, 2] == 2.0
+    @test res[1, 3, 2] == 0.0
+
+    @test res[2, 1, 2] == 0.0
+    @test res[2, 2, 2] == 0.0
+    @test res[2, 3, 2] == 36.0
+
+    @test res[1, 1, 3] == 0.0
+    @test res[1, 2, 3] == 0.0
+    @test res[1, 3, 3] == 0.0
+
+    @test res[2, 1, 3] == 0.0
+    @test res[2, 2, 3] == 0.0
+    @test res[2, 3, 3] == 72.0
+end
+
 @testset "hess_vec" begin
     function f(x)
         return [x[1]^2 * x[2], x[1] * x[3]^3]
@@ -251,7 +267,9 @@ end
     dir = [-1.0, 1.0, 3.0]
 
     res = CxxMatrix(2, 3)
-    derivative!(res, f, 2, 3, x, :hess_vec; dir=dir)
+    tape_id = 3
+    create_tape(f, x, tape_id)
+    derivative!(res, tape_id, 2, 3, x, :hess_vec; dir=dir)
 
     @test res[1, 1] == -2.0
     @test res[1, 2] == -2.0
@@ -272,8 +290,9 @@ end
     weights = [[1.0, 0.0, 0.0] [0.0, 1.0, -1.0]]
 
     res = CxxTensor(3, 3, 3)
-
-    derivative!(res, f, 2, 3, x, :mat_hess; weights=weights)
+    tape_id = 3
+    create_tape(f, x, tape_id)
+    derivative!(res, tape_id, 2, 3, x, :mat_hess; weights=weights)
 
     @test res[1, 1, 1] == 4.0
     @test res[1, 1, 2] == 2.0
@@ -330,7 +349,9 @@ end
     end
     dir[3, 2] = -1.0
     res = CxxTensor(1, 3, 2)
-    derivative!(res, f, 1, 3, x, :hess_mat; dir=dir)
+    tape_id = 3
+    create_tape(f, x, tape_id)
+    derivative!(res, tape_id, 1, 3, x, :hess_mat; dir=dir)
 
     @test res[1, 1, 1] == 0.0
     @test res[1, 1, 2] == -12.0
@@ -369,7 +390,9 @@ end
     end
     weights[3, 2] = -1.0
     res = CxxMatrix(3, 3)
-    derivative!(res, f, 2, 3, x, :mat_hess_vec; dir=dir, weights=weights)
+    tape_id = 3
+    create_tape(f, x, tape_id)
+    derivative!(res, tape_id, 2, 3, x, :mat_hess_vec; dir=dir, weights=weights)
 
     @test res[1, 1] == -2.0
     @test res[1, 2] == -2.0

@@ -10,13 +10,11 @@
     x = [1.0, 1.0, 2.0]
     function_and_derivative_value!(res, f, 1, 3, x, :jac)
 
-
     @test res[1][1] == f(x)
     @test res[2][1] == 2.0
     @test res[2][2] == 2.0
     @test res[2][3] == 1.0
 end
-
 
 @testset "reuse_jac" begin
     # m = 1
@@ -41,8 +39,6 @@ end
     @test res[2][2] == 0.0
     @test res[2][3] == 1.0
 end
-
-
 
 @testset "jac_tl" begin
     # m > 1, n / 2 < m
@@ -113,7 +109,6 @@ end
     @test res[2][2, 3] == -4.0
     @test res[2][2, 4] == 4.0
 
-    
     x = [0.0, 1.0, 2.0, -1.0]
     function_and_derivative_value!(res, f, 2, 4, x, :jac; reuse_tape=true)
 
@@ -128,10 +123,7 @@ end
     @test res[2][2, 2] == 0.0
     @test res[2][2, 3] == -4.0
     @test res[2][2, 4] == 4.0
-
 end
-
-
 
 @testset "jac_vec" begin
     function f(x)
@@ -183,7 +175,6 @@ end
     @test res[1][2] == f(x)[2]
     @test res[2][1] == 1.0
     @test res[2][2] == 0.0
-
 end
 
 @testset "jac_mat" begin
@@ -236,7 +227,6 @@ end
     x = [2.0, 1.0, 2.0]
     function_and_derivative_value!(res, f, 2, 3, x, :jac_mat; dir=dir, reuse_tape=true)
 
-
     @test res[1][1] == f(x)[1]
     @test res[1][2] == f(x)[2]
     @test res[2][1, 1] == 4.0
@@ -247,10 +237,8 @@ end
     @test res[2][2, 2] == 0.0
     @test res[2][2, 3] == 12.0
 
-
     dir[1, 1] = 0.0
     function_and_derivative_value!(res, f, 2, 3, x, :jac_mat; dir=dir, reuse_tape=true)
-
 
     @test res[1][1] == f(x)[1]
     @test res[1][2] == f(x)[2]
@@ -309,7 +297,7 @@ end
     @test res[2][3] == 12
 
     function_and_derivative_value!(
-        res, f, 2, 3, x,:vec_jac; weights=[0.0, 1.0], reuse_tape=true
+        res, f, 2, 3, x, :vec_jac; weights=[0.0, 1.0], reuse_tape=true
     )
 
     @test res[1][1] == f(x)[1]
@@ -395,7 +383,9 @@ end
     @test res[2][3, 3] == 0.0
 
     x = [2.0, 1.0, 2.0]
-    function_and_derivative_value!(res, f, 2, 3, x, :mat_jac; weights=weights, reuse_tape=true)
+    function_and_derivative_value!(
+        res, f, 2, 3, x, :mat_jac; weights=weights, reuse_tape=true
+    )
 
     @test res[1][1] == f(x)[1]
     @test res[1][2] == f(x)[2]
@@ -415,10 +405,12 @@ end
     weights[1, 1] = 0.0
 
     x = [2.0, 1.0, 2.0]
-    function_and_derivative_value!(res, f, 2, 3, x, :mat_jac; weights=weights, reuse_tape=true)
+    function_and_derivative_value!(
+        res, f, 2, 3, x, :mat_jac; weights=weights, reuse_tape=true
+    )
 
     @test res[1][1] == f(x)[1]
-    @test res[1][2] == f(x)[2]    
+    @test res[1][2] == f(x)[2]
 
     @test res[2][1, 1] == 0.0
     @test res[2][1, 2] == 0.0

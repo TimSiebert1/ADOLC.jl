@@ -14,7 +14,9 @@ end
 
 function tensor_address(degree::Integer, adolc_partial::Vector{Cint})
     # "+1" because c++ indexing is -1
-    return TbadoubleModule.tensor_address(degree, adolc_partial) + 1
+    return ccall(
+        (:tensor_address, ADOLC_JLL_PATH), Cint, (Cint, Ptr{Cint}), degree, adolc_partial
+    ) + 1
 end
 
 """
@@ -97,99 +99,6 @@ function partial_to_adolc_format!(
         res[i] = 0
     end
     return sort!(res; rev=true)
-end
-
-"""
-    create_cxx_identity(n::I_1, m::I_2) where {I_1 <: Integer, I_2 <: Integer}
-
-Creates a identity matrix of shape (`n`, `m`) of type CxxPtr{CxxPtr{Float64}} (wrapper of C++'s double**).
-
-
-# Example
-```jldoctest
-id = CxxMatrix(create_cxx_identity(2, 4), 2, 4)
-
-
-# output
-
-2×4 CxxMatrix:
- 1.0  0.0  0.0  0.0
- 0.0  1.0  0.0  0.0
-```
-"""
-function create_cxx_identity(n::I_1, m::I_2) where {I_1<:Integer,I_2<:Integer}
-    I = myalloc2(n, m)
-    for i in 1:n
-        for j in 1:m
-            I[i, j] = 0.0
-            if i == j
-                I[i, i] = 1.0
-            end
-        end
-    end
-    return I
-end
-
-"""
-    create_partial_cxx_identity(n::I_1, idxs::Vector{I_2}) where {I_1 <: Integer, I_2 <: Integer}
-
-Creates a matrix of shape (`n`, `length(idxs)`) of type CxxPtr{CxxPtr{Float64}} (wrapper of C++'s double**).
-The columns are canonical basis vectors corresponding to the entries of `idxs`. The order of the basis vectors
-is defined by the order of the indices in `idxs`. Details about the application can be found in this [guide](@ref "Seed-Matrix").
-
-!!! warning
-    The number of rows `n` must be smaller than the maximal index of `idxs`!
-
-!!! warning
-    The values of `idxs` must be non-negative!
-
-# Examples
-```jldoctest
-n = 4
-idxs = [1, 3]
-id = CxxMatrix(create_partial_cxx_identity(n, idxs), n, length(idxs))
-# output
-
-4×2 CxxMatrix:
- 1.0  0.0
- 0.0  0.0
- 0.0  1.0
- 0.0  0.0
-```
-The order in `idxs` defines the order of the basis vectors.
-```jldoctest
-n = 3
-idxs = [3, 0, 1]
-id = CxxMatrix(create_partial_cxx_identity(n, idxs), n, length(idxs))
-
-
-# output
-
-3×3 CxxMatrix:
- 0.0  0.0  1.0
- 0.0  0.0  0.0
- 1.0  0.0  0.0
-```
-"""
-function create_partial_cxx_identity(
-    n::I_1, idxs::Vector{I_2}
-) where {I_1<:Integer,I_2<:Integer}
-    if n < maximum(idxs)
-        throw(
-            "ArgumentError: The number of rows must be greater than the largest index: $n < $(maximum(idxs)).",
-        )
-    end
-    m = length(idxs)
-    I = myalloc2(n, m)
-    for j in 1:m
-        for i in 1:n
-            I[i, j] = 0.0
-        end
-        if idxs[j] > 0
-            I[idxs[j], j] = 1.0
-        end
-    end
-    return I
 end
 
 """
@@ -382,7 +291,7 @@ end
     allocator(m::Integer, n::Integer, mode::Symbol, num_dir::Integer, num_weights::Integer)
 
 """
-function allocator(m, n, mode, num_dir, num_weights)
+function allocator(tape_id, m, n, mode, num_dir, num_weights, x)
     if mode === :jac
         if m > 1
             return CxxMatrix(m, n)
@@ -417,7 +326,7 @@ function allocator(m, n, mode, num_dir, num_weights)
     elseif mode === :mat_hess_mat
         return CxxTensor(num_weights, n, num_dir)
     elseif mode === :abs_normal
-        throw("NotImplementedError: Use `init_abs_normal_form` instead")
+        return init_abs_normal_form(tape_id, x)
     end
 end
 

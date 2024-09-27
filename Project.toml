@@ -5,13 +5,22 @@ version = "1.4.0"
 
 [deps]
 ADOLC_jll = "5f481b30-e4a3-563b-890b-c343462061b6"
+BandedMatrices = "aae01518-5342-5314-be14-df237901396f"
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 CxxWrap = "1f15a43c-97ca-5a2a-ae31-89f07a497df4"
+DifferentiationInterface = "a0c0ee7d-e4b9-4e03-894e-1c5f64a51d63"
+Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+Tapir = "07d77754-e150-4737-8c94-cd238a1fb45b"
+Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
-CxxWrap = "0.16"
 ADOLC_jll = "1.2.1"
+CxxWrap = "0.16"
 LinearAlgebra = "1.9"
 SpecialFunctions = "2.4"
 julia = "1.9"
