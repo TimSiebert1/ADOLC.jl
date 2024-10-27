@@ -16,7 +16,7 @@ mutable struct Adouble{T<:Union{TapeBasedAD,TapeLessAD}} <: AbstractFloat
     function Adouble{TapeBasedAD}(a::TapeBasedAD)
         adouble = new{TapeBasedAD}(a, true)
         return finalizer(
-            a -> ccall((:free_tb_adouble, ADOLC_JLL_PATH), Cvoid, (Ptr{Cvoid},), a.val),
+            a -> ccall((:free_tb_adouble, adolc_interface_lib), Cvoid, (Ptr{Cvoid},), a.val),
             adouble,
         )
     end
@@ -24,7 +24,7 @@ mutable struct Adouble{T<:Union{TapeBasedAD,TapeLessAD}} <: AbstractFloat
         if is_diff
             adouble = new{TapeBasedAD}(
                 ccall(
-                    (:create_tb_adouble, ADOLC_JLL_PATH),
+                    (:create_tb_adouble, adolc_interface_lib),
                     TapeBasedAD,
                     (Cdouble,),
                     Cdouble(val),
@@ -32,7 +32,7 @@ mutable struct Adouble{T<:Union{TapeBasedAD,TapeLessAD}} <: AbstractFloat
                 is_diff,
             )
             finalizer(
-                a -> ccall((:free_tb_adouble, ADOLC_JLL_PATH), Cvoid, (Ptr{Cvoid},), a.val),
+                a -> ccall((:free_tb_adouble, adolc_interface_lib), Cvoid, (Ptr{Cvoid},), a.val),
                 adouble,
             )
         else
@@ -43,7 +43,7 @@ mutable struct Adouble{T<:Union{TapeBasedAD,TapeLessAD}} <: AbstractFloat
     function Adouble{TapeLessAD}(a::TapeLessAD)
         adouble = new{TapeLessAD}(a, true)
         return finalizer(
-            a -> ccall((:free_tl_adouble, ADOLC_JLL_PATH), Cvoid, (Ptr{Cvoid},), a.val),
+            a -> ccall((:free_tl_adouble, adolc_interface_lib), Cvoid, (Ptr{Cvoid},), a.val),
             adouble,
         )
     end
@@ -51,7 +51,7 @@ mutable struct Adouble{T<:Union{TapeBasedAD,TapeLessAD}} <: AbstractFloat
         if is_diff
             adouble = new{TapeLessAD}(
                 ccall(
-                    (:create_tl_adouble, ADOLC_JLL_PATH),
+                    (:create_tl_adouble, adolc_interface_lib),
                     TapeLessAD,
                     (Cdouble,),
                     Cdouble(val),
@@ -59,7 +59,7 @@ mutable struct Adouble{T<:Union{TapeBasedAD,TapeLessAD}} <: AbstractFloat
                 is_diff,
             )
             finalizer(
-                a -> ccall((:free_tl_adouble, ADOLC_JLL_PATH), Cvoid, (Ptr{Cvoid},), a.val),
+                a -> ccall((:free_tl_adouble, adolc_interface_lib), Cvoid, (Ptr{Cvoid},), a.val),
                 adouble,
             )
         else
@@ -70,7 +70,7 @@ mutable struct Adouble{T<:Union{TapeBasedAD,TapeLessAD}} <: AbstractFloat
     function Adouble{TapeLessAD}(val::V, ad_val::W) where {V<:Real,W<:Real}
         adouble = new{TapeLessAD}(
             ccall(
-                (:create_tl_adouble_with_ad, ADOLC_JLL_PATH),
+                (:create_tl_adouble_with_ad, adolc_interface_lib),
                 TapeLessAD,
                 (Cdouble, Ptr{Cdouble}),
                 Cdouble(val),
@@ -79,14 +79,14 @@ mutable struct Adouble{T<:Union{TapeBasedAD,TapeLessAD}} <: AbstractFloat
             true,
         )
         return finalizer(
-            a -> ccall((:free_tl_adouble, ADOLC_JLL_PATH), Cvoid, (Ptr{Cvoid},), a.val),
+            a -> ccall((:free_tl_adouble, adolc_interface_lib), Cvoid, (Ptr{Cvoid},), a.val),
             adouble,
         )
     end
     function Adouble{TapeLessAD}(val::V, ad_val::Vector{W}) where {V<:Real,W<:Real}
         adouble = new{TapeLessAD}(
             ccall(
-                (:create_tl_adouble_with_ad, ADOLC_JLL_PATH),
+                (:create_tl_adouble_with_ad, adolc_interface_lib),
                 TapeLessAD,
                 (Cdouble, Ptr{Vector{Cdouble}}),
                 Cdouble(val),
@@ -95,7 +95,7 @@ mutable struct Adouble{T<:Union{TapeBasedAD,TapeLessAD}} <: AbstractFloat
             true,
         )
         return finalizer(
-            a -> ccall((:free_tl_adouble, ADOLC_JLL_PATH), Cvoid, (Ptr{Cvoid},), a.val),
+            a -> ccall((:free_tl_adouble, adolc_interface_lib), Cvoid, (Ptr{Cvoid},), a.val),
             adouble,
         )
     end
@@ -114,16 +114,16 @@ function Base.unsafe_convert(
 end
 
 function get_value(a::TapeBasedAD)
-    return ccall((:get_tb_value, ADOLC_JLL_PATH), Cdouble, (Ptr{Cvoid},), a)
+    return ccall((:get_tb_value, adolc_interface_lib), Cdouble, (Ptr{Cvoid},), a)
 end
 
 function get_value(a::TapeLessAD)
-    return ccall((:get_tl_value, ADOLC_JLL_PATH), Cdouble, (Ptr{Cvoid},), a)
+    return ccall((:get_tl_value, adolc_interface_lib), Cdouble, (Ptr{Cvoid},), a)
 end
 
 function get_ad_value(a::TapeLessAD)
     return unsafe_load(
-        ccall((:get_tl_ad_values, ADOLC_JLL_PATH), Ptr{Cdouble}, (Ptr{Cvoid},), a)
+        ccall((:get_tl_ad_values, adolc_interface_lib), Ptr{Cdouble}, (Ptr{Cvoid},), a)
     )
 end
 function get_ad_value(a::Adouble{TapeLessAD})
@@ -133,7 +133,7 @@ end
 
 function get_ad_value(a::TapeLessAD, idx::Integer)
     return ccall(
-        (:get_tl_ad_value_idx, ADOLC_JLL_PATH), Cdouble, (Ptr{Cvoid}, Cint), a, idx - 1
+        (:get_tl_ad_value_idx, adolc_interface_lib), Cdouble, (Ptr{Cvoid}, Cint), a, idx - 1
     )
 end
 function get_ad_value(a::Adouble{TapeLessAD}, idx::Integer)
@@ -142,7 +142,7 @@ function get_ad_value(a::Adouble{TapeLessAD}, idx::Integer)
 end
 
 function get_ad_values(a::TapeLessAD, n::Integer)
-    ptr_vals = ccall((:get_tl_ad_values, ADOLC_JLL_PATH), Ptr{Cdouble}, (Ptr{Cvoid},), a)
+    ptr_vals = ccall((:get_tl_ad_values, adolc_interface_lib), Ptr{Cdouble}, (Ptr{Cvoid},), a)
     return unsafe_wrap(Vector{Cdouble}, ptr_vals, n)
 end
 function get_ad_values(a::Adouble{TapeLessAD}, n::Integer)
@@ -165,7 +165,7 @@ function get_value(a::Vector{Adouble{T}}) where {T<:Union{TapeBasedAD,TapeLessAD
 end
 
 function set_value(a::TapeLessAD, val::Cdouble)
-    return ccall((:set_tl_value, ADOLC_JLL_PATH), Cvoid, (Ptr{Cvoid}, Cdouble), a, val)
+    return ccall((:set_tl_value, adolc_interface_lib), Cvoid, (Ptr{Cvoid}, Cdouble), a, val)
 end
 function set_value(a::Adouble{TapeLessAD}, val::Cdouble)
     check_is_diff(a)
@@ -174,12 +174,12 @@ end
 
 function set_ad_value(a::TapeLessAD, val::Cdouble)
     return ccall(
-        (:set_tl_ad_value, ADOLC_JLL_PATH), Cvoid, (Ptr{Cvoid}, Ptr{Cdouble}), a, Ref(val)
+        (:set_tl_ad_value, adolc_interface_lib), Cvoid, (Ptr{Cvoid}, Ptr{Cdouble}), a, Ref(val)
     )
 end
 function set_ad_value(a::TapeLessAD, val::Vector{Cdouble})
     return ccall(
-        (:set_tl_ad_value, ADOLC_JLL_PATH),
+        (:set_tl_ad_value, adolc_interface_lib),
         Cvoid,
         (Ptr{Cvoid}, Ptr{Vector{Cdouble}}),
         a,
@@ -193,7 +193,7 @@ end
 
 function set_ad_value(a::TapeLessAD, idx::Integer, val::Cdouble)
     return ccall(
-        (:set_tl_ad_value_idx, ADOLC_JLL_PATH),
+        (:set_tl_ad_value_idx, adolc_interface_lib),
         Cvoid,
         (Ptr{Cvoid}, Cint, Cdouble),
         a,
@@ -207,7 +207,7 @@ function set_ad_value(a::Adouble{TapeLessAD}, idx::Integer, val::Cdouble)
 end
 
 function set_num_dir(n::Integer)
-    return ccall((:set_num_dir, ADOLC_JLL_PATH), Cvoid, (Cint,), n)
+    return ccall((:set_num_dir, adolc_interface_lib), Cvoid, (Cint,), n)
 end
 
 #-------- utilities for type handling ----------
@@ -248,14 +248,14 @@ Base.convert(::Type{Adouble{T}}, x::Adouble{T}) where {T<:Union{TapeBasedAD,Tape
 
 function mkparam(x::Cdouble)
     return Adouble{TapeBasedAD}(
-        ccall((:mkparam_, ADOLC_JLL_PATH), TapeBasedAD, (Cdouble,), x)
+        ccall((:mkparam_, adolc_interface_lib), TapeBasedAD, (Cdouble,), x)
     )
 end
 
 function mkparam(x::Vector{Cdouble})
     return [
         Adouble{TapeBasedAD}(
-            ccall((:mkparam_, ADOLC_JLL_PATH), TapeBasedAD, (Cdouble,), x_i)
+            ccall((:mkparam_, adolc_interface_lib), TapeBasedAD, (Cdouble,), x_i)
         ) for x_i in x
     ]
 end

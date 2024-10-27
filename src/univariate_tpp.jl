@@ -24,8 +24,8 @@ function univariate_tpp(
     if !reuse_tape
         _, m, n = create_tape(f, x, tape_id)
     else
-        m = ccall((:num_dependent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
-        n = ccall((:num_independent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
+        m = ccall((:num_dependent, adolc_interface_lib), Cuint, (Cshort,), tape_id)
+        n = ccall((:num_independent, adolc_interface_lib), Cuint, (Cshort,), tape_id)
     end
     init_tp = CxxMatrix(zeros(Cdouble, n, degree + 1))
     for i in 1:n
@@ -62,8 +62,8 @@ function univariate_tpp(
     if !reuse_tape
         y, m, n = create_tape(f, x, tape_id)
     else
-        m = ccall((:num_dependent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
-        n = ccall((:num_independent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
+        m = ccall((:num_dependent, adolc_interface_lib), Cuint, (Cshort,), tape_id)
+        n = ccall((:num_independent, adolc_interface_lib), Cuint, (Cshort,), tape_id)
     end
     res = CxxMatrix(m, degree + 1)
     univariate_tpp!(res, tape_id, m, n, degree, init_tp; keep=keep)
@@ -87,7 +87,7 @@ function univariate_tpp!(
     res, tape_id, m::Integer, n::Integer, degree::Integer, init_tp; keep::Bool=false
 )
     return ccall(
-        (:forward1, ADOLC_JLL_PATH),
+        (:forward1, adolc_interface_lib),
         Cvoid,
         (Cshort, Cint, Cint, Cint, Cint, Ptr{Ptr{Cdouble}}, Ptr{Ptr{Cdouble}}),
         tape_id,

@@ -15,7 +15,7 @@ end
 function tensor_address(degree::Integer, adolc_partial::Vector{Cint})
     # "+1" because c++ indexing is -1
     return ccall(
-        (:tensor_address, ADOLC_JLL_PATH), Cint, (Cint, Ptr{Cint}), degree, adolc_partial
+        (:tensor_address, adolc_interface_lib), Cint, (Cint, Ptr{Cint}), degree, adolc_partial
     ) + 1
 end
 

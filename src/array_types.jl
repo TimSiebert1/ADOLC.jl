@@ -1,8 +1,9 @@
 module array_types
-const ADOLC_JLL_PATH = "/Users/timsiebert/Projects/ADOLCInterface/ADOLCInterface.jl/ADOL-CInterface/ADOL-C/c_interface/libADOLCInterface.dylib"
+#using ADOLC_jll
+adolc_interface_lib = "/Users/timsiebert/Projects/ADOLCInterface/ADOLCInterface.jl/lib/libADOLCInterface.dylib"
 function Base.getindex(cxx_ptr_ptr_ptr::Ptr{Ptr{Ptr{Cdouble}}}, dim)
     return ccall(
-        (:getindex_tens, ADOLC_JLL_PATH),
+        (:getindex_tens, adolc_interface_lib),
         Ptr{Ptr{Cdouble}},
         (Ptr{Ptr{Ptr{Cdouble}}}, Cint),
         cxx_ptr_ptr_ptr,
@@ -11,7 +12,7 @@ function Base.getindex(cxx_ptr_ptr_ptr::Ptr{Ptr{Ptr{Cdouble}}}, dim)
 end
 function Base.getindex(cxx_ptr_ptr_ptr::Ptr{Ptr{Ptr{Cdouble}}}, dim::Int64)
     return ccall(
-        (:getindex_tens, ADOLC_JLL_PATH),
+        (:getindex_tens, adolc_interface_lib),
         Ptr{Ptr{Cdouble}},
         (Ptr{Ptr{Ptr{Cdouble}}}, Cint),
         cxx_ptr_ptr_ptr,
@@ -20,7 +21,7 @@ function Base.getindex(cxx_ptr_ptr_ptr::Ptr{Ptr{Ptr{Cdouble}}}, dim::Int64)
 end
 function Base.getindex(cxx_ptr_ptr_ptr::Ptr{Ptr{Ptr{Cdouble}}}, dim, row, col)
     return ccall(
-        (:getindex_tens, ADOLC_JLL_PATH),
+        (:getindex_tens, adolc_interface_lib),
         Cdouble,
         (Ptr{Ptr{Ptr{Cdouble}}}, Cint, Cint, Cint),
         cxx_ptr_ptr_ptr,
@@ -33,7 +34,7 @@ function Base.getindex(
     cxx_ptr_ptr_ptr::Ptr{Ptr{Ptr{Cdouble}}}, dim::Int64, row::Int64, col::Int64
 )
     return ccall(
-        (:getindex_tens, ADOLC_JLL_PATH),
+        (:getindex_tens, adolc_interface_lib),
         Cdouble,
         (Ptr{Ptr{Ptr{Cdouble}}}, Cint, Cint, Cint),
         cxx_ptr_ptr_ptr,
@@ -44,7 +45,7 @@ function Base.getindex(
 end
 function Base.setindex!(cxx_ptr_ptr_ptr::Ptr{Ptr{Ptr{Cdouble}}}, val, dim, row, col)
     return ccall(
-        (:setindex_tens, ADOLC_JLL_PATH),
+        (:setindex_tens, adolc_interface_lib),
         Cvoid,
         (Ptr{Ptr{Ptr{Cdouble}}}, Cdouble, Cint, Cint, Cint),
         cxx_ptr_ptr_ptr,
@@ -62,7 +63,7 @@ function Base.setindex!(
     col::Int64,
 )
     return ccall(
-        (:setindex_tens, ADOLC_JLL_PATH),
+        (:setindex_tens, adolc_interface_lib),
         Cvoid,
         (Ptr{Ptr{Ptr{Cdouble}}}, Cdouble, Cint, Cint, Cint),
         cxx_ptr_ptr_ptr,
@@ -74,7 +75,7 @@ function Base.setindex!(
 end
 function Base.getindex(cxx_ptr_ptr::Ptr{Ptr{Cdouble}}, row, col)
     return ccall(
-        (:getindex_mat, ADOLC_JLL_PATH),
+        (:getindex_mat, adolc_interface_lib),
         Cdouble,
         (Ptr{Ptr{Cdouble}}, Cint, Cint),
         cxx_ptr_ptr,
@@ -84,7 +85,7 @@ function Base.getindex(cxx_ptr_ptr::Ptr{Ptr{Cdouble}}, row, col)
 end
 function Base.getindex(cxx_ptr_ptr::Ptr{Ptr{Cdouble}}, row::Int64, col::Int64)
     return ccall(
-        (:getindex_mat, ADOLC_JLL_PATH),
+        (:getindex_mat, adolc_interface_lib),
         Cdouble,
         (Ptr{Ptr{Cdouble}}, Cint, Cint),
         cxx_ptr_ptr,
@@ -94,7 +95,7 @@ function Base.getindex(cxx_ptr_ptr::Ptr{Ptr{Cdouble}}, row::Int64, col::Int64)
 end
 function Base.setindex!(cxx_ptr_ptr::Ptr{Ptr{Cdouble}}, val, row, col)
     return ccall(
-        (:setindex_mat, ADOLC_JLL_PATH),
+        (:setindex_mat, adolc_interface_lib),
         Cvoid,
         (Ptr{Ptr{Cdouble}}, Cdouble, Cint, Cint),
         cxx_ptr_ptr,
@@ -107,7 +108,7 @@ function Base.setindex!(
     cxx_ptr_ptr::Ptr{Ptr{Cdouble}}, val::Cdouble, row::Int64, col::Int64
 )
     return ccall(
-        (:setindex_mat, ADOLC_JLL_PATH),
+        (:setindex_mat, adolc_interface_lib),
         Cvoid,
         (Ptr{Ptr{Cdouble}}, Cdouble, Cint, Cint),
         cxx_ptr_ptr,
@@ -118,17 +119,17 @@ function Base.setindex!(
 end
 function Base.getindex(cxx_ptr::Ptr{Cdouble}, row::Int64)
     return ccall(
-        (:getindex_vec, ADOLC_JLL_PATH), Cdouble, (Ptr{Cdouble}, Cint), cxx_ptr, row - 1
+        (:getindex_vec, adolc_interface_lib), Cdouble, (Ptr{Cdouble}, Cint), cxx_ptr, row - 1
     )
 end
 function Base.getindex(cxx_ptr::Ptr{Cdouble}, row)
     return ccall(
-        (:getindex_vec, ADOLC_JLL_PATH), Cdouble, (Ptr{Cdouble}, Cint), cxx_ptr, row - 1
+        (:getindex_vec, adolc_interface_lib), Cdouble, (Ptr{Cdouble}, Cint), cxx_ptr, row - 1
     )
 end
 function Base.setindex!(cxx_ptr::Ptr{Cdouble}, val::Cdouble, row::Int64)
     return ccall(
-        (:setindex_vec, ADOLC_JLL_PATH),
+        (:setindex_vec, adolc_interface_lib),
         Cvoid,
         (Ptr{Cdouble}, Cdouble, Cint),
         cxx_ptr,
@@ -138,7 +139,7 @@ function Base.setindex!(cxx_ptr::Ptr{Cdouble}, val::Cdouble, row::Int64)
 end
 function Base.setindex!(cxx_ptr::Ptr{Cdouble}, val, row)
     return ccall(
-        (:setindex_vec, ADOLC_JLL_PATH),
+        (:setindex_vec, adolc_interface_lib),
         Cvoid,
         (Ptr{Cdouble}, Cdouble, Cint),
         cxx_ptr,
@@ -148,11 +149,11 @@ function Base.setindex!(cxx_ptr::Ptr{Cdouble}, val, row)
 end
 
 function cxx_tensor_finalizer(x)
-    return ccall((:myfree3, ADOLC_JLL_PATH), Cvoid, (Ptr{Ptr{Ptr{Cvoid}}},), x.data)
+    return ccall((:myfree3, adolc_interface_lib), Cvoid, (Ptr{Ptr{Ptr{Cvoid}}},), x.data)
 end
 function alloc_tensor(dim1, dim2, dim3)
     return ccall(
-        (:myalloc3, ADOLC_JLL_PATH),
+        (:myalloc3, adolc_interface_lib),
         Ptr{Ptr{Ptr{Cdouble}}},
         (Cint, Cint, Cint),
         dim1,
@@ -224,10 +225,10 @@ function Base.getindex(cxx_tensor::CxxTensor, dim1::Integer, dim2::Integer, dim3
 end
 
 function cxx_mat_finalizer(cxx_mat)
-    return ccall((:myfree2, ADOLC_JLL_PATH), Cvoid, (Ptr{Ptr{Cdouble}},), cxx_mat.data)
+    return ccall((:myfree2, adolc_interface_lib), Cvoid, (Ptr{Ptr{Cdouble}},), cxx_mat.data)
 end
 function alloc_matrix(dim1, dim2)
-    return ccall((:myalloc2, ADOLC_JLL_PATH), Ptr{Ptr{Cdouble}}, (Cint, Cint), dim1, dim2)
+    return ccall((:myalloc2, adolc_interface_lib), Ptr{Ptr{Cdouble}}, (Cint, Cint), dim1, dim2)
 end
 
 """
@@ -280,9 +281,9 @@ function Base.getindex(cxx_mat::CxxMatrix, dim1::Integer, dim2::Integer)
 end
 
 function cxx_vec_finalizer(cxx_vec)
-    return ccall((:myfree1, ADOLC_JLL_PATH), Cvoid, (Ptr{Cdouble},), cxx_vec.data)
+    return ccall((:myfree1, adolc_interface_lib), Cvoid, (Ptr{Cdouble},), cxx_vec.data)
 end
-alloc_vector(dim) = ccall((:myalloc1, ADOLC_JLL_PATH), Ptr{Cdouble}, (Cint,), dim)
+alloc_vector(dim) = ccall((:myalloc1, adolc_interface_lib), Ptr{Cdouble}, (Cint,), dim)
 """
     mutable struct CxxVector <: AbstractVector{Cdouble}
 Wrapper of a `double*` (`Ptr{Cdouble}`).

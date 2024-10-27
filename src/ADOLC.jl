@@ -1,5 +1,6 @@
 module ADOLC
-const ADOLC_JLL_PATH = "/Users/timsiebert/Projects/ADOLCInterface/ADOLCInterface.jl/ADOL-CInterface/ADOL-C/c_interface/libADOLCInterface.dylib"
+# using ADOLC_jll
+adolc_interface_lib = "/Users/timsiebert/Projects/ADOLCInterface/ADOLCInterface.jl/lib/libADOLCInterface.dylib"
 using CxxWrap
 using LinearAlgebra
 using SpecialFunctions: SpecialFunctions

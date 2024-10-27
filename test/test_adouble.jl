@@ -1,7 +1,7 @@
 
 @testset "adouble" begin
     ()
-    a = ccall((:create_tb_adouble, ADOLC_JLL_PATH), TapeBasedAD, (Cdouble,), 3.0)
+    a = ccall((:create_tb_adouble, adolc_interface_lib), TapeBasedAD, (Cdouble,), 3.0)
     @test get_value(Adouble{TapeBasedAD}(a)) == 3.0
     @test get_value(Adouble{TapeBasedAD}(3.0)) == 3.0
     @test get_value(Adouble{TapeBasedAD}(3.0; is_diff=true)) == 3.0

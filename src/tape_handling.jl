@@ -2,7 +2,7 @@
 
 function Base.:<<(a::TapeBasedAD, x::Cdouble)
     return ccall(
-        (:create_independent, ADOLC_JLL_PATH), Cvoid, (Ptr{Cvoid}, Cdouble), a.adouble, x
+        (:create_independent, adolc_interface_lib), Cvoid, (Ptr{Cvoid}, Cdouble), a.adouble, x
     )
 end
 function Base.:<<(a::Adouble{TapeBasedAD}, x::Cdouble)
@@ -41,7 +41,7 @@ end
 
 function Base.:>>(a::TapeBasedAD, x_ref::Base.RefArray{Cdouble})
     return ccall(
-        (:create_dependent, ADOLC_JLL_PATH), Cvoid, (Ptr{Cvoid}, Ptr{Cdouble}), a, x_ref
+        (:create_dependent, adolc_interface_lib), Cvoid, (Ptr{Cvoid}, Ptr{Cdouble}), a, x_ref
     )
 end
 function Base.:>>(a::Adouble{TapeBasedAD}, x::Vector{Cdouble})
@@ -66,11 +66,11 @@ end
 
 function trace_on(tag; keep=0)
     return ccall(
-        (:c_trace_on, ADOLC_JLL_PATH), Cint, (Cshort, Cint), Cshort(tag), Cint(keep)
+        (:c_trace_on, adolc_interface_lib), Cint, (Cshort, Cint), Cshort(tag), Cint(keep)
     )
 end
 function trace_off(; flag=0)
-    return ccall((:c_trace_off, ADOLC_JLL_PATH), Cint, (Cint,), Cint(flag))
+    return ccall((:c_trace_off, adolc_interface_lib), Cint, (Cint,), Cint(flag))
 end
 
 # --------------------- create tape -----------------------------
@@ -83,7 +83,7 @@ function create_tape(
     enableMinMaxUsingAbs=false,
 )
     if enableMinMaxUsingAbs
-        ccall((:enableMinMaxUsingAbs, ADOLC_JLL_PATH), Cvoid, ())
+        ccall((:enableMinMaxUsingAbs, adolc_interface_lib), Cvoid, ())
     end
     trace_on(tape_id; keep=keep)
     a = create_independent(x)
@@ -91,7 +91,7 @@ function create_tape(
     y = create_dependent(b)
     trace_off(; flag=flag)
     if enableMinMaxUsingAbs
-        ccall((:disableMinMaxUsingAbs, ADOLC_JLL_PATH), Cvoid, ())
+        ccall((:disableMinMaxUsingAbs, adolc_interface_lib), Cvoid, ())
     end
     return y, length(y), length(x)
 end
@@ -106,7 +106,7 @@ function create_tape(
     enableMinMaxUsingAbs=false,
 )
     if enableMinMaxUsingAbs
-        ccall((:enableMinMaxUsingAbs, ADOLC_JLL_PATH), Cvoid, ())
+        ccall((:enableMinMaxUsingAbs, adolc_interface_lib), Cvoid, ())
     end
     trace_on(tape_id; keep=keep)
     a, a_param = create_independent(x, param)
@@ -114,7 +114,7 @@ function create_tape(
     y = create_dependent(b)
     trace_off(; flag=flag)
     if enableMinMaxUsingAbs
-        ccall((:disableMinMaxUsingAbs, ADOLC_JLL_PATH), Cvoid, ())
+        ccall((:disableMinMaxUsingAbs, adolc_interface_lib), Cvoid, ())
     end
     return y, length(y), length(x)
 end
@@ -137,7 +137,7 @@ end
 
 function set_param_vec(tape_id, param)
     return ccall(
-        (:set_param_vec, ADOLC_JLL_PATH),
+        (:set_param_vec, adolc_interface_lib),
         Cvoid,
         (Cshort, Cuint, Ptr{Cdouble}),
         tape_id,

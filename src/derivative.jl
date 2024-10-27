@@ -71,8 +71,8 @@ function derivative(
     if !reuse_tape
         _, m, n = create_tape(f, x, tape_id; enableMinMaxUsingAbs=mode == :abs_normal)
     else
-        m = ccall((:num_dependent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
-        n = ccall((:num_independent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
+        m = ccall((:num_dependent, adolc_interface_lib), Cuint, (Cshort,), tape_id)
+        n = ccall((:num_independent, adolc_interface_lib), Cuint, (Cshort,), tape_id)
     end
     res = allocator(tape_id, m, n, mode, size(dir, 2)[1], size(weights, 1)[1], x)
     if mode === :abs_normal
@@ -140,8 +140,8 @@ function derivative(
         )
     else
         set_param_vec(tape_id, param)
-        m = ccall((:num_dependent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
-        n = ccall((:num_independent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
+        m = ccall((:num_dependent, adolc_interface_lib), Cuint, (Cshort,), tape_id)
+        n = ccall((:num_independent, adolc_interface_lib), Cuint, (Cshort,), tape_id)
     end
     res = allocator(tape_id, m, n, mode, size(dir, 2)[1], size(weights, 1)[1], x)
     if mode === :abs_normal
@@ -217,8 +217,8 @@ function derivative(
         _, m, n = create_tape(f, x, tape_id)
         reuse_tape = true
     else
-        m = ccall((:num_dependent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
-        n = ccall((:num_independent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
+        m = ccall((:num_dependent, adolc_interface_lib), Cuint, (Cshort,), tape_id)
+        n = ccall((:num_independent, adolc_interface_lib), Cuint, (Cshort,), tape_id)
     end
     res = CxxMatrix(m, length(partials))
     derivative!(res, tape_id, m, n, x, partials; id_seed=id_seed, adolc_format=adolc_format)
@@ -270,8 +270,8 @@ function derivative(
         _, m, n = create_tape(f, x, tape_id)
         reuse_tape = true
     else
-        m = ccall((:num_dependent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
-        n = ccall((:num_independent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
+        m = ccall((:num_dependent, adolc_interface_lib), Cuint, (Cshort,), tape_id)
+        n = ccall((:num_independent, adolc_interface_lib), Cuint, (Cshort,), tape_id)
     end
 
     res = CxxMatrix(m, length(partials))
@@ -299,8 +299,8 @@ function derivative(
         _, m, n = create_tape(f, x, tape_id)
         reuse_tape = true
     else
-        m = ccall((:num_dependent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
-        n = ccall((:num_independent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
+        m = ccall((:num_dependent, adolc_interface_lib), Cuint, (Cshort,), tape_id)
+        n = ccall((:num_independent, adolc_interface_lib), Cuint, (Cshort,), tape_id)
     end
     res = CxxMatrix(m, binomial(n + degree, degree))
     derivative!(res, tape_id, m, n, x, degree, CxxMatrix(create_cxx_identity(n, n), n, n))
@@ -329,8 +329,8 @@ function derivative(
         _, m, n = create_tape(f, x, tape_id)
         reuse_tape = true
     else
-        m = ccall((:num_dependent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
-        n = ccall((:num_independent, ADOLC_JLL_PATH), Cuint, (Cshort,), tape_id)
+        m = ccall((:num_dependent, adolc_interface_lib), Cuint, (Cshort,), tape_id)
+        n = ccall((:num_independent, adolc_interface_lib), Cuint, (Cshort,), tape_id)
     end
     num_seeds = size(seed, 2)
     res = CxxMatrix(m, binomial(num_seeds + degree, degree))
@@ -733,7 +733,7 @@ function zos_forward!(
     out::Vector{Cdouble}, tape_id::Integer, m::Integer, n::Integer, x::Vector{Cdouble}
 )
     return ccall(
-        (:zos_forward, ADOLC_JLL_PATH),
+        (:zos_forward, adolc_interface_lib),
         Cint,
         (Cshort, Cint, Cint, Cint, Ptr{Cdouble}, Ptr{Cdouble}),
         tape_id,
@@ -747,7 +747,7 @@ end
 
 function fos_reverse!(res::CxxVector, tape_id::Integer, m::Integer, n::Integer, weights)
     return ccall(
-        (:fos_reverse, ADOLC_JLL_PATH),
+        (:fos_reverse, adolc_interface_lib),
         Cint,
         (Cshort, Cint, Cint, Ptr{Cdouble}, Ptr{Cdouble}),
         tape_id,
@@ -770,7 +770,7 @@ function fov_reverse!(
 )
     num_weights = size(weights, 1)
     return ccall(
-        (:fov_reverse, ADOLC_JLL_PATH),
+        (:fov_reverse, adolc_interface_lib),
         Cint,
         (Cshort, Cint, Cint, Cint, Ptr{Ptr{Cdouble}}, Ptr{Ptr{Cdouble}}),
         tape_id,
@@ -792,7 +792,7 @@ function fos_forward!(
     keep::Integer=0,
 )
     return ccall(
-        (:fos_forward, ADOLC_JLL_PATH),
+        (:fos_forward, adolc_interface_lib),
         Cint,
         (Cshort, Cint, Cint, Cint, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cdouble}),
         tape_id,
@@ -829,7 +829,7 @@ function fov_forward!(
 )
     num_dir = size(dir, 2)
     return ccall(
-        (:fov_forward, ADOLC_JLL_PATH),
+        (:fov_forward, adolc_interface_lib),
         Cint,
         (
             Cshort,
@@ -886,7 +886,7 @@ function vec_hess_vec!(
         throw("Not twice differentiable!")
     end
     return ccall(
-        (:hos_reverse, ADOLC_JLL_PATH),
+        (:hos_reverse, adolc_interface_lib),
         Cint,
         (Cshort, Cint, Cint, Cint, Ptr{Cdouble}, Ptr{Ptr{Cdouble}}),
         tape_id,
@@ -1005,7 +1005,7 @@ function mat_hess_vec!(
     num_weights = size(weights, 1)
     fos_forward!([res_out, res_grad], tape_id, m, n, x, dir; keep=2)
     rc = ccall(
-        (:hov_reverse, ADOLC_JLL_PATH),
+        (:hov_reverse, adolc_interface_lib),
         Cint,
         (Cshort, Cint, Cint, Cint, Cint, Ptr{Ptr{Cdouble}}, Ptr{Ptr{Ptr{Cdouble}}}),
         tape_id,
@@ -1040,12 +1040,12 @@ function mat_hess_vec!(
 )
     num_weights = size(weights, 1)
     mat_short = ccall(
-        (:alloc_short_mat, ADOLC_JLL_PATH), Ptr{Ptr{Cshort}}, (Cint, Cint), num_weights, n
+        (:alloc_short_mat, adolc_interface_lib), Ptr{Ptr{Cshort}}, (Cint, Cint), num_weights, n
     )
     cxx_weights = isa(weights, Matrix) ? CxxMatrix(weights) : weights
     fos_forward!([res_out, res_grad], tape_id, m, n, x, dir; keep=2)
     rc = ccall(
-        (:hov_reverse, ADOLC_JLL_PATH),
+        (:hov_reverse, adolc_interface_lib),
         Cint,
         (
             Cshort,
@@ -1066,7 +1066,7 @@ function mat_hess_vec!(
         res_tmp,
         mat_short,
     )
-    ccall((:free_short_mat, ADOLC_JLL_PATH), Cvoid, (Ptr{Ptr{Cshort}},), mat_short)
+    ccall((:free_short_mat, adolc_interface_lib), Cvoid, (Ptr{Ptr{Cshort}},), mat_short)
     if lower_triag
         for i in 1:num_weights
             for j in 1:n
@@ -1274,7 +1274,7 @@ function higher_order!(
 )
     num_seeds = seed.dim2
     return ccall(
-        (:tensor_eval, ADOLC_JLL_PATH),
+        (:tensor_eval, adolc_interface_lib),
         Cint,
         (
             Cshort,
@@ -1315,7 +1315,7 @@ function higher_order!(
     end
     res_tmp = CxxMatrix(m, binomial(num_seeds + degree, degree))
     rc = ccall(
-        (:tensor_eval, ADOLC_JLL_PATH),
+        (:tensor_eval, adolc_interface_lib),
         Cint,
         (
             Cshort,
