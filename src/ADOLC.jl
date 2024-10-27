@@ -1,6 +1,5 @@
 module ADOLC
-# using ADOLC_jll
-adolc_interface_lib = "/Users/timsiebert/Projects/ADOLCInterface/ADOLCInterface.jl/lib/libADOLCInterface.dylib"
+using ADOLC_jll
 using LinearAlgebra
 using SpecialFunctions: SpecialFunctions
 
