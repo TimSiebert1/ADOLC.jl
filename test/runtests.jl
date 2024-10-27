@@ -1,9 +1,7 @@
 using ADOLC
 using ADOLC.array_types
 using Test
-#using ADOLC_jll
-adolc_interface_lib = "/Users/timsiebert/Projects/ADOLCInterface/ADOLCInterface.jl/lib/libADOLCInterface.dylib"
-using CxxWrap
+using ADOLC_jll
 using SpecialFunctions: SpecialFunctions
 
 include("test_adouble.jl")
