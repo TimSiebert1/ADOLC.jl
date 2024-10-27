@@ -54,5 +54,4 @@ export derivative,
 
 export erf, eps
 export mkparam
-export ADOLC_JLL_PATH
 end # module ADOLC
