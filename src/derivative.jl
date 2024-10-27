@@ -1004,10 +1004,11 @@ function mat_hess_vec!(
 )
     num_weights = size(weights, 1)
     fos_forward!([res_out, res_grad], tape_id, m, n, x, dir; keep=2)
+    mat_short = ccall((:alloc_short_mat, adolc_interface_lib), Ptr{Ptr{Cshort}}, (Cint, Cint), num_weights, n)
     rc = ccall(
         (:hov_reverse, adolc_interface_lib),
         Cint,
-        (Cshort, Cint, Cint, Cint, Cint, Ptr{Ptr{Cdouble}}, Ptr{Ptr{Ptr{Cdouble}}}),
+        (Cshort, Cint, Cint, Cint, Cint, Ptr{Ptr{Cdouble}}, Ptr{Ptr{Ptr{Cdouble}}}, Ptr{Ptr{Cshort}}),
         tape_id,
         m,
         n,
@@ -1015,7 +1016,9 @@ function mat_hess_vec!(
         num_weights,
         isa(weights, Matrix) ? CxxMatrix(weights) : weights,
         res_tmp,
+        mat_short
     )
+    ccall((:free_short_mat, adolc_interface_lib), Cvoid, (Ptr{Ptr{Cshort}},), mat_short)
     for i in 1:num_weights
         for j in 1:n
             res[i, j] = res_tmp[i, j, 2]
