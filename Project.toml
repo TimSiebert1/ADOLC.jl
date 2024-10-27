@@ -19,8 +19,7 @@ Tapir = "07d77754-e150-4737-8c94-cd238a1fb45b"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
-ADOLC_jll = "1.2.1"
-CxxWrap = "0.16"
+ADOLC_jll = "2.0.0"
 LinearAlgebra = "1.9"
 SpecialFunctions = "2.4"
 julia = "1.9"
