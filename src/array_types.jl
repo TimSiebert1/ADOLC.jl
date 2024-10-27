@@ -1,6 +1,5 @@
 module array_types
-#using ADOLC_jll
-adolc_interface_lib = "/Users/timsiebert/Projects/ADOLCInterface/ADOLCInterface.jl/lib/libADOLCInterface.dylib"
+using ADOLC_jll
 function Base.getindex(cxx_ptr_ptr_ptr::Ptr{Ptr{Ptr{Cdouble}}}, dim)
     return ccall(
         (:getindex_tens, adolc_interface_lib),
